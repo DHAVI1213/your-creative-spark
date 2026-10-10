@@ -3,6 +3,6 @@
  * Se o arquivo não existir, o card mostra um portal brilhante no lugar.
  */
 export const ARTE = {
-  heroi: "/arte/heroi.png",
-  heroi2: "/arte/heroi-2.png",
+  heroi: "/arte/heroi.webp",
+  heroi2: "/arte/heroi-2.webp",
 };

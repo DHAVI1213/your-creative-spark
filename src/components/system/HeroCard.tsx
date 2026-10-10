@@ -175,22 +175,24 @@ export function HeroCard({
       >
         <div
           className={cn(
-            "hero-rise absolute bottom-0 [animation-delay:250ms]",
-            "right-[-8%] h-[78%] opacity-35 md:right-[24%] md:h-[112%] md:opacity-100",
+            "absolute bottom-0",
+            "right-[-12%] h-[80%] opacity-25 md:right-[22%] md:h-full md:opacity-100",
           )}
         >
-          <div className="hero-float h-full">
-            {art && artOk ? (
-              <img
-                ref={imgRef}
-                src={art}
-                alt=""
-                onError={() => setArtOk(false)}
-                className="h-full w-auto max-w-none object-contain object-bottom drop-shadow-[0_0_40px_rgba(0,0,0,.6)]"
-              />
-            ) : (
-              <Gate colors={t.gate} />
-            )}
+          <div className="hero-rise h-full [animation-delay:250ms]">
+            <div className="hero-float h-full">
+              {art && artOk ? (
+                <img
+                  ref={imgRef}
+                  src={art}
+                  alt=""
+                  onError={() => setArtOk(false)}
+                  className="h-full w-auto max-w-none object-contain object-bottom drop-shadow-[0_0_40px_rgba(0,0,0,.6)]"
+                />
+              ) : (
+                <Gate colors={t.gate} />
+              )}
+            </div>
           </div>
         </div>
       </div>
