@@ -11,14 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppAgendadorRouteImport } from './routes/_app/agendador'
 import { Route as AppClonadorRouteImport } from './routes/_app/clonador'
+import { Route as AppContaRouteImport } from './routes/_app/conta'
 import { Route as AppEditorRouteImport } from './routes/_app/editor'
 import { Route as AppLimpadorRouteImport } from './routes/_app/limpador'
 import { Route as AppMineradorRouteImport } from './routes/_app/minerador'
 import { Route as AppPainelRouteImport } from './routes/_app/painel'
 import { Route as AppPlanosRouteImport } from './routes/_app/planos'
 import { Route as AppViralRouteImport } from './routes/_app/viral'
+import { Route as ApiKiwifyRouteImport } from './routes/api/kiwify'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,6 +34,21 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAgendadorRoute = AppAgendadorRouteImport.update({
   id: '/agendador',
   path: '/agendador',
@@ -37,6 +57,11 @@ const AppAgendadorRoute = AppAgendadorRouteImport.update({
 const AppClonadorRoute = AppClonadorRouteImport.update({
   id: '/clonador',
   path: '/clonador',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppContaRoute = AppContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEditorRoute = AppEditorRouteImport.update({
@@ -69,82 +94,120 @@ const AppViralRoute = AppViralRouteImport.update({
   path: '/viral',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiKiwifyRoute = ApiKiwifyRouteImport.update({
+  id: '/api/kiwify',
+  path: '/api/kiwify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/entrar': typeof EntrarRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin': typeof AppAdminRoute
   '/agendador': typeof AppAgendadorRoute
   '/clonador': typeof AppClonadorRoute
+  '/conta': typeof AppContaRoute
   '/editor': typeof AppEditorRoute
   '/limpador': typeof AppLimpadorRoute
   '/minerador': typeof AppMineradorRoute
   '/painel': typeof AppPainelRoute
   '/planos': typeof AppPlanosRoute
   '/viral': typeof AppViralRoute
+  '/api/kiwify': typeof ApiKiwifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/entrar': typeof EntrarRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin': typeof AppAdminRoute
   '/agendador': typeof AppAgendadorRoute
   '/clonador': typeof AppClonadorRoute
+  '/conta': typeof AppContaRoute
   '/editor': typeof AppEditorRoute
   '/limpador': typeof AppLimpadorRoute
   '/minerador': typeof AppMineradorRoute
   '/painel': typeof AppPainelRoute
   '/planos': typeof AppPlanosRoute
   '/viral': typeof AppViralRoute
+  '/api/kiwify': typeof ApiKiwifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/entrar': typeof EntrarRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/_app/admin': typeof AppAdminRoute
   '/_app/agendador': typeof AppAgendadorRoute
   '/_app/clonador': typeof AppClonadorRoute
+  '/_app/conta': typeof AppContaRoute
   '/_app/editor': typeof AppEditorRoute
   '/_app/limpador': typeof AppLimpadorRoute
   '/_app/minerador': typeof AppMineradorRoute
   '/_app/painel': typeof AppPainelRoute
   '/_app/planos': typeof AppPlanosRoute
   '/_app/viral': typeof AppViralRoute
+  '/api/kiwify': typeof ApiKiwifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/entrar'
+    | '/redefinir-senha'
+    | '/admin'
     | '/agendador'
     | '/clonador'
+    | '/conta'
     | '/editor'
     | '/limpador'
     | '/minerador'
     | '/painel'
     | '/planos'
     | '/viral'
+    | '/api/kiwify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/entrar'
+    | '/redefinir-senha'
+    | '/admin'
     | '/agendador'
     | '/clonador'
+    | '/conta'
     | '/editor'
     | '/limpador'
     | '/minerador'
     | '/painel'
     | '/planos'
     | '/viral'
+    | '/api/kiwify'
   id:
     | '__root__'
     | '/'
     | '/_app'
+    | '/entrar'
+    | '/redefinir-senha'
+    | '/_app/admin'
     | '/_app/agendador'
     | '/_app/clonador'
+    | '/_app/conta'
     | '/_app/editor'
     | '/_app/limpador'
     | '/_app/minerador'
     | '/_app/painel'
     | '/_app/planos'
     | '/_app/viral'
+    | '/api/kiwify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  EntrarRoute: typeof EntrarRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  ApiKiwifyRoute: typeof ApiKiwifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,6 +226,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/agendador': {
       id: '/_app/agendador'
       path: '/agendador'
@@ -175,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/clonador'
       fullPath: '/clonador'
       preLoaderRoute: typeof AppClonadorRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/conta': {
+      id: '/_app/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof AppContaRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/editor': {
@@ -219,12 +310,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppViralRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/kiwify': {
+      id: '/api/kiwify'
+      path: '/api/kiwify'
+      fullPath: '/api/kiwify'
+      preLoaderRoute: typeof ApiKiwifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
   AppAgendadorRoute: typeof AppAgendadorRoute
   AppClonadorRoute: typeof AppClonadorRoute
+  AppContaRoute: typeof AppContaRoute
   AppEditorRoute: typeof AppEditorRoute
   AppLimpadorRoute: typeof AppLimpadorRoute
   AppMineradorRoute: typeof AppMineradorRoute
@@ -234,8 +334,10 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
   AppAgendadorRoute: AppAgendadorRoute,
   AppClonadorRoute: AppClonadorRoute,
+  AppContaRoute: AppContaRoute,
   AppEditorRoute: AppEditorRoute,
   AppLimpadorRoute: AppLimpadorRoute,
   AppMineradorRoute: AppMineradorRoute,
@@ -249,6 +351,9 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  EntrarRoute: EntrarRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
+  ApiKiwifyRoute: ApiKiwifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

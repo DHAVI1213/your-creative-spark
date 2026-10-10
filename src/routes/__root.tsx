@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { APP_NAME, APP_TAGLINE } from "@/lib/app";
+import { AuthProvider } from "@/lib/auth";
 import { DeviceProvider } from "@/lib/device";
 import { initPWA } from "@/lib/pwa";
 
@@ -140,11 +141,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DeviceProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="top-center" richColors />
-      </DeviceProvider>
+      <AuthProvider>
+        <DeviceProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <Toaster position="top-center" richColors />
+        </DeviceProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

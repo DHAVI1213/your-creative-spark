@@ -24,6 +24,11 @@ describe("App routing", () => {
     "/minerador",
     "/agendador",
     "/planos",
+    "/conta",
+    "/admin",
+    "/entrar",
+    "/redefinir-senha",
+    "/api/kiwify",
   ])("matches a page for %s", (path) => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     expect(router.matchRoutes(path).at(-1)?.routeId).not.toBe(rootRouteId);

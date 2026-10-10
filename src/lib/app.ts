@@ -3,12 +3,6 @@ import { CalendarClock, Copy, Eraser, Film, Flame, Radar, type LucideIcon } from
 export const APP_NAME = "Fábrica de Conteúdo";
 export const APP_TAGLINE = "Suas ferramentas de criação e vendas em um app só";
 
-/** Link do checkout (Kiwify, Hotmart, Mercado Pago...). Troque quando criar o produto. */
-export const CHECKOUT_URL = {
-  mensal: "#planos",
-  vitalicio: "#planos",
-};
-
 export type ToolStatus = "ativo" | "em-breve";
 
 export type ToolPath =

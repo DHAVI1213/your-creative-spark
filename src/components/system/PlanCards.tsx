@@ -1,10 +1,11 @@
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { CHECKOUT_URL } from "@/lib/app";
+import { useAuth } from "@/lib/auth";
+import { useAppConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
-// Preços: troque aqui quando definir os valores finais.
+// Preços e links de checkout: editados no Painel do dono (tabela app_config).
 export const PLANS = [
   {
     id: "mensal" as const,
@@ -36,7 +37,22 @@ export const PLANS = [
   },
 ];
 
+/** Monta o link do checkout já com o e-mail da conta (a Kiwify preenche o campo). */
+function linkCheckout(base: string, email: string | undefined) {
+  if (!base) return "#planos";
+  if (!email || !/^https?:\/\//.test(base)) return base;
+  try {
+    const u = new URL(base);
+    u.searchParams.set("email", email);
+    return u.toString();
+  } catch {
+    return base;
+  }
+}
+
 export function PlanCards() {
+  const cfg = useAppConfig();
+  const { user } = useAuth();
   return (
     <div className="grid gap-5 md:grid-cols-2">
       {PLANS.map((p) => (
@@ -69,7 +85,9 @@ export function PlanCards() {
             </div>
           </div>
           <div>
-            <span className="font-display text-5xl font-bold">{p.price}</span>
+            <span className="font-display text-5xl font-bold">
+              {p.id === "mensal" ? cfg.preco_mensal : cfg.preco_vitalicio}
+            </span>
             <span className="ml-2 text-sm text-muted-foreground">{p.period}</span>
           </div>
           <ul className="space-y-2.5">
@@ -86,7 +104,14 @@ export function PlanCards() {
             variant={p.highlight ? "default" : "secondary"}
             className={cn("mt-auto uppercase tracking-wider", p.highlight && "sys-btn-glow")}
           >
-            <a href={CHECKOUT_URL[p.id]}>Quero o {p.name}</a>
+            <a
+              href={linkCheckout(
+                p.id === "mensal" ? cfg.checkout_mensal : cfg.checkout_vitalicio,
+                user?.email,
+              )}
+            >
+              Quero o {p.name}
+            </a>
           </Button>
         </div>
       ))}
