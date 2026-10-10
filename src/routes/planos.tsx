@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/planos")({
-  head: () => ({ meta: [{ title: "Planos · Spark Suite" }] }),
+  head: () => ({ meta: [{ title: "Planos · Fábrica de Conteúdo" }] }),
   component: Planos,
 });
 

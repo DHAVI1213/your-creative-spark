@@ -5,7 +5,7 @@ import { TOOLS } from "@/lib/app";
 import { useDevice } from "@/lib/device";
 
 export const Route = createFileRoute("/editor")({
-  head: () => ({ meta: [{ title: "Editor em Massa · Spark Suite" }] }),
+  head: () => ({ meta: [{ title: "Editor em Massa · Fábrica de Conteúdo" }] }),
   component: EditorPage,
 });
 

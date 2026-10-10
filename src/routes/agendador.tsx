@@ -4,7 +4,7 @@ import { ComingSoon } from "@/components/ComingSoon";
 import { TOOLS } from "@/lib/app";
 
 export const Route = createFileRoute("/agendador")({
-  head: () => ({ meta: [{ title: "Agendador · Spark Suite" }] }),
+  head: () => ({ meta: [{ title: "Agendador · Fábrica de Conteúdo" }] }),
   component: AgendadorPage,
 });
 

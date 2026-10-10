@@ -5,7 +5,7 @@ import { TOOLS } from "@/lib/app";
 import { useDevice } from "@/lib/device";
 
 export const Route = createFileRoute("/minerador")({
-  head: () => ({ meta: [{ title: "Minerador de Clientes · Spark Suite" }] }),
+  head: () => ({ meta: [{ title: "Minerador de Clientes · Fábrica de Conteúdo" }] }),
   component: MineradorPage,
 });
 

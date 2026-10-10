@@ -31,7 +31,7 @@ import { cleanVideo, loadFFmpeg, readVideoMeta } from "@/lib/metadata/video";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/limpador")({
-  head: () => ({ meta: [{ title: "Limpador de Metadados · Spark Suite" }] }),
+  head: () => ({ meta: [{ title: "Limpador de Metadados · Fábrica de Conteúdo" }] }),
   component: Limpador,
 });
 

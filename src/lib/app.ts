@@ -1,6 +1,6 @@
 import { CalendarClock, Eraser, Film, Radar, type LucideIcon } from "lucide-react";
 
-export const APP_NAME = "Spark Suite";
+export const APP_NAME = "Fábrica de Conteúdo";
 export const APP_TAGLINE = "Suas ferramentas de criação e vendas em um app só";
 
 export type ToolStatus = "ativo" | "em-breve";

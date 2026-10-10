@@ -1,9 +1,9 @@
-// Service worker do Spark Suite: deixa o app instalável e abrindo rápido.
+// Service worker da Fábrica de Conteúdo: deixa o app instalável e abrindo rápido.
 // Páginas: tenta a rede primeiro (sempre a versão mais nova) e usa o cache se estiver offline.
 // Arquivos estáticos (JS, CSS, ícones, fontes): cache primeiro.
-const VERSION = "v1";
-const STATIC_CACHE = `spark-static-${VERSION}`;
-const PAGES_CACHE = `spark-pages-${VERSION}`;
+const VERSION = "v2";
+const STATIC_CACHE = `fabrica-static-${VERSION}`;
+const PAGES_CACHE = `fabrica-pages-${VERSION}`;
 
 self.addEventListener("install", () => self.skipWaiting());
 
