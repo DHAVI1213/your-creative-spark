@@ -10,91 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AgendadorRouteImport } from './routes/agendador'
-import { Route as EditorRouteImport } from './routes/editor'
-import { Route as LimpadorRouteImport } from './routes/limpador'
-import { Route as MineradorRouteImport } from './routes/minerador'
-import { Route as PlanosRouteImport } from './routes/planos'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppAgendadorRouteImport } from './routes/_app/agendador'
+import { Route as AppClonadorRouteImport } from './routes/_app/clonador'
+import { Route as AppEditorRouteImport } from './routes/_app/editor'
+import { Route as AppLimpadorRouteImport } from './routes/_app/limpador'
+import { Route as AppMineradorRouteImport } from './routes/_app/minerador'
+import { Route as AppPainelRouteImport } from './routes/_app/painel'
+import { Route as AppPlanosRouteImport } from './routes/_app/planos'
+import { Route as AppViralRouteImport } from './routes/_app/viral'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AgendadorRoute = AgendadorRouteImport.update({
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAgendadorRoute = AppAgendadorRouteImport.update({
   id: '/agendador',
   path: '/agendador',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const EditorRoute = EditorRouteImport.update({
+const AppClonadorRoute = AppClonadorRouteImport.update({
+  id: '/clonador',
+  path: '/clonador',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditorRoute = AppEditorRouteImport.update({
   id: '/editor',
   path: '/editor',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const LimpadorRoute = LimpadorRouteImport.update({
+const AppLimpadorRoute = AppLimpadorRouteImport.update({
   id: '/limpador',
   path: '/limpador',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const MineradorRoute = MineradorRouteImport.update({
+const AppMineradorRoute = AppMineradorRouteImport.update({
   id: '/minerador',
   path: '/minerador',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const PlanosRoute = PlanosRouteImport.update({
+const AppPainelRoute = AppPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanosRoute = AppPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppViralRoute = AppViralRouteImport.update({
+  id: '/viral',
+  path: '/viral',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/agendador': typeof AgendadorRoute
-  '/editor': typeof EditorRoute
-  '/limpador': typeof LimpadorRoute
-  '/minerador': typeof MineradorRoute
-  '/planos': typeof PlanosRoute
+  '/agendador': typeof AppAgendadorRoute
+  '/clonador': typeof AppClonadorRoute
+  '/editor': typeof AppEditorRoute
+  '/limpador': typeof AppLimpadorRoute
+  '/minerador': typeof AppMineradorRoute
+  '/painel': typeof AppPainelRoute
+  '/planos': typeof AppPlanosRoute
+  '/viral': typeof AppViralRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/agendador': typeof AgendadorRoute
-  '/editor': typeof EditorRoute
-  '/limpador': typeof LimpadorRoute
-  '/minerador': typeof MineradorRoute
-  '/planos': typeof PlanosRoute
+  '/agendador': typeof AppAgendadorRoute
+  '/clonador': typeof AppClonadorRoute
+  '/editor': typeof AppEditorRoute
+  '/limpador': typeof AppLimpadorRoute
+  '/minerador': typeof AppMineradorRoute
+  '/painel': typeof AppPainelRoute
+  '/planos': typeof AppPlanosRoute
+  '/viral': typeof AppViralRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/agendador': typeof AgendadorRoute
-  '/editor': typeof EditorRoute
-  '/limpador': typeof LimpadorRoute
-  '/minerador': typeof MineradorRoute
-  '/planos': typeof PlanosRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/agendador': typeof AppAgendadorRoute
+  '/_app/clonador': typeof AppClonadorRoute
+  '/_app/editor': typeof AppEditorRoute
+  '/_app/limpador': typeof AppLimpadorRoute
+  '/_app/minerador': typeof AppMineradorRoute
+  '/_app/painel': typeof AppPainelRoute
+  '/_app/planos': typeof AppPlanosRoute
+  '/_app/viral': typeof AppViralRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/agendador' | '/editor' | '/limpador' | '/minerador' | '/planos'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agendador' | '/editor' | '/limpador' | '/minerador' | '/planos'
-  id:
-    | '__root__'
     | '/'
     | '/agendador'
+    | '/clonador'
     | '/editor'
     | '/limpador'
     | '/minerador'
+    | '/painel'
     | '/planos'
+    | '/viral'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/agendador'
+    | '/clonador'
+    | '/editor'
+    | '/limpador'
+    | '/minerador'
+    | '/painel'
+    | '/planos'
+    | '/viral'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/agendador'
+    | '/_app/clonador'
+    | '/_app/editor'
+    | '/_app/limpador'
+    | '/_app/minerador'
+    | '/_app/painel'
+    | '/_app/planos'
+    | '/_app/viral'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AgendadorRoute: typeof AgendadorRoute
-  EditorRoute: typeof EditorRoute
-  LimpadorRoute: typeof LimpadorRoute
-  MineradorRoute: typeof MineradorRoute
-  PlanosRoute: typeof PlanosRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -106,51 +156,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/agendador': {
-      id: '/agendador'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/agendador': {
+      id: '/_app/agendador'
       path: '/agendador'
       fullPath: '/agendador'
-      preLoaderRoute: typeof AgendadorRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppAgendadorRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/editor': {
-      id: '/editor'
+    '/_app/clonador': {
+      id: '/_app/clonador'
+      path: '/clonador'
+      fullPath: '/clonador'
+      preLoaderRoute: typeof AppClonadorRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/editor': {
+      id: '/_app/editor'
       path: '/editor'
       fullPath: '/editor'
-      preLoaderRoute: typeof EditorRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEditorRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/limpador': {
-      id: '/limpador'
+    '/_app/limpador': {
+      id: '/_app/limpador'
       path: '/limpador'
       fullPath: '/limpador'
-      preLoaderRoute: typeof LimpadorRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppLimpadorRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/minerador': {
-      id: '/minerador'
+    '/_app/minerador': {
+      id: '/_app/minerador'
       path: '/minerador'
       fullPath: '/minerador'
-      preLoaderRoute: typeof MineradorRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppMineradorRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/planos': {
-      id: '/planos'
+    '/_app/painel': {
+      id: '/_app/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AppPainelRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planos': {
+      id: '/_app/planos'
       path: '/planos'
       fullPath: '/planos'
-      preLoaderRoute: typeof PlanosRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppPlanosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/viral': {
+      id: '/_app/viral'
+      path: '/viral'
+      fullPath: '/viral'
+      preLoaderRoute: typeof AppViralRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppAgendadorRoute: typeof AppAgendadorRoute
+  AppClonadorRoute: typeof AppClonadorRoute
+  AppEditorRoute: typeof AppEditorRoute
+  AppLimpadorRoute: typeof AppLimpadorRoute
+  AppMineradorRoute: typeof AppMineradorRoute
+  AppPainelRoute: typeof AppPainelRoute
+  AppPlanosRoute: typeof AppPlanosRoute
+  AppViralRoute: typeof AppViralRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAgendadorRoute: AppAgendadorRoute,
+  AppClonadorRoute: AppClonadorRoute,
+  AppEditorRoute: AppEditorRoute,
+  AppLimpadorRoute: AppLimpadorRoute,
+  AppMineradorRoute: AppMineradorRoute,
+  AppPainelRoute: AppPainelRoute,
+  AppPlanosRoute: AppPlanosRoute,
+  AppViralRoute: AppViralRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AgendadorRoute: AgendadorRoute,
-  EditorRoute: EditorRoute,
-  LimpadorRoute: LimpadorRoute,
-  MineradorRoute: MineradorRoute,
-  PlanosRoute: PlanosRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

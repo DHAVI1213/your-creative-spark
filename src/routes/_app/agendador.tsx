@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ComingSoon } from "@/components/ComingSoon";
 import { TOOLS } from "@/lib/app";
 
-export const Route = createFileRoute("/agendador")({
+export const Route = createFileRoute("/_app/agendador")({
   head: () => ({ meta: [{ title: "Agendador · Fábrica de Conteúdo" }] }),
   component: AgendadorPage,
 });

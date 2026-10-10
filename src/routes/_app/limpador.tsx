@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { SystemHeader } from "@/components/system/System";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,7 +31,7 @@ import {
 import { cleanVideo, loadFFmpeg, readVideoMeta } from "@/lib/metadata/video";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/limpador")({
+export const Route = createFileRoute("/_app/limpador")({
   head: () => ({ meta: [{ title: "Limpador de Metadados · Fábrica de Conteúdo" }] }),
   component: Limpador,
 });
@@ -312,18 +313,12 @@ function Limpador() {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-primary">
-          <Eraser className="size-4" /> Limpador de Metadados
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-          Tire seus dados das fotos e vídeos
-        </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-          Remove localização, modelo do aparelho, datas e dados de edição. Os arquivos não saem do
-          seu {device.isMobile ? "celular" : "computador"}: tudo é feito aqui mesmo, sem upload.
-        </p>
-      </header>
+      <SystemHeader
+        label="HAB-01 · Limpador de Metadados"
+        icon={Eraser}
+        title="Limpador de Metadados"
+        description={`Remove localização, modelo do aparelho, datas e dados de edição. Os arquivos não saem do seu ${device.isMobile ? "celular" : "computador"}: tudo é feito aqui mesmo, sem upload.`}
+      />
 
       {/* Área de arquivos */}
       <div
@@ -338,8 +333,8 @@ function Limpador() {
           if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card/40 px-6 py-10 text-center transition-colors",
-          dragging && "border-primary bg-primary/10",
+          "sys-panel sys-scan flex flex-col items-center justify-center gap-3 rounded-md border-dashed px-6 py-10 text-center transition-colors",
+          dragging && "bg-primary/15",
         )}
       >
         <span className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary">
@@ -355,7 +350,7 @@ function Limpador() {
             JPG, PNG, WebP, MP4, MOV · {device.isMobile ? "" : "ou "}vários de uma vez
           </p>
         </div>
-        <Button onClick={() => inputRef.current?.click()} className="mt-1">
+        <Button onClick={() => inputRef.current?.click()} className="sys-btn-glow mt-1">
           {device.isMobile ? "Abrir galeria" : "Selecionar arquivos"}
         </Button>
         <input
@@ -372,7 +367,7 @@ function Limpador() {
       </div>
 
       {engine === "carregando" && (
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-card/60 px-4 py-3 text-sm text-muted-foreground">
+        <div className="sys-panel sys-panel-muted flex items-center gap-2 rounded-sm px-4 py-3 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin text-primary" />
           Preparando o motor de vídeo (só na primeira vez)…
         </div>
@@ -381,7 +376,7 @@ function Limpador() {
       {items.length > 0 && (
         <>
           {/* Barra de ações */}
-          <div className="sticky top-16 z-20 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-background/90 p-3 backdrop-blur md:top-4">
+          <div className="sys-panel sticky top-16 z-20 flex flex-wrap items-center gap-2 rounded-sm p-3 md:top-4">
             <div className="mr-auto text-sm">
               <span className="font-medium">{items.length}</span>{" "}
               <span className="text-muted-foreground">arquivo{items.length > 1 ? "s" : ""}</span>
@@ -443,7 +438,7 @@ function Limpador() {
               d: "JPG, PNG e vídeos saem sem recompressão.",
             },
           ].map((c) => (
-            <div key={c.t} className="rounded-xl border border-border bg-card/40 p-4">
+            <div key={c.t} className="sys-panel sys-panel-muted rounded-sm p-4">
               <c.icon className="mb-2 size-5 text-primary" />
               <p className="text-sm font-medium">{c.t}</p>
               <p className="mt-1 text-xs text-muted-foreground">{c.d}</p>
@@ -468,7 +463,7 @@ function FileCard({
   const others = item.entries.filter((e) => !e.sensitive);
 
   return (
-    <li className="flex gap-3 rounded-xl border border-border bg-card/60 p-3">
+    <li className="sys-panel sys-panel-muted flex gap-3 rounded-sm p-3">
       <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
         {item.preview ? (
           <img src={item.preview} alt="" className="size-full object-cover" />

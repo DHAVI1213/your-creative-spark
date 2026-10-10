@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Clock } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { Tool } from "@/lib/app";
+import { RankBadge, SystemHeader, SystemWindow } from "./system/System";
 
 export function ComingSoon({
   tool,
@@ -16,36 +17,44 @@ export function ComingSoon({
 }) {
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-primary">
-          <tool.icon className="size-4" /> {tool.name}
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{tool.description}</h1>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-          <Clock className="size-3.5" /> Chegando nas próximas atualizações
-        </span>
-      </header>
+      <SystemHeader
+        label={`${tool.code} · ${tool.name}`}
+        icon={tool.icon}
+        title={tool.name}
+        description={tool.description}
+      />
 
-      <div className="rounded-2xl border border-border bg-card/50 p-5">
-        <p className="mb-3 text-sm font-medium">O que vem nessa ferramenta</p>
-        <ul className="space-y-2">
-          {bullets.map((b) => (
-            <li key={b} className="flex gap-2 text-sm text-muted-foreground">
-              <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-              {b}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <SystemWindow title="Habilidade bloqueada" scan className="sys-pop">
+        <div className="space-y-4 p-5">
+          <div className="flex items-center gap-3">
+            <Lock className="sys-pulse size-5 text-primary" />
+            <p className="text-sm">
+              Esta habilidade será liberada numa próxima atualização do sistema.
+            </p>
+            <RankBadge rank={tool.rank} className="ml-auto" />
+          </div>
+          <div>
+            <p className="sys-label mb-2">Efeitos da habilidade</p>
+            <ul className="space-y-2">
+              {bullets.map((b) => (
+                <li key={b} className="flex gap-2 text-sm text-muted-foreground">
+                  <span className="mt-1.5 size-1.5 shrink-0 rotate-45 bg-primary shadow-[0_0_6px_var(--color-primary)]" />
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </SystemWindow>
 
       {deviceNote && (
-        <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm text-muted-foreground">
-          {deviceNote}
-        </div>
+        <SystemWindow muted>
+          <p className="p-4 text-sm text-muted-foreground">{deviceNote}</p>
+        </SystemWindow>
       )}
 
       <Button asChild variant="secondary">
-        <Link to="/">
+        <Link to="/painel">
           <ArrowLeft className="size-4" /> Voltar ao painel
         </Link>
       </Button>

@@ -1,7 +1,7 @@
 // Service worker da Fábrica de Conteúdo: deixa o app instalável e abrindo rápido.
 // Páginas: tenta a rede primeiro (sempre a versão mais nova) e usa o cache se estiver offline.
 // Arquivos estáticos (JS, CSS, ícones, fontes): cache primeiro.
-const VERSION = "v2";
+const VERSION = "v3";
 const STATIC_CACHE = `fabrica-static-${VERSION}`;
 const PAGES_CACHE = `fabrica-pages-${VERSION}`;
 

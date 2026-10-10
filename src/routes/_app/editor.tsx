@@ -4,7 +4,7 @@ import { ComingSoon } from "@/components/ComingSoon";
 import { TOOLS } from "@/lib/app";
 import { useDevice } from "@/lib/device";
 
-export const Route = createFileRoute("/editor")({
+export const Route = createFileRoute("/_app/editor")({
   head: () => ({ meta: [{ title: "Editor em Massa · Fábrica de Conteúdo" }] }),
   component: EditorPage,
 });
