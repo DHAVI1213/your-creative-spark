@@ -14,16 +14,208 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_config: {
+        Row: {
+          atualizado_em: string
+          chave: string
+          valor: string
+        }
+        Insert: {
+          atualizado_em?: string
+          chave: string
+          valor: string
+        }
+        Update: {
+          atualizado_em?: string
+          chave?: string
+          valor?: string
+        }
+        Relationships: []
+      }
+      app_secrets: {
+        Row: {
+          atualizado_em: string
+          chave: string
+          valor: string
+        }
+        Insert: {
+          atualizado_em?: string
+          chave: string
+          valor: string
+        }
+        Update: {
+          atualizado_em?: string
+          chave?: string
+          valor?: string
+        }
+        Relationships: []
+      }
+      assinaturas: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          email: string
+          id: string
+          kiwify_order_id: string | null
+          kiwify_subscription_id: string | null
+          observacao: string | null
+          origem: string
+          plano: string
+          status: string
+          user_id: string | null
+          valido_ate: string | null
+          valor_centavos: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          email: string
+          id?: string
+          kiwify_order_id?: string | null
+          kiwify_subscription_id?: string | null
+          observacao?: string | null
+          origem?: string
+          plano: string
+          status: string
+          user_id?: string | null
+          valido_ate?: string | null
+          valor_centavos?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          email?: string
+          id?: string
+          kiwify_order_id?: string | null
+          kiwify_subscription_id?: string | null
+          observacao?: string | null
+          origem?: string
+          plano?: string
+          status?: string
+          user_id?: string | null
+          valido_ate?: string | null
+          valor_centavos?: number | null
+        }
+        Relationships: []
+      }
+      eventos_kiwify: {
+        Row: {
+          assinatura_valida: boolean
+          email: string | null
+          erro: string | null
+          id: string
+          order_id: string | null
+          payload: Json | null
+          processado: boolean
+          produto: string | null
+          recebido_em: string
+          status_pedido: string | null
+          tipo: string | null
+          valor_centavos: number | null
+        }
+        Insert: {
+          assinatura_valida?: boolean
+          email?: string | null
+          erro?: string | null
+          id?: string
+          order_id?: string | null
+          payload?: Json | null
+          processado?: boolean
+          produto?: string | null
+          recebido_em?: string
+          status_pedido?: string | null
+          tipo?: string | null
+          valor_centavos?: number | null
+        }
+        Update: {
+          assinatura_valida?: boolean
+          email?: string | null
+          erro?: string | null
+          id?: string
+          order_id?: string | null
+          payload?: Json | null
+          processado?: boolean
+          produto?: string | null
+          recebido_em?: string
+          status_pedido?: string | null
+          tipo?: string | null
+          valor_centavos?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          nome: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id: string
+          nome?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_has_secret: { Args: { _chave: string }; Returns: boolean }
+      admin_set_secret: {
+        Args: { _chave: string; _valor: string }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      liga_conta_confirmada: {
+        Args: { _email: string; _id: string }
+        Returns: undefined
+      }
+      tem_acesso: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "cliente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +342,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "cliente"],
+    },
   },
 } as const
