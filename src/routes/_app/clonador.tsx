@@ -1,20 +1,19 @@
 import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Box,
   Code2,
   Copy,
   Download,
   Eye,
   FileArchive,
-  ImageIcon,
   Loader2,
-  MousePointerClick,
   PencilLine,
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { SiteManual } from "@/components/clonador/SiteManual";
+import { VisualEditor, type VisualEditorHandle } from "@/components/clonador/VisualEditor";
 import { SystemHeader, SystemWindow } from "@/components/system/System";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,12 +28,6 @@ export const Route = createFileRoute("/_app/clonador")({
 });
 
 type Mode = "ver" | "editar" | "codigo";
-
-const EDITOR_STYLE_ID = "__fabrica_editor_style";
-const EDITOR_CSS = `
-  *:hover { outline: 1px dashed rgba(56,170,255,.55) !important; outline-offset: 2px; }
-  img { cursor: pointer !important; }
-`;
 
 function downloadBlob(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
@@ -67,19 +60,10 @@ function Clonador() {
   const [html, setHtml] = useState("");
   const [mode, setMode] = useState<Mode>("ver");
   const [zipProgress, setZipProgress] = useState<number | null>(null);
-  const frameRef = useRef<HTMLIFrameElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const pendingImg = useRef<HTMLImageElement | null>(null);
+  const editorRef = useRef<VisualEditorHandle>(null);
 
   /** Lê de volta o HTML editado dentro do modo de edição. */
-  const readEditedHtml = () => {
-    const doc = frameRef.current?.contentDocument;
-    if (!doc?.documentElement) return html;
-    doc.getElementById(EDITOR_STYLE_ID)?.remove();
-    doc.designMode = "off";
-    const out = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-    return out;
-  };
+  const readEditedHtml = () => editorRef.current?.getHtml() ?? html;
 
   const switchMode = (next: Mode) => {
     if (next === mode) return;
@@ -106,43 +90,6 @@ function Clonador() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const onEditLoad = () => {
-    const doc = frameRef.current?.contentDocument;
-    if (!doc) return;
-    doc.designMode = "on";
-    const style = doc.createElement("style");
-    style.id = EDITOR_STYLE_ID;
-    style.textContent = EDITOR_CSS;
-    doc.head?.appendChild(style);
-    doc.addEventListener("dblclick", (e) => {
-      const target = e.target as HTMLElement | null;
-      if (target?.tagName === "IMG") {
-        e.preventDefault();
-        pendingImg.current = target as HTMLImageElement;
-        imageInputRef.current?.click();
-      }
-    });
-    doc.addEventListener("click", (e) => {
-      if ((e.target as HTMLElement | null)?.closest("a")) e.preventDefault();
-    });
-  };
-
-  const onImagePicked = (file: File | undefined) => {
-    const img = pendingImg.current;
-    if (!file || !img) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      img.src = String(reader.result);
-      img.removeAttribute("srcset");
-      img
-        .closest("picture")
-        ?.querySelectorAll("source")
-        .forEach((s) => s.remove());
-      toast.success("Imagem trocada.");
-    };
-    reader.readAsDataURL(file);
   };
 
   const downloadHtml = () => {
@@ -186,7 +133,7 @@ function Clonador() {
         label="HAB-02 · Clonador de Sites"
         icon={Copy}
         title="Clonador de Sites"
-        description="Copie um site com autorização do dono, troque textos e imagens e baixe pronto para o seu cliente."
+        description="Copie um site com autorização do dono, edite tudo no editor visual e use os prompts prontos para criar sites novos com IA."
       />
 
       <SystemWindow title="Alvo" className="sys-pop">
@@ -286,21 +233,6 @@ function Clonador() {
             </div>
           )}
 
-          {mode === "editar" && (
-            <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <MousePointerClick className="size-3.5 text-primary" /> Clique em qualquer texto e
-                digite por cima
-              </span>
-              <span className="flex items-center gap-1">
-                <ImageIcon className="size-3.5 text-primary" /> Dois cliques numa imagem para trocar
-              </span>
-              <span className="flex items-center gap-1">
-                <Box className="size-3.5 text-primary" /> Animações ficam pausadas durante a edição
-              </span>
-            </p>
-          )}
-
           <SystemWindow muted className="overflow-hidden">
             {mode === "codigo" ? (
               <textarea
@@ -310,15 +242,7 @@ function Clonador() {
                 className="block h-[70dvh] w-full resize-none bg-background/60 p-4 font-mono text-xs leading-5 text-foreground outline-none"
               />
             ) : mode === "editar" ? (
-              <iframe
-                key="editar"
-                ref={frameRef}
-                title="Editar site"
-                srcDoc={html}
-                sandbox="allow-same-origin"
-                onLoad={onEditLoad}
-                className="block h-[70dvh] w-full bg-white"
-              />
+              <VisualEditor ref={editorRef} html={html} />
             ) : (
               <iframe
                 key="ver"
@@ -335,19 +259,10 @@ function Clonador() {
             arquivos junto — sites muito dinâmicos podem carregar algumas partes do original mesmo
             assim.
           </p>
+
+          <SiteManual html={html} url={result.finalUrl} />
         </>
       )}
-
-      <input
-        ref={imageInputRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => {
-          onImagePicked(e.target.files?.[0]);
-          e.target.value = "";
-        }}
-      />
     </div>
   );
 }
