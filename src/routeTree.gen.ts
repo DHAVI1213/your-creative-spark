@@ -10,33 +10,91 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgendadorRouteImport } from './routes/agendador'
+import { Route as EditorRouteImport } from './routes/editor'
+import { Route as LimpadorRouteImport } from './routes/limpador'
+import { Route as MineradorRouteImport } from './routes/minerador'
+import { Route as PlanosRouteImport } from './routes/planos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgendadorRoute = AgendadorRouteImport.update({
+  id: '/agendador',
+  path: '/agendador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorRoute = EditorRouteImport.update({
+  id: '/editor',
+  path: '/editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LimpadorRoute = LimpadorRouteImport.update({
+  id: '/limpador',
+  path: '/limpador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MineradorRoute = MineradorRouteImport.update({
+  id: '/minerador',
+  path: '/minerador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agendador': typeof AgendadorRoute
+  '/editor': typeof EditorRoute
+  '/limpador': typeof LimpadorRoute
+  '/minerador': typeof MineradorRoute
+  '/planos': typeof PlanosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agendador': typeof AgendadorRoute
+  '/editor': typeof EditorRoute
+  '/limpador': typeof LimpadorRoute
+  '/minerador': typeof MineradorRoute
+  '/planos': typeof PlanosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agendador': typeof AgendadorRoute
+  '/editor': typeof EditorRoute
+  '/limpador': typeof LimpadorRoute
+  '/minerador': typeof MineradorRoute
+  '/planos': typeof PlanosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/agendador' | '/editor' | '/limpador' | '/minerador' | '/planos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/agendador' | '/editor' | '/limpador' | '/minerador' | '/planos'
+  id:
+    | '__root__'
+    | '/'
+    | '/agendador'
+    | '/editor'
+    | '/limpador'
+    | '/minerador'
+    | '/planos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgendadorRoute: typeof AgendadorRoute
+  EditorRoute: typeof EditorRoute
+  LimpadorRoute: typeof LimpadorRoute
+  MineradorRoute: typeof MineradorRoute
+  PlanosRoute: typeof PlanosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +106,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agendador': {
+      id: '/agendador'
+      path: '/agendador'
+      fullPath: '/agendador'
+      preLoaderRoute: typeof AgendadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editor': {
+      id: '/editor'
+      path: '/editor'
+      fullPath: '/editor'
+      preLoaderRoute: typeof EditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/limpador': {
+      id: '/limpador'
+      path: '/limpador'
+      fullPath: '/limpador'
+      preLoaderRoute: typeof LimpadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minerador': {
+      id: '/minerador'
+      path: '/minerador'
+      fullPath: '/minerador'
+      preLoaderRoute: typeof MineradorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgendadorRoute: AgendadorRoute,
+  EditorRoute: EditorRoute,
+  LimpadorRoute: LimpadorRoute,
+  MineradorRoute: MineradorRoute,
+  PlanosRoute: PlanosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
