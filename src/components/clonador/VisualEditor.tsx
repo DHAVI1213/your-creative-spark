@@ -13,12 +13,14 @@ import {
   AlignRight,
   ArrowDown,
   ArrowUp,
-  ChevronsDownUp,
+  Check,
+  ChevronRight,
   ChevronsUpDown,
   CopyPlus,
   EyeOff,
   Hand,
   ImagePlus,
+  Lightbulb,
   Monitor,
   MousePointer2,
   PencilLine,
@@ -26,15 +28,20 @@ import {
   Redo2,
   RotateCcw,
   Smartphone,
+  Square,
   Tablet,
   Trash2,
+  Type,
   Undo2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +60,14 @@ const EDITOR_CSS = `
   .${SELECTED} { outline: 2px solid #38aaff !important; outline-offset: 2px !important; box-shadow: 0 0 0 4px rgba(56,170,255,.18) !important; }
   [contenteditable="true"] { outline: 2px solid #f5c24b !important; cursor: text !important; }
   a, button { cursor: default !important; }
+  /* Elementos que só aparecem com animação ao rolar (os scripts ficam parados na edição):
+     mostra todos para dar para editar. Isso só vale dentro do editor, não vai para o site. */
+  [data-aos], .aos-init, .wow, [data-sal], [data-scroll], [data-scroll-reveal], .reveal, .sr,
+  [data-animate], [data-animation], .animate__animated, .elementor-invisible, [data-w-id],
+  [data-framer-appear-id], [data-motion], .fade-in, .fade-up, .js-reveal, [style*="opacity:0"], [style*="opacity: 0"] {
+    opacity: 1 !important; visibility: visible !important; transform: none !important;
+    animation: none !important; transition: none !important; clip-path: none !important;
+  }
 `;
 
 type Snapshot = { body: string; bodyStyle: string | null };
@@ -118,6 +133,28 @@ export const VisualEditor = forwardRef<VisualEditorHandle, { html: string }>(fun
   const [viewport, setViewport] = useState<Viewport>("pc");
   const [, setVersion] = useState(0);
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
+
+  const [mostrarDicas, setMostrarDicas] = useState(() => {
+    try {
+      return localStorage.getItem("fabrica:dicas-editor") !== "ok";
+    } catch {
+      return true;
+    }
+  });
+  const fecharDicas = () => {
+    setMostrarDicas(false);
+    try {
+      localStorage.setItem("fabrica:dicas-editor", "ok");
+    } catch {
+      /* sem armazenamento */
+    }
+  };
+
+  // Fecha as dicas sozinho no primeiro toque em algum elemento.
+  useEffect(() => {
+    if (selected && mostrarDicas) fecharDicas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   const setTool = (t: Tool) => {
     toolRef.current = t;
@@ -392,6 +429,19 @@ export const VisualEditor = forwardRef<VisualEditorHandle, { html: string }>(fun
     doc.addEventListener("pointercancel", endDrag);
 
     doc.addEventListener("keydown", (e) => handleKey(e));
+
+    // A barrinha flutuante acompanha a rolagem do site.
+    let agendado = false;
+    const acompanhar = () => {
+      if (agendado) return;
+      agendado = true;
+      requestAnimationFrame(() => {
+        agendado = false;
+        if (selectedRef.current) refresh();
+      });
+    };
+    doc.addEventListener("scroll", acompanhar, true);
+    doc.defaultView?.addEventListener("resize", acompanhar);
   };
 
   const handleKey = useCallback(
@@ -463,62 +513,151 @@ export const VisualEditor = forwardRef<VisualEditorHandle, { html: string }>(fun
   const isImg = el?.tagName === "IMG";
   const link = el?.closest("a") as HTMLAnchorElement | null;
   const editingText = !!editingRef.current;
+  const soTexto = !!el && !isImg && el.tagName !== "BODY" && el.children.length === 0;
+
+  // Posição da barrinha flutuante sobre o elemento selecionado.
+  let barra: { top: number; left: number } | null = null;
+  if (el && el.tagName !== "BODY" && frameRef.current && el.isConnected) {
+    const f = frameRef.current;
+    const r = el.getBoundingClientRect();
+    const larguraBarra = 330;
+    const visivel = r.bottom > 0 && r.top < f.clientHeight;
+    if (visivel) {
+      const top =
+        r.top > 46
+          ? f.offsetTop + r.top - 42
+          : f.offsetTop + Math.min(r.bottom + 6, f.clientHeight - 40);
+      const left = f.offsetLeft + Math.max(4, Math.min(r.left, f.clientWidth - larguraBarra - 4));
+      barra = { top, left };
+    }
+  }
+
+  const caminho: HTMLElement[] = [];
+  for (let n: HTMLElement | null = el; n && n.tagName !== "HTML"; n = n.parentElement)
+    caminho.unshift(n);
 
   return (
     <div className="flex flex-col lg:flex-row">
       {/* Área do site */}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1 border-b border-primary/20 bg-background/60 p-2">
-          <ToolButton
-            active={tool === "selecionar"}
-            onClick={() => setTool("selecionar")}
-            title="Selecionar"
-          >
-            <MousePointer2 className="size-4" />
-          </ToolButton>
-          <ToolButton
-            active={tool === "mover"}
-            onClick={() => setTool("mover")}
-            title="Mover livre (arrastar)"
-          >
-            <Hand className="size-4" />
-          </ToolButton>
-          <span className="mx-1 h-5 w-px bg-border" />
-          <ToolButton onClick={undo} title="Desfazer (Ctrl+Z)" disabled={!undoRef.current.length}>
-            <Undo2 className="size-4" />
-          </ToolButton>
-          <ToolButton onClick={redo} title="Refazer (Ctrl+Y)" disabled={!redoRef.current.length}>
-            <Redo2 className="size-4" />
-          </ToolButton>
-          <span className="mx-1 h-5 w-px bg-border" />
-          <ToolButton
-            active={viewport === "pc"}
-            onClick={() => setViewport("pc")}
-            title="Ver como PC"
-          >
-            <Monitor className="size-4" />
-          </ToolButton>
-          <ToolButton
-            active={viewport === "tablet"}
-            onClick={() => setViewport("tablet")}
-            title="Ver como tablet"
-          >
-            <Tablet className="size-4" />
-          </ToolButton>
-          <ToolButton
-            active={viewport === "celular"}
-            onClick={() => setViewport("celular")}
-            title="Ver como celular"
-          >
-            <Smartphone className="size-4" />
-          </ToolButton>
-          <span className="ml-auto hidden font-mono text-[10px] text-muted-foreground sm:block">
-            {tool === "mover"
-              ? "Arraste qualquer elemento"
-              : "Clique para selecionar · dois cliques para editar texto ou imagem"}
-          </span>
+          <Segmento>
+            <ToolButton
+              active={tool === "selecionar"}
+              onClick={() => setTool("selecionar")}
+              title="Selecionar e editar"
+            >
+              <MousePointer2 className="size-4" />{" "}
+              <span className="hidden sm:inline">Selecionar</span>
+            </ToolButton>
+            <ToolButton
+              active={tool === "mover"}
+              onClick={() => setTool("mover")}
+              title="Arrastar elementos livremente"
+            >
+              <Hand className="size-4" /> <span className="hidden sm:inline">Mover</span>
+            </ToolButton>
+          </Segmento>
+          <Segmento>
+            <ToolButton onClick={undo} title="Desfazer (Ctrl+Z)" disabled={!undoRef.current.length}>
+              <Undo2 className="size-4" />
+            </ToolButton>
+            <ToolButton onClick={redo} title="Refazer (Ctrl+Y)" disabled={!redoRef.current.length}>
+              <Redo2 className="size-4" />
+            </ToolButton>
+          </Segmento>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex h-8 items-center gap-1.5 rounded-sm bg-primary px-3 text-xs font-semibold text-primary-foreground transition-transform hover:-translate-y-px"
+              >
+                <Plus className="size-4" /> Adicionar
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 border-primary/30 p-3">
+              <InsertBlock onInsert={insertAfter} after={!!el && el.tagName !== "BODY"} />
+            </PopoverContent>
+          </Popover>
+          <Segmento className="ml-auto">
+            <ToolButton
+              active={viewport === "pc"}
+              onClick={() => setViewport("pc")}
+              title="Ver como PC"
+            >
+              <Monitor className="size-4" />
+            </ToolButton>
+            <ToolButton
+              active={viewport === "tablet"}
+              onClick={() => setViewport("tablet")}
+              title="Ver como tablet"
+            >
+              <Tablet className="size-4" />
+            </ToolButton>
+            <ToolButton
+              active={viewport === "celular"}
+              onClick={() => setViewport("celular")}
+              title="Ver como celular"
+            >
+              <Smartphone className="size-4" />
+            </ToolButton>
+          </Segmento>
         </div>
-        <div className="flex justify-center bg-background/80">
+
+        {/* Caminho clicável até o elemento */}
+        <div className="flex min-h-9 items-center gap-1 overflow-x-auto border-b border-primary/10 bg-background/40 px-2 py-1 text-[11px] whitespace-nowrap">
+          {el ? (
+            caminho.slice(-5).map((n, i, arr) => (
+              <span key={i} className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => select(n)}
+                  className={cn(
+                    "rounded-sm px-1.5 py-0.5 transition-colors hover:bg-primary/15",
+                    i === arr.length - 1
+                      ? "bg-primary/20 font-semibold text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {nomeAmigavel(n)}
+                </button>
+                {i < arr.length - 1 && <ChevronRight className="size-3 text-muted-foreground/60" />}
+              </span>
+            ))
+          ) : (
+            <span className="px-1.5 text-muted-foreground">
+              {tool === "mover"
+                ? "Arraste qualquer parte do site para mudar de lugar"
+                : "Toque em qualquer parte do site para começar"}
+            </span>
+          )}
+        </div>
+
+        <div className="relative flex justify-center bg-background/80">
+          {mostrarDicas && (
+            <div className="absolute inset-x-2 top-2 z-20 flex items-start gap-3 rounded-sm border border-primary/40 bg-background/95 p-3 text-xs shadow-xl backdrop-blur">
+              <Lightbulb className="mt-0.5 size-4 shrink-0 text-gold" />
+              <ol className="grid flex-1 gap-1.5 sm:grid-cols-3">
+                <li>
+                  <b className="text-primary">1.</b> Toque em qualquer parte do site.
+                </li>
+                <li>
+                  <b className="text-primary">2.</b> Use a barrinha que aparece em cima dela.
+                </li>
+                <li>
+                  <b className="text-primary">3.</b> Ajuste cores e tamanhos no painel ao lado.
+                </li>
+              </ol>
+              <button
+                type="button"
+                onClick={fecharDicas}
+                className="rounded-sm p-1 text-muted-foreground hover:text-foreground"
+                aria-label="Fechar dicas"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          )}
           <iframe
             ref={frameRef}
             title="Editor visual do site"
@@ -528,289 +667,391 @@ export const VisualEditor = forwardRef<VisualEditorHandle, { html: string }>(fun
             style={{ width: VIEWPORT_WIDTH[viewport] }}
             className="block h-[70dvh] max-w-full bg-white transition-[width] duration-300"
           />
+
+          {/* Barrinha flutuante */}
+          {barra && el && (
+            <div
+              className="absolute z-10 flex items-center gap-0.5 rounded-sm border border-primary/60 bg-background/95 p-0.5 shadow-[0_8px_24px_-8px_rgba(0,0,0,.8),0_0_14px_-4px_var(--color-primary)] backdrop-blur"
+              style={{ top: barra.top, left: barra.left }}
+            >
+              <span className="px-2 font-mono text-[10px] text-primary uppercase">
+                {nomeAmigavel(el)}
+              </span>
+              <BarraBtn
+                onClick={() =>
+                  isImg
+                    ? pickImage(el as HTMLImageElement)
+                    : editingText
+                      ? stopTextEdit()
+                      : startTextEdit(el)
+                }
+                title={isImg ? "Trocar imagem" : editingText ? "Terminar edição" : "Editar texto"}
+                destaque={editingText}
+              >
+                {isImg ? (
+                  <ImagePlus className="size-4" />
+                ) : editingText ? (
+                  <Check className="size-4" />
+                ) : (
+                  <PencilLine className="size-4" />
+                )}
+              </BarraBtn>
+              <BarraBtn onClick={moveUp} title="Subir">
+                <ArrowUp className="size-4" />
+              </BarraBtn>
+              <BarraBtn onClick={moveDown} title="Descer">
+                <ArrowDown className="size-4" />
+              </BarraBtn>
+              <BarraBtn onClick={duplicate} title="Duplicar (Ctrl+D)">
+                <CopyPlus className="size-4" />
+              </BarraBtn>
+              <BarraBtn
+                onClick={() =>
+                  el.parentElement &&
+                  el.parentElement.tagName !== "HTML" &&
+                  select(el.parentElement)
+                }
+                title="Selecionar o bloco de fora"
+              >
+                <ChevronsUpDown className="size-4" />
+              </BarraBtn>
+              <BarraBtn onClick={remove} title="Apagar (Delete)" perigo>
+                <Trash2 className="size-4" />
+              </BarraBtn>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Painel de propriedades */}
-      <aside className="max-h-[70dvh] w-full shrink-0 overflow-y-auto border-t border-primary/20 bg-background/70 lg:w-80 lg:border-t-0 lg:border-l">
+      <aside className="max-h-[calc(70dvh+80px)] w-full shrink-0 overflow-y-auto border-t border-primary/20 bg-background/70 lg:w-80 lg:border-t-0 lg:border-l">
         {!el ? (
           <div className="space-y-4 p-4">
-            <p className="sys-label">[ Inspetor ]</p>
+            <p className="sys-label">[ Editor ]</p>
             <p className="text-sm text-muted-foreground">
-              Clique em qualquer parte do site para selecionar. Você pode editar o texto, mudar
-              cores e tamanhos, mover, duplicar ou apagar.
+              Toque em qualquer parte do site para editar. Dois toques num texto escrevem por cima;
+              numa imagem, trocam a foto.
             </p>
-            <ul className="space-y-1.5 font-mono text-[11px] text-muted-foreground">
-              <li>2 cliques · editar texto / trocar imagem</li>
+            <ul className="space-y-1.5 rounded-sm border border-primary/15 bg-background/40 p-3 font-mono text-[11px] text-muted-foreground">
               <li>Delete · apagar</li>
               <li>Ctrl+D · duplicar</li>
               <li>Ctrl+Z / Ctrl+Y · desfazer / refazer</li>
-              <li>Esc · soltar seleção</li>
+              <li>Esc · soltar a seleção</li>
             </ul>
-            <InsertBlock onInsert={insertAfter} />
+            <p className="text-[11px] text-muted-foreground">
+              As animações ficam paradas enquanto você edita. Veja tudo se mexendo na aba <b>Ver</b>
+              .
+            </p>
           </div>
         ) : (
-          <div className="space-y-5 p-4">
-            <div className="space-y-2">
-              <p className="sys-label">[ Selecionado ]</p>
-              <p className="truncate rounded-sm border border-primary/25 bg-primary/5 px-2 py-1 font-mono text-xs text-primary">
-                {describe(el)}
-              </p>
-              <div className="flex gap-1">
-                <SmallButton
-                  onClick={() =>
-                    el.parentElement && el.tagName !== "BODY" && select(el.parentElement)
-                  }
-                  title="Selecionar o elemento de fora"
-                >
-                  <ChevronsUpDown className="size-3.5" /> Pai
-                </SmallButton>
-                <SmallButton
-                  onClick={() =>
-                    el.firstElementChild && select(el.firstElementChild as HTMLElement)
-                  }
-                  title="Selecionar o primeiro elemento de dentro"
-                >
-                  <ChevronsDownUp className="size-3.5" /> Filho
-                </SmallButton>
+          <div className="space-y-4 p-4">
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-sm border border-primary/40 bg-primary/10 text-primary">
+                {isImg ? (
+                  <ImagePlus className="size-4" />
+                ) : soTexto ? (
+                  <Type className="size-4" />
+                ) : (
+                  <Square className="size-4" />
+                )}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">{nomeAmigavel(el)}</p>
+                <p className="truncate font-mono text-[10px] text-muted-foreground">
+                  {describe(el)}
+                </p>
               </div>
             </div>
 
-            <Section title="Ações">
-              <div className="grid grid-cols-3 gap-1">
-                <SmallButton
-                  onClick={() =>
-                    isImg
-                      ? pickImage(el as HTMLImageElement)
-                      : editingText
-                        ? stopTextEdit()
-                        : startTextEdit(el)
-                  }
-                  active={editingText}
-                >
-                  {isImg ? <ImagePlus className="size-3.5" /> : <PencilLine className="size-3.5" />}
-                  {isImg ? "Trocar" : editingText ? "Pronto" : "Texto"}
-                </SmallButton>
-                <SmallButton onClick={duplicate}>
-                  <CopyPlus className="size-3.5" /> Duplicar
-                </SmallButton>
-                <SmallButton onClick={remove} danger>
-                  <Trash2 className="size-3.5" /> Apagar
-                </SmallButton>
-                <SmallButton onClick={moveUp}>
-                  <ArrowUp className="size-3.5" /> Subir
-                </SmallButton>
-                <SmallButton onClick={moveDown}>
-                  <ArrowDown className="size-3.5" /> Descer
-                </SmallButton>
-                <SmallButton
-                  onClick={() => act((x) => x.style.setProperty("display", "none", "important"))}
-                >
-                  <EyeOff className="size-3.5" /> Ocultar
-                </SmallButton>
-              </div>
-              {el.style.translate && (
-                <SmallButton
-                  onClick={() => act((x) => x.style.removeProperty("translate"))}
-                  className="w-full"
-                >
-                  <RotateCcw className="size-3.5" /> Voltar para a posição original
-                </SmallButton>
-              )}
-            </Section>
+            <Tabs
+              defaultValue={isImg || soTexto || link ? "conteudo" : "estilo"}
+              key={describe(el) + (isImg ? "i" : "")}
+            >
+              <TabsList className="grid h-auto w-full grid-cols-4 bg-secondary/60">
+                <TabsTrigger value="conteudo" className="px-1 text-[11px]">
+                  Conteúdo
+                </TabsTrigger>
+                <TabsTrigger value="estilo" className="px-1 text-[11px]">
+                  Estilo
+                </TabsTrigger>
+                <TabsTrigger value="layout" className="px-1 text-[11px]">
+                  Layout
+                </TabsTrigger>
+                <TabsTrigger value="codigo" className="px-1 text-[11px]">
+                  Código
+                </TabsTrigger>
+              </TabsList>
 
-            {isImg && (
-              <Section title="Imagem">
-                <Field label="Endereço da imagem">
-                  <CommitInput
-                    value={(el as HTMLImageElement).getAttribute("src") || ""}
-                    onCommit={(v) => act((x) => (x as HTMLImageElement).setAttribute("src", v))}
-                  />
-                </Field>
-                <Field label="Texto alternativo">
-                  <CommitInput
-                    value={(el as HTMLImageElement).alt}
-                    onCommit={(v) => act((x) => ((x as HTMLImageElement).alt = v))}
-                  />
-                </Field>
-                <Field label="Encaixe">
-                  <Segmented
-                    value={cs?.objectFit || "fill"}
-                    options={[
-                      ["cover", "Preencher"],
-                      ["contain", "Inteira"],
-                      ["fill", "Esticar"],
-                    ]}
-                    onChange={(v) => act(() => setStyle("object-fit", v))}
-                  />
-                </Field>
-              </Section>
-            )}
-
-            {link && (
-              <Section title="Link">
-                <Field label="Para onde leva">
-                  <CommitInput
-                    value={link.getAttribute("href") || ""}
-                    placeholder="https://wa.me/55..."
-                    onCommit={(v) => {
-                      pushHistory();
-                      link.setAttribute("href", v);
-                      refresh();
-                    }}
-                  />
-                </Field>
-                <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={link.target === "_blank"}
-                    onChange={(e) => {
-                      pushHistory();
-                      if (e.target.checked) {
-                        link.target = "_blank";
-                        link.rel = "noopener";
-                      } else link.removeAttribute("target");
-                      refresh();
-                    }}
-                  />
-                  Abrir em nova aba
-                </label>
-              </Section>
-            )}
-
-            <Section title="Texto">
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Cor">
-                  <ColorInput
-                    value={rgbToHex(cs?.color || "#000")}
-                    onStart={pushHistory}
-                    onChange={(v) => setStyle("color", v)}
-                  />
-                </Field>
-                <Field label="Tamanho">
-                  <CommitInput
-                    value={cs?.fontSize || ""}
-                    onCommit={(v) =>
-                      act(() => setStyle("font-size", /^\d+$/.test(v) ? `${v}px` : v))
-                    }
-                  />
-                </Field>
-              </div>
-              <Field label="Peso">
-                <Segmented
-                  value={String(cs?.fontWeight || "400")}
-                  options={[
-                    ["300", "Fino"],
-                    ["400", "Normal"],
-                    ["600", "Médio"],
-                    ["800", "Forte"],
-                  ]}
-                  onChange={(v) => act(() => setStyle("font-weight", v))}
-                />
-              </Field>
-              <Field label="Alinhamento">
-                <div className="flex gap-1">
-                  {(
-                    [
-                      ["left", AlignLeft],
-                      ["center", AlignCenter],
-                      ["right", AlignRight],
-                    ] as const
-                  ).map(([v, Icon]) => (
-                    <SmallButton
-                      key={v}
-                      active={cs?.textAlign === v || (v === "left" && cs?.textAlign === "start")}
-                      onClick={() => act(() => setStyle("text-align", v))}
+              <TabsContent value="conteudo" className="mt-4 space-y-4">
+                {soTexto && (
+                  <Field label="Texto">
+                    <CommitTextarea
+                      value={el.textContent || ""}
+                      onCommit={(v) => act((x) => (x.textContent = v))}
+                    />
+                  </Field>
+                )}
+                {isImg && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => pickImage(el as HTMLImageElement)}
                     >
-                      <Icon className="size-3.5" />
-                    </SmallButton>
-                  ))}
+                      <ImagePlus className="size-4" /> Trocar por uma foto sua
+                    </Button>
+                    <Field label="Ou cole o endereço de uma imagem">
+                      <CommitInput
+                        value={(el as HTMLImageElement).getAttribute("src") || ""}
+                        onCommit={(v) => act((x) => (x as HTMLImageElement).setAttribute("src", v))}
+                      />
+                    </Field>
+                    <Field label="Descrição da imagem (ajuda no Google)">
+                      <CommitInput
+                        value={(el as HTMLImageElement).alt}
+                        onCommit={(v) => act((x) => ((x as HTMLImageElement).alt = v))}
+                      />
+                    </Field>
+                    <Field label="Encaixe">
+                      <Segmented
+                        value={cs?.objectFit || "fill"}
+                        options={[
+                          ["cover", "Preencher"],
+                          ["contain", "Inteira"],
+                          ["fill", "Esticar"],
+                        ]}
+                        onChange={(v) => act(() => setStyle("object-fit", v))}
+                      />
+                    </Field>
+                  </>
+                )}
+                {link && (
+                  <>
+                    <Field label="Quando clicar, leva para">
+                      <CommitInput
+                        value={link.getAttribute("href") || ""}
+                        placeholder="https://wa.me/5562999999999"
+                        onCommit={(v) => {
+                          pushHistory();
+                          link.setAttribute("href", v);
+                          refresh();
+                        }}
+                      />
+                    </Field>
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={link.target === "_blank"}
+                        onChange={(e) => {
+                          pushHistory();
+                          if (e.target.checked) {
+                            link.target = "_blank";
+                            link.rel = "noopener";
+                          } else link.removeAttribute("target");
+                          refresh();
+                        }}
+                      />
+                      Abrir em nova aba
+                    </label>
+                  </>
+                )}
+                {!soTexto && !isImg && !link && (
+                  <p className="text-xs text-muted-foreground">
+                    Este é um bloco com outras coisas dentro. Toque direto no texto ou na imagem que
+                    quer mudar, ou use as abas Estilo e Layout para mexer no bloco inteiro.
+                  </p>
+                )}
+                {!soTexto && !isImg && (
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => (editingText ? stopTextEdit() : startTextEdit(el))}
+                  >
+                    <PencilLine className="size-4" />{" "}
+                    {editingText ? "Terminar edição" : "Escrever direto no site"}
+                  </Button>
+                )}
+              </TabsContent>
+
+              <TabsContent value="estilo" className="mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="Cor do texto">
+                    <ColorInput
+                      value={rgbToHex(cs?.color || "#000")}
+                      onStart={pushHistory}
+                      onChange={(v) => setStyle("color", v)}
+                    />
+                  </Field>
+                  <Field label="Cor de fundo">
+                    <ColorInput
+                      value={rgbToHex(cs?.backgroundColor || "#fff")}
+                      onStart={pushHistory}
+                      onChange={(v) => setStyle("background-color", v)}
+                    />
+                  </Field>
                 </div>
-              </Field>
-              <Field label="Fonte">
-                <CommitInput
-                  value={cs?.fontFamily || ""}
-                  onCommit={(v) => act(() => setStyle("font-family", v))}
-                />
-              </Field>
-            </Section>
-
-            <Section title="Caixa">
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Fundo">
-                  <ColorInput
-                    value={rgbToHex(cs?.backgroundColor || "#fff")}
-                    onStart={pushHistory}
-                    onChange={(v) => setStyle("background-color", v)}
+                <Field
+                  label={`Tamanho da letra · ${Math.round(parseFloat(cs?.fontSize || "16"))}px`}
+                >
+                  <Slider
+                    value={[parseFloat(cs?.fontSize || "16")]}
+                    min={8}
+                    max={120}
+                    step={1}
+                    onPointerDown={pushHistory}
+                    onValueChange={([v]) => setStyle("font-size", `${v ?? 16}px`)}
                   />
                 </Field>
-                <Field label="Cantos">
+                <Field label="Peso da letra">
+                  <Segmented
+                    value={String(cs?.fontWeight || "400")}
+                    options={[
+                      ["300", "Fino"],
+                      ["400", "Normal"],
+                      ["600", "Médio"],
+                      ["800", "Forte"],
+                    ]}
+                    onChange={(v) => act(() => setStyle("font-weight", v))}
+                  />
+                </Field>
+                <Field label="Alinhamento">
+                  <div className="flex gap-1">
+                    {(
+                      [
+                        ["left", AlignLeft],
+                        ["center", AlignCenter],
+                        ["right", AlignRight],
+                      ] as const
+                    ).map(([v, Icon]) => (
+                      <SmallButton
+                        key={v}
+                        className="flex-1"
+                        active={cs?.textAlign === v || (v === "left" && cs?.textAlign === "start")}
+                        onClick={() => act(() => setStyle("text-align", v))}
+                      >
+                        <Icon className="size-3.5" />
+                      </SmallButton>
+                    ))}
+                  </div>
+                </Field>
+                <Field
+                  label={`Cantos arredondados · ${Math.round(parseFloat(cs?.borderTopLeftRadius || "0"))}px`}
+                >
+                  <Slider
+                    value={[parseFloat(cs?.borderTopLeftRadius || "0")]}
+                    min={0}
+                    max={60}
+                    step={1}
+                    onPointerDown={pushHistory}
+                    onValueChange={([v]) => setStyle("border-radius", `${v ?? 0}px`)}
+                  />
+                </Field>
+                <Field
+                  label={`Transparência · ${Math.round(parseFloat(cs?.opacity || "1") * 100)}%`}
+                >
+                  <Slider
+                    value={[parseFloat(cs?.opacity || "1") * 100]}
+                    min={0}
+                    max={100}
+                    step={5}
+                    onPointerDown={pushHistory}
+                    onValueChange={([v]) => setStyle("opacity", String((v ?? 100) / 100))}
+                  />
+                </Field>
+                <Field label="Fonte">
                   <CommitInput
-                    value={cs?.borderRadius || ""}
-                    onCommit={(v) =>
-                      act(() => setStyle("border-radius", /^\d+$/.test(v) ? `${v}px` : v))
+                    value={cs?.fontFamily || ""}
+                    onCommit={(v) => act(() => setStyle("font-family", v))}
+                  />
+                </Field>
+              </TabsContent>
+
+              <TabsContent value="layout" className="mt-4 space-y-4">
+                <Field
+                  label={`Espaço por dentro · ${Math.round(parseFloat(cs?.paddingTop || "0"))}px`}
+                >
+                  <Slider
+                    value={[parseFloat(cs?.paddingTop || "0")]}
+                    min={0}
+                    max={160}
+                    step={2}
+                    onPointerDown={pushHistory}
+                    onValueChange={([v]) => setStyle("padding", `${v ?? 0}px`)}
+                  />
+                </Field>
+                <Field
+                  label={`Espaço por fora · ${Math.round(parseFloat(cs?.marginTop || "0"))}px`}
+                >
+                  <Slider
+                    value={[parseFloat(cs?.marginTop || "0")]}
+                    min={0}
+                    max={160}
+                    step={2}
+                    onPointerDown={pushHistory}
+                    onValueChange={([v]) => setStyle("margin-top", `${v ?? 0}px`)}
+                  />
+                </Field>
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="Largura">
+                    <CommitInput
+                      value={el.style.width || cs?.width || ""}
+                      onCommit={(v) => act(() => setStyle("width", /^\d+$/.test(v) ? `${v}px` : v))}
+                    />
+                  </Field>
+                  <Field label="Altura">
+                    <CommitInput
+                      value={el.style.height || cs?.height || ""}
+                      onCommit={(v) =>
+                        act(() => setStyle("height", /^\d+$/.test(v) ? `${v}px` : v))
+                      }
+                    />
+                  </Field>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Largura e altura aceitam px, %, auto. Ex.: 100%, 320px.
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  <SmallButton
+                    onClick={() => act((x) => x.style.setProperty("display", "none", "important"))}
+                  >
+                    <EyeOff className="size-3.5" /> Ocultar
+                  </SmallButton>
+                  <SmallButton
+                    onClick={() =>
+                      act((x) => {
+                        x.style.removeProperty("translate");
+                      })
                     }
-                  />
-                </Field>
-                <Field label="Espaço dentro">
-                  <CommitInput
-                    value={cs?.padding || ""}
-                    onCommit={(v) => act(() => setStyle("padding", /^\d+$/.test(v) ? `${v}px` : v))}
-                  />
-                </Field>
-                <Field label="Espaço fora">
-                  <CommitInput
-                    value={cs?.margin || ""}
-                    onCommit={(v) => act(() => setStyle("margin", /^\d+$/.test(v) ? `${v}px` : v))}
-                  />
-                </Field>
-                <Field label="Largura">
-                  <CommitInput
-                    value={el.style.width || cs?.width || ""}
-                    onCommit={(v) => act(() => setStyle("width", /^\d+$/.test(v) ? `${v}px` : v))}
-                  />
-                </Field>
-                <Field label="Altura">
-                  <CommitInput
-                    value={el.style.height || cs?.height || ""}
-                    onCommit={(v) => act(() => setStyle("height", /^\d+$/.test(v) ? `${v}px` : v))}
-                  />
-                </Field>
-              </div>
-              <Field label={`Transparência · ${Math.round(parseFloat(cs?.opacity || "1") * 100)}%`}>
-                <Slider
-                  value={[parseFloat(cs?.opacity || "1") * 100]}
-                  min={0}
-                  max={100}
-                  step={5}
-                  onPointerDown={pushHistory}
-                  onValueChange={([v]) => setStyle("opacity", String((v ?? 100) / 100))}
+                  >
+                    <RotateCcw className="size-3.5" /> Posição original
+                  </SmallButton>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Para arrastar livremente, use <b>Mover</b> na barra de cima.
+                </p>
+              </TabsContent>
+
+              <TabsContent value="codigo" className="mt-4 space-y-2">
+                <p className="text-[11px] text-muted-foreground">
+                  Para quem entende de HTML: edite o código só deste pedaço.
+                </p>
+                <OuterHtmlEditor
+                  key={el.outerHTML.length + describe(el)}
+                  el={el}
+                  onApply={(code) => {
+                    const doc = docRef.current;
+                    if (!doc) return;
+                    pushHistory();
+                    const tpl = doc.createElement("template");
+                    tpl.innerHTML = code.trim();
+                    const nodes = [...tpl.content.childNodes];
+                    if (!nodes.length) return;
+                    el.replaceWith(...nodes);
+                    select((nodes.find((n) => n.nodeType === 1) as HTMLElement) ?? null);
+                  }}
                 />
-              </Field>
-              <p className="text-[11px] text-muted-foreground">
-                Aceita px, %, auto… Ex.: 20px, 50%, 10px 20px.
-              </p>
-            </Section>
-
-            <Section title="Código do elemento">
-              <OuterHtmlEditor
-                key={el.outerHTML.length + describe(el)}
-                el={el}
-                onApply={(code) => {
-                  const doc = docRef.current;
-                  if (!doc) return;
-                  pushHistory();
-                  const tpl = doc.createElement("template");
-                  tpl.innerHTML = code.trim();
-                  const nodes = [...tpl.content.childNodes];
-                  if (!nodes.length) return;
-                  el.replaceWith(...nodes);
-                  select((nodes.find((n) => n.nodeType === 1) as HTMLElement) ?? null);
-                }}
-              />
-            </Section>
-
-            <InsertBlock onInsert={insertAfter} after />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </aside>
@@ -828,6 +1069,32 @@ export const VisualEditor = forwardRef<VisualEditorHandle, { html: string }>(fun
     </div>
   );
 });
+
+/** Nome que qualquer pessoa entende para cada tipo de elemento. */
+function nomeAmigavel(el: Element): string {
+  const t = el.tagName;
+  if (t === "BODY") return "Página";
+  if (t === "IMG" || t === "PICTURE") return "Imagem";
+  if (t === "H1" || t === "H2" || t === "H3") return "Título";
+  if (/^H[4-6]$/.test(t)) return "Subtítulo";
+  if (t === "A") return el.children.length ? "Link" : "Botão / link";
+  if (t === "BUTTON") return "Botão";
+  if (t === "HEADER") return "Topo";
+  if (t === "FOOTER") return "Rodapé";
+  if (t === "NAV") return "Menu";
+  if (t === "SECTION" || t === "MAIN" || t === "ARTICLE") return "Seção";
+  if (t === "VIDEO") return "Vídeo";
+  if (t === "CANVAS") return "Animação / 3D";
+  if (t === "SVG" || t === "svg") return "Ícone";
+  if (t === "FORM") return "Formulário";
+  if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return "Campo";
+  if (t === "UL" || t === "OL") return "Lista";
+  if (t === "LI") return "Item";
+  if (t === "P" || t === "SPAN" || t === "LABEL" || t === "STRONG" || t === "EM" || t === "SMALL")
+    return "Texto";
+  if (t === "IFRAME") return "Conteúdo incorporado";
+  return el.children.length ? "Bloco" : "Texto";
+}
 
 // ===== Peças do painel =====
 
@@ -870,7 +1137,7 @@ function ToolButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex size-8 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground disabled:opacity-35",
+        "flex h-8 min-w-8 items-center justify-center gap-1.5 rounded-sm px-2 text-xs text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground disabled:opacity-35",
         active &&
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
       )}
@@ -1056,5 +1323,71 @@ function InsertBlock({ onInsert, after }: { onInsert: (html: string) => void; af
         Inserir HTML
       </Button>
     </div>
+  );
+}
+
+function Segmento({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-0.5 rounded-sm border border-primary/20 bg-background/50 p-0.5",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function BarraBtn({
+  onClick,
+  title,
+  children,
+  perigo,
+  destaque,
+}: {
+  onClick: () => void;
+  title: string;
+  children: ReactNode;
+  perigo?: boolean;
+  destaque?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onClick={onClick}
+      className={cn(
+        "flex size-8 items-center justify-center rounded-[3px] text-foreground/80 transition-colors hover:bg-primary/20 hover:text-foreground",
+        perigo && "hover:bg-destructive/20 hover:text-destructive",
+        destaque && "bg-gold/20 text-gold",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Área de texto que aplica ao sair do campo (ou Ctrl+Enter). */
+function CommitTextarea({ value, onCommit }: { value: string; onCommit: (v: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  const commit = () => {
+    if (draft !== value) onCommit(draft);
+  };
+  return (
+    <Textarea
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          commit();
+        }
+      }}
+      className="min-h-20 text-sm"
+    />
   );
 }

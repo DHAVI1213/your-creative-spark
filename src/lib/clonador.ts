@@ -6,7 +6,9 @@ import { createServerFn } from "@tanstack/react-start";
  */
 
 const MAX_HTML_BYTES = 6 * 1024 * 1024;
-const MAX_ASSET_BYTES = 8 * 1024 * 1024;
+const MAX_ASSET_BYTES = 20 * 1024 * 1024;
+/** Limite somado por chamada, para a resposta não ficar pesada demais. */
+const MAX_BATCH_BYTES = 30 * 1024 * 1024;
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36";
 
@@ -135,19 +137,23 @@ function toBase64(buf: Uint8Array) {
   return btoa(s);
 }
 
-/** Baixa vários arquivos do site (imagens, CSS, JS, fontes) para montar o .zip completo. */
+/** Baixa vários arquivos do site (imagens, CSS, JS, fontes, modelos 3D, vídeos) para montar o .zip. */
 export const fetchAssets = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
     const urls = (input as { urls?: unknown })?.urls;
     if (!Array.isArray(urls)) throw new Error("Lista de arquivos inválida.");
-    return { urls: urls.filter((u): u is string => typeof u === "string").slice(0, 25) };
+    return { urls: urls.filter((u): u is string => typeof u === "string").slice(0, 12) };
   })
   .handler(async ({ data }): Promise<AssetResult[]> => {
+    let total = 0;
     return Promise.all(
       data.urls.map(async (raw) => {
         try {
           const url = assertPublicUrl(raw);
           const { res, buf } = await fetchWithLimit(url, "*/*", MAX_ASSET_BYTES);
+          total += buf.byteLength;
+          if (total > MAX_BATCH_BYTES)
+            throw new Error("lote grande demais; ficou ligado ao site original");
           return {
             url: raw,
             ok: true,

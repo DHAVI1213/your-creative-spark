@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Code2,
@@ -7,11 +7,14 @@ import {
   Eye,
   FileArchive,
   Loader2,
+  MousePointerClick,
   PencilLine,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { LovableGratis } from "@/components/clonador/LovableGratis";
 import { SiteManual } from "@/components/clonador/SiteManual";
 import { VisualEditor, type VisualEditorHandle } from "@/components/clonador/VisualEditor";
 import { SystemHeader, SystemWindow } from "@/components/system/System";
@@ -19,7 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { clonePage, type ClonePageResult } from "@/lib/clonador";
+import { detectarRecursos, prepararPrevia } from "@/lib/clonador-analise";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/clonador")({
@@ -61,6 +66,8 @@ function Clonador() {
   const [mode, setMode] = useState<Mode>("ver");
   const [zipProgress, setZipProgress] = useState<number | null>(null);
   const editorRef = useRef<VisualEditorHandle>(null);
+  const previa = useMemo(() => prepararPrevia(html), [html]);
+  const recursos = useMemo(() => (html ? detectarRecursos(html) : []), [html]);
 
   /** Lê de volta o HTML editado dentro do modo de edição. */
   const readEditedHtml = () => editorRef.current?.getHtml() ?? html;
@@ -112,6 +119,7 @@ function Clonador() {
       downloadBlob(rep.blob, `${slug(result.title)}.zip`);
       toast.success(
         `${rep.saved} arquivos salvos no .zip` +
+          (rep.fromScripts ? ` · ${rep.fromScripts} achados dentro dos scripts` : "") +
           (rep.failed ? ` · ${rep.failed} não baixaram (ficam ligados ao site original)` : ""),
       );
     } catch (e) {
@@ -136,133 +144,197 @@ function Clonador() {
         description="Copie um site com autorização do dono, edite tudo no editor visual e use os prompts prontos para criar sites novos com IA."
       />
 
-      <SystemWindow title="Alvo" className="sys-pop">
-        <form
-          className="space-y-4 p-4 md:p-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onClone();
-          }}
-        >
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://site-do-cliente.com.br"
-              inputMode="url"
-              autoCapitalize="off"
-              autoCorrect="off"
-              className="h-11 font-mono"
-            />
-            <Button
-              type="submit"
-              className="sys-btn-glow h-11 sm:w-40"
-              disabled={loading || !url.trim()}
+      <Tabs defaultValue="clonar">
+        <TabsList className="grid h-auto w-full grid-cols-2 bg-secondary/60 sm:w-auto sm:inline-grid">
+          <TabsTrigger value="clonar" className="gap-1.5 px-4 text-xs">
+            <Copy className="size-3.5" /> Clonar e editar
+          </TabsTrigger>
+          <TabsTrigger value="lovable" className="gap-1.5 px-4 text-xs">
+            <Wallet className="size-3.5" /> Lovable sem créditos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="lovable" className="mt-5">
+          <SystemWindow title="Guia · Lovable sem gastar créditos" className="sys-pop">
+            <div className="p-4 md:p-5">
+              <LovableGratis />
+            </div>
+          </SystemWindow>
+        </TabsContent>
+
+        <TabsContent value="clonar" className="mt-5 space-y-6">
+          <SystemWindow title="Alvo" className="sys-pop">
+            <form
+              className="space-y-4 p-4 md:p-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                onClone();
+              }}
             >
-              {loading ? <Loader2 className="size-4 animate-spin" /> : <Copy className="size-4" />}
-              Clonar
-            </Button>
-          </div>
-          <label className="flex cursor-pointer items-start gap-3 text-sm text-muted-foreground">
-            <Checkbox
-              checked={authorized}
-              onCheckedChange={(v) => setAuthorized(v === true)}
-              className="mt-0.5"
-            />
-            <span>
-              <ShieldCheck className="mr-1 inline size-4 text-primary" />
-              Confirmo que sou o dono deste site ou tenho autorização do dono para copiar e editar.
-            </span>
-          </label>
-        </form>
-      </SystemWindow>
-
-      {result && (
-        <>
-          <div className="grid grid-cols-2 gap-2 font-mono text-xs sm:grid-cols-4">
-            <Stat label="Scripts" value={result.stats.scripts} />
-            <Stat label="Estilos" value={result.stats.styles} />
-            <Stat label="Imagens" value={result.stats.images} />
-            <Stat label="3D / Canvas" value={result.stats.has3d ? "sim" : "não"} />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex rounded-sm border border-primary/30 p-0.5">
-              <ModeButton active={mode === "ver"} onClick={() => switchMode("ver")} icon={Eye}>
-                Ver
-              </ModeButton>
-              <ModeButton
-                active={mode === "editar"}
-                onClick={() => switchMode("editar")}
-                icon={PencilLine}
-              >
-                Editar
-              </ModeButton>
-              <ModeButton
-                active={mode === "codigo"}
-                onClick={() => switchMode("codigo")}
-                icon={Code2}
-              >
-                Código
-              </ModeButton>
-            </div>
-            <div className="ml-auto flex flex-wrap gap-2">
-              <Button variant="secondary" size="sm" onClick={copyCode}>
-                <Copy className="size-4" /> Copiar código
-              </Button>
-              <Button variant="secondary" size="sm" onClick={downloadHtml}>
-                <Download className="size-4" /> HTML
-              </Button>
-              <Button size="sm" onClick={downloadZip} disabled={zipProgress !== null}>
-                {zipProgress !== null ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <FileArchive className="size-4" />
-                )}
-                Site completo (.zip)
-              </Button>
-            </div>
-          </div>
-
-          {zipProgress !== null && (
-            <div className="space-y-1">
-              <Progress value={zipProgress * 100} className="h-1.5" />
-              <p className="font-mono text-xs text-muted-foreground">
-                Baixando imagens, estilos, scripts e fontes…
-              </p>
-            </div>
-          )}
-
-          <SystemWindow muted className="overflow-hidden">
-            {mode === "codigo" ? (
-              <textarea
-                value={html}
-                onChange={(e) => setHtml(e.target.value)}
-                spellCheck={false}
-                className="block h-[70dvh] w-full resize-none bg-background/60 p-4 font-mono text-xs leading-5 text-foreground outline-none"
-              />
-            ) : mode === "editar" ? (
-              <VisualEditor ref={editorRef} html={html} />
-            ) : (
-              <iframe
-                key="ver"
-                title="Prévia do site"
-                srcDoc={html}
-                sandbox="allow-scripts allow-forms allow-popups"
-                className="block h-[70dvh] w-full bg-white"
-              />
-            )}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://site-do-cliente.com.br"
+                  inputMode="url"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  className="h-11 font-mono"
+                />
+                <Button
+                  type="submit"
+                  className="sys-btn-glow h-11 sm:w-40"
+                  disabled={loading || !url.trim()}
+                >
+                  {loading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Copy className="size-4" />
+                  )}
+                  Clonar
+                </Button>
+              </div>
+              <label className="flex cursor-pointer items-start gap-3 text-sm text-muted-foreground">
+                <Checkbox
+                  checked={authorized}
+                  onCheckedChange={(v) => setAuthorized(v === true)}
+                  className="mt-0.5"
+                />
+                <span>
+                  <ShieldCheck className="mr-1 inline size-4 text-primary" />
+                  Confirmo que sou o dono deste site ou tenho autorização do dono para copiar e
+                  editar.
+                </span>
+              </label>
+            </form>
           </SystemWindow>
 
-          <p className="text-xs text-muted-foreground">
-            O <b>HTML</b> continua puxando imagens e scripts do site original. O <b>.zip</b> traz os
-            arquivos junto — sites muito dinâmicos podem carregar algumas partes do original mesmo
-            assim.
-          </p>
+          {result && (
+            <>
+              <div className="grid grid-cols-2 gap-2 font-mono text-xs sm:grid-cols-4">
+                <Stat label="Scripts" value={result.stats.scripts} />
+                <Stat label="Estilos" value={result.stats.styles} />
+                <Stat label="Imagens" value={result.stats.images} />
+                <Stat
+                  label="Animações / 3D"
+                  value={recursos.length ? `${recursos.length} achados` : "nenhum"}
+                />
+              </div>
+              {recursos.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span className="text-muted-foreground">Encontrado no site:</span>
+                  {recursos.map((r) => (
+                    <span
+                      key={r.nome}
+                      className={cn(
+                        "rounded-sm border px-2 py-0.5",
+                        r.tipo === "3d"
+                          ? "border-shadow/50 text-shadow"
+                          : r.tipo === "rolagem"
+                            ? "border-primary/50 text-primary"
+                            : r.tipo === "plataforma"
+                              ? "border-border text-muted-foreground"
+                              : "border-gold/50 text-gold",
+                      )}
+                    >
+                      {r.nome}
+                    </span>
+                  ))}
+                </div>
+              )}
 
-          <SiteManual html={html} url={result.finalUrl} />
-        </>
-      )}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex rounded-sm border border-primary/30 p-0.5">
+                  <ModeButton active={mode === "ver"} onClick={() => switchMode("ver")} icon={Eye}>
+                    Ver
+                  </ModeButton>
+                  <ModeButton
+                    active={mode === "editar"}
+                    onClick={() => switchMode("editar")}
+                    icon={PencilLine}
+                  >
+                    Editar
+                  </ModeButton>
+                  <ModeButton
+                    active={mode === "codigo"}
+                    onClick={() => switchMode("codigo")}
+                    icon={Code2}
+                  >
+                    Código
+                  </ModeButton>
+                </div>
+                <div className="ml-auto flex flex-wrap gap-2">
+                  <Button variant="secondary" size="sm" onClick={copyCode}>
+                    <Copy className="size-4" /> Copiar código
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={downloadHtml}>
+                    <Download className="size-4" /> HTML
+                  </Button>
+                  <Button size="sm" onClick={downloadZip} disabled={zipProgress !== null}>
+                    {zipProgress !== null ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <FileArchive className="size-4" />
+                    )}
+                    Site completo (.zip)
+                  </Button>
+                </div>
+              </div>
+
+              {zipProgress !== null && (
+                <div className="space-y-1">
+                  <Progress value={zipProgress * 100} className="h-1.5" />
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Baixando imagens, estilos, scripts e fontes…
+                  </p>
+                </div>
+              )}
+
+              <SystemWindow muted className="overflow-hidden">
+                {mode === "codigo" ? (
+                  <textarea
+                    value={html}
+                    onChange={(e) => setHtml(e.target.value)}
+                    spellCheck={false}
+                    className="block h-[70dvh] w-full resize-none bg-background/60 p-4 font-mono text-xs leading-5 text-foreground outline-none"
+                  />
+                ) : mode === "editar" ? (
+                  <VisualEditor ref={editorRef} html={html} />
+                ) : (
+                  <iframe
+                    key="ver"
+                    title="Prévia do site"
+                    srcDoc={previa}
+                    sandbox="allow-scripts allow-forms allow-popups"
+                    className="block h-[70dvh] w-full bg-white"
+                  />
+                )}
+              </SystemWindow>
+
+              <div className="grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+                <p className="flex gap-2 rounded-sm border border-primary/15 bg-background/40 p-3">
+                  <MousePointerClick className="size-4 shrink-0 text-primary" />
+                  <span>
+                    Na aba <b>Ver</b> o site roda com os scripts: role a página para ver as
+                    animações de rolagem, 3D e efeitos. No <b>Editar</b> elas ficam paradas para
+                    você conseguir mexer.
+                  </span>
+                </p>
+                <p className="flex gap-2 rounded-sm border border-primary/15 bg-background/40 p-3">
+                  <FileArchive className="size-4 shrink-0 text-primary" />
+                  <span>
+                    O <b>.zip</b> é a cópia fiel: mantém as pastas do site e baixa também o que os
+                    scripts carregam (modelos 3D, vídeos, fontes, partes do código). Dentro dele tem
+                    um LEIA-ME de como abrir com as animações funcionando.
+                  </span>
+                </p>
+              </div>
+
+              <SiteManual html={html} url={result.finalUrl} />
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
