@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { Logo } from "@/components/AppShell";
+import { HeroCard } from "@/components/system/HeroCard";
 import { PlanCards } from "@/components/system/PlanCards";
 import { RankBadge, SystemWindow } from "@/components/system/System";
 import {
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { APP_NAME, TOOLS } from "@/lib/app";
+import { ARTE } from "@/lib/arte";
 import { cn } from "@/lib/utils";
 
 // No head() here: the home route inherits title/description/og/twitter from
@@ -107,20 +109,37 @@ function Vendas() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 pb-16 md:grid-cols-[1.1fr_1fr] md:pt-20 md:pb-24">
-        <div className="sys-pop space-y-6">
-          <p className="sys-label">[ Sistema ] Um novo jogador foi detectado</p>
-          <h1 className="text-4xl font-bold uppercase leading-[0.95] tracking-wide md:text-6xl">
-            Transforme seu PC e seu celular numa{" "}
-            <span className="sys-glow-text">fábrica de conteúdo</span>
-          </h1>
-          <p className="max-w-xl text-base text-muted-foreground md:text-lg">
+      {/* Hero: ficha de personagem */}
+      <section className="mx-auto max-w-6xl px-4 pt-6 pb-16 md:pb-24">
+        <p className="sys-label mb-2">[ Sistema ] Um novo jogador foi detectado</p>
+        <HeroCard
+          theme="azul"
+          rank="S"
+          kicker="O seu arsenal"
+          title={
+            <>
+              Fábrica de
+              <br />
+              <span className="sys-glow-text">Conteúdo</span>
+            </>
+          }
+          subtitle="6 habilidades · PC e celular"
+          art={ARTE.heroi}
+          navTitle="Sobre"
+          nav={[
+            { label: "Habilidades", href: "#habilidades" },
+            { label: "Como funciona", href: "#como-funciona" },
+            { label: "Planos", href: "#planos" },
+            { label: "Garantia", href: "#planos" },
+            { label: "Dúvidas", href: "#duvidas" },
+          ]}
+        >
+          <h1 className="max-w-md text-base font-normal normal-case text-white/85 md:text-lg">
             Edite vídeos em massa, limpe metadados, clone sites, encontre clientes e agende seus
             posts. Seis ferramentas num app só, que se adapta ao seu aparelho.
-          </p>
+          </h1>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="sys-btn-glow uppercase tracking-wider">
+            <Button asChild size="lg" className="uppercase tracking-wider">
               <a href="#planos">
                 Despertar agora <ArrowRight className="size-4" />
               </a>
@@ -129,7 +148,7 @@ function Vendas() {
               <a href="#habilidades">Ver habilidades</a>
             </Button>
           </div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs text-muted-foreground">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs text-white/60">
             <span className="flex items-center gap-1.5">
               <MonitorSmartphone className="size-3.5 text-primary" /> PC e celular
             </span>
@@ -140,9 +159,7 @@ function Vendas() {
               <Download className="size-3.5 text-primary" /> Sem loja de apps
             </span>
           </div>
-        </div>
-
-        <StatusWindow />
+        </HeroCard>
       </section>
 
       {/* Problema */}
@@ -201,38 +218,77 @@ function Vendas() {
       </section>
 
       {/* Como funciona */}
-      <section className="border-y border-primary/10 bg-background/40">
+      <section
+        id="como-funciona"
+        className="scroll-mt-20 border-y border-primary/10 bg-background/40"
+      >
         <div className="mx-auto max-w-6xl px-4 py-16">
           <p className="sys-label mb-3">[ Missão ] Como começar</p>
           <h2 className="mb-8 text-3xl font-bold uppercase md:text-4xl">
             Três passos e você já está jogando
           </h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              { n: "01", t: "Escolha seu rank", d: "Mensal ou vitalício. O acesso chega na hora." },
-              {
-                n: "02",
-                t: "Instale no aparelho",
-                d: "Um toque em “Instalar o app”, no PC ou no celular. Sem loja.",
-              },
-              {
-                n: "03",
-                t: "Use as habilidades",
-                d: "Edite, limpe, clone, minere e agende de um lugar só.",
-              },
-            ].map((s) => (
-              <div key={s.n} className="flex gap-4">
-                <span className="sys-glow-text font-display text-5xl font-bold leading-none">
-                  {s.n}
-                </span>
-                <div>
-                  <h3 className="text-lg font-bold uppercase">{s.t}</h3>
-                  <p className="text-sm text-muted-foreground">{s.d}</p>
+          <div className="grid items-center gap-10 md:grid-cols-[1fr_minmax(0,24rem)]">
+            <div className="grid gap-6">
+              {[
+                {
+                  n: "01",
+                  t: "Escolha seu rank",
+                  d: "Mensal ou vitalício. O acesso chega na hora.",
+                },
+                {
+                  n: "02",
+                  t: "Instale no aparelho",
+                  d: "Um toque em “Instalar o app”, no PC ou no celular. Sem loja.",
+                },
+                {
+                  n: "03",
+                  t: "Use as habilidades",
+                  d: "Edite, limpe, clone, minere e agende de um lugar só.",
+                },
+              ].map((s) => (
+                <div key={s.n} className="flex gap-4">
+                  <span className="sys-glow-text font-display text-5xl font-bold leading-none">
+                    {s.n}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-bold uppercase">{s.t}</h3>
+                    <p className="text-sm text-muted-foreground">{s.d}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <StatusWindow />
           </div>
         </div>
+      </section>
+
+      {/* Card do plano vitalício */}
+      <section className="mx-auto max-w-6xl px-4 pt-20">
+        <HeroCard
+          theme="dourado"
+          rank="S"
+          kicker="Plano vitalício"
+          title="Monarca Vitalício"
+          subtitle="pagamento único"
+          art={ARTE.heroi2}
+          navTitle="Inclui"
+          nav={[
+            { label: "Todas as habilidades", href: "#planos" },
+            { label: "Novas ferramentas", href: "#planos" },
+            { label: "Sem mensalidade", href: "#planos" },
+            { label: "Suporte prioritário", href: "#planos" },
+          ]}
+        >
+          <p className="max-w-md">
+            Pague uma vez e use para sempre, no PC e no celular. Toda habilidade nova que for
+            liberada chega para você sem custo extra.
+          </p>
+          <Button asChild size="lg" className="uppercase tracking-wider">
+            <a href="#planos">
+              Quero ser Monarca <ArrowRight className="size-4" />
+            </a>
+          </Button>
+        </HeroCard>
       </section>
 
       {/* Planos */}
@@ -274,7 +330,7 @@ function Vendas() {
               Recompensa: mais conteúdo, menos horas de trabalho e mais clientes.
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg" className="sys-btn-glow uppercase tracking-wider">
+              <Button asChild size="lg" className="uppercase tracking-wider">
                 <a href="#planos">
                   <Zap className="size-4" /> Aceitar
                 </a>

@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, Lock, MonitorSmartphone } from "lucide-react";
 
 import { InstallButton } from "@/components/InstallButton";
+import { HeroCard } from "@/components/system/HeroCard";
 import { RankBadge, SystemWindow } from "@/components/system/System";
 import { TOOLS } from "@/lib/app";
+import { ARTE } from "@/lib/arte";
 import { useDevice } from "@/lib/device";
 import { cn } from "@/lib/utils";
 
@@ -14,31 +16,40 @@ export const Route = createFileRoute("/_app/painel")({
 
 function Painel() {
   const device = useDevice();
+  const navigate = useNavigate();
   const unlocked = TOOLS.filter((t) => t.status === "ativo").length;
 
   return (
     <div className="space-y-8">
-      <SystemWindow title="Notificação do sistema" scan className="sys-pop">
-        <div className="space-y-4 p-5 md:p-7">
-          <h1 className="sys-glow-text text-3xl font-bold uppercase tracking-wider md:text-5xl">
-            Bem-vindo, Criador.
-          </h1>
-          <p className="max-w-xl text-muted-foreground">
-            Você recebeu acesso à <span className="text-foreground">Fábrica de Conteúdo</span>.
-            Escolha uma habilidade para começar a sua missão de hoje.
-          </p>
-          <div className="grid max-w-xl grid-cols-3 gap-2 font-mono text-xs">
-            <Stat label="Habilidades" value={`${unlocked}/${TOOLS.length}`} />
-            <Stat
-              label="Modo"
-              value={
-                device.ready ? { forte: "Forte", medio: "Médio", leve: "Leve" }[device.tier] : "—"
-              }
-            />
-            <Stat label="Lote" value={device.ready ? `${device.concurrency}x` : "—"} />
-          </div>
+      <HeroCard
+        compact
+        theme="azul"
+        rank="S"
+        kicker="Notificação do sistema"
+        title="Bem-vindo, Criador."
+        subtitle="Fábrica de Conteúdo"
+        art={ARTE.heroi}
+        navTitle="Habilidades"
+        nav={TOOLS.map((t) => ({
+          label: t.short,
+          onClick: () => navigate({ to: t.to }),
+          active: t.status === "ativo",
+        }))}
+      >
+        <p className="max-w-md">
+          Escolha uma habilidade para começar a sua missão de hoje. As liberadas aparecem acesas.
+        </p>
+        <div className="grid max-w-md grid-cols-3 gap-2 font-mono text-xs">
+          <Stat label="Habilidades" value={`${unlocked}/${TOOLS.length}`} />
+          <Stat
+            label="Modo"
+            value={
+              device.ready ? { forte: "Forte", medio: "Médio", leve: "Leve" }[device.tier] : "—"
+            }
+          />
+          <Stat label="Lote" value={device.ready ? `${device.concurrency}x` : "—"} />
         </div>
-      </SystemWindow>
+      </HeroCard>
 
       <section className="space-y-3">
         <p className="sys-label">[ Habilidades ]</p>
@@ -121,7 +132,7 @@ function Painel() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-sm border border-primary/20 bg-background/40 px-3 py-2">
+    <div className="rounded-sm border border-white/15 bg-black/25 px-3 py-2 backdrop-blur-sm">
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
       <div className="mt-0.5 truncate text-sm text-foreground">{value}</div>
     </div>

@@ -1,0 +1,13 @@
+ESPAÇO DA ARTE DO APP
+=====================
+
+Coloque aqui as imagens dos personagens do app (PNG com fundo transparente, em pé, de corpo
+inteiro ou da cintura para cima, de preferência na vertical, uns 1200 px de altura):
+
+  heroi.png      -> card azul da página de vendas e do painel
+  heroi-2.png    -> card dourado (plano vitalício) da página de vendas
+
+Enquanto esses arquivos não existirem, o app mostra um portal brilhante no lugar.
+
+Use só arte que é sua: um personagem original gerado por IA ou desenhado por um artista que você
+contratou. Personagens e artes de animes, mangás e jogos têm dono e não podem ir num produto pago.

@@ -305,3 +305,147 @@
     animation: none;
   }
 }
+
+/* ===== Botões animados ===== */
+.btn-anim {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s ease,
+    background-color 0.2s ease,
+    filter 0.2s ease;
+}
+.btn-anim:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+.btn-anim:active {
+  transform: translateY(0) scale(0.97);
+  filter: brightness(1.25);
+  transition-duration: 0.06s;
+}
+/* Faixa de brilho que atravessa o botão. */
+.btn-anim::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    oklch(1 0 0 / 0.38) 47%,
+    oklch(1 0 0 / 0.05) 55%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.btn-anim:hover::after {
+  animation: btn-sweep 0.75s ease;
+}
+/* Botão principal: brilho passa sozinho de tempos em tempos e a borda pulsa. */
+.btn-cta::after {
+  animation: btn-sweep 3.8s ease-in-out 1.2s infinite;
+}
+.btn-cta {
+  animation: btn-breathe 2.8s ease-in-out infinite;
+}
+.btn-cta:hover {
+  box-shadow:
+    0 0 0 1px oklch(0.85 0.12 230 / 0.9),
+    0 0 26px 2px oklch(0.72 0.17 238 / 0.85),
+    0 0 60px 6px oklch(0.72 0.17 238 / 0.35);
+}
+@keyframes btn-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  45%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+@keyframes btn-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px oklch(0.72 0.17 238 / 0.55),
+      0 0 14px -2px oklch(0.72 0.17 238 / 0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px oklch(0.85 0.12 230 / 0.85),
+      0 0 26px 0 oklch(0.72 0.17 238 / 0.75);
+  }
+}
+
+/* Links do menu lateral do card, estilo "• SOBRE". */
+.hero-nav-link {
+  position: relative;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease,
+    letter-spacing 0.2s ease;
+}
+.hero-nav-link::before {
+  content: "";
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.25s ease;
+}
+.hero-nav-link:hover {
+  color: white;
+  transform: translateX(-4px);
+  letter-spacing: 0.14em;
+}
+.hero-nav-link:hover::before {
+  width: 18px;
+}
+
+/* Arte que "sai" de dentro do card. */
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+    filter: blur(6px) brightness(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.hero-rise {
+  animation: hero-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-anim,
+  .btn-anim:hover,
+  .btn-cta,
+  .btn-cta::after,
+  .btn-anim:hover::after,
+  .hero-float,
+  .hero-rise {
+    animation: none;
+    transform: none;
+  }
+}
