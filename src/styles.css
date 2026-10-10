@@ -164,14 +164,7 @@
     background-color: var(--color-background);
     background-image:
       radial-gradient(55rem 28rem at 80% -12%, oklch(0.72 0.17 238 / 0.16), transparent 60%),
-      radial-gradient(40rem 26rem at -10% 110%, oklch(0.6 0.2 295 / 0.12), transparent 60%),
-      linear-gradient(oklch(0.72 0.17 238 / 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, oklch(0.72 0.17 238 / 0.035) 1px, transparent 1px);
-    background-size:
-      auto,
-      auto,
-      44px 44px,
-      44px 44px;
+      radial-gradient(40rem 26rem at -10% 110%, oklch(0.6 0.2 295 / 0.12), transparent 60%);
     background-attachment: fixed;
     min-height: 100dvh;
   }

@@ -518,7 +518,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, { html: string }>(fun
               : "Clique para selecionar · dois cliques para editar texto ou imagem"}
           </span>
         </div>
-        <div className="flex justify-center bg-[repeating-conic-gradient(#0d1424_0_25%,#0a101d_0_50%)] bg-[length:16px_16px]">
+        <div className="flex justify-center bg-background/80">
           <iframe
             ref={frameRef}
             title="Editor visual do site"
