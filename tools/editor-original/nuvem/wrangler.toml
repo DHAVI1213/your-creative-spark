@@ -1,0 +1,14 @@
+name = "agendador-editor"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+[triggers]
+crons = ["* * * * *"]
+[[d1_databases]]
+binding = "DB"
+database_name = "agendador-editor"
+database_id = "PREENCHIDO_PELO_INSTALADOR"
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "agendador-editor-midia"
+[vars]
+GRAPH_VERSION = "v23.0"

@@ -1,0 +1,7 @@
+nuvem/config.json
+nuvem/.dev.vars
+.env*
+node_modules/
+dist/
+.wrangler/
+*.log

@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Minerador Viral</title>
+    <link rel="stylesheet" href="painel.css" />
+  </head>
+  <body>
+    <header class="top">
+      <img src="icones/48.png" width="30" height="30" alt="" />
+      <div class="marca"><b>Minerador Viral</b><small>Instagram · TikTok · Shorts</small></div>
+      <span class="pill demo" id="demoPill" hidden>DEMO</span>
+      <span class="pill" id="appPill" title="Editor em Massa no seu PC">App …</span>
+    </header>
+
+    <nav class="abas">
+      <button class="aba on" data-aba="minerar">Minerar</button>
+      <button class="aba" data-aba="link">🔗 Link</button>
+      <button class="aba" data-aba="historico">Histórico</button>
+      <button class="aba" data-aba="ajustes">Ajustes</button>
+    </nav>
+
+    <!-- ===================================================== MINERAR -->
+    <main id="vMinerar" class="vista">
+      <section class="perfil" id="perfilCard">
+        <span class="plat" id="platBadge">—</span>
+        <div class="pinfo">
+          <b id="perfilNome">Abra um perfil</b
+          ><small id="perfilSub">Instagram, TikTok ou a aba Shorts de um canal</small>
+        </div>
+        <button class="btn sm" id="btnIrShorts" hidden>Ir para Shorts</button>
+      </section>
+
+      <section class="cfg" id="cfg">
+        <div class="linha">
+          <label title="Como a lista final é ordenada"
+            >Ranking
+            <select id="optOrdem">
+              <option value="score">Acima da média do perfil</option>
+              <option value="potencial">Potencial viral (alcance + engajamento)</option>
+              <option value="views">Mais visualizados</option>
+              <option value="likes">Mais curtidos</option>
+              <option value="comments">Mais comentados</option>
+              <option value="engajamento">Maior engajamento</option>
+              <option value="recentes">Mais recentes</option>
+            </select>
+          </label>
+          <label title="Quantos vídeos aprovados você quer receber (1 a 500)"
+            >Quero baixar
+            <input id="optQuero" type="number" min="1" max="500" step="1" value="50" />
+          </label>
+        </div>
+        <div class="linha tres">
+          <label title="Onde fazer o ranking"
+            >Analisar
+            <select id="optEscopo">
+              <option value="todo">Perfil inteiro</option>
+              <option value="ultimos">Só os últimos…</option>
+            </select>
+          </label>
+          <label id="lblUltimos" title="Quantos vídeos recentes olhar (1 a 5.000)"
+            >Últimos vídeos
+            <input id="optUltimos" type="number" min="1" max="5000" step="1" value="300" />
+          </label>
+          <label id="lblDias"
+            >Período
+            <select id="optDias">
+              <option value="0">qualquer</option>
+              <option value="7">7 dias</option>
+              <option value="30">30 dias</option>
+              <option value="90">90 dias</option>
+              <option value="365">1 ano</option>
+            </select>
+          </label>
+        </div>
+        <div class="filtros">
+          <div class="ftit">
+            <span>FILTROS MÍNIMOS</span><small>o vídeo precisa passar em todos</small>
+          </div>
+          <div class="linha tres">
+            <label>Views<input id="optMinViews" placeholder="ex: 100K" /></label>
+            <label>Curtidas<input id="optMinLikes" placeholder="0" /></label>
+            <label>Comentários<input id="optMinComments" placeholder="0" /></label>
+          </div>
+        </div>
+        <button class="btn primary full" id="btnMinerar">⛏ Minerar perfil</button>
+        <button
+          class="btn full ghost2"
+          id="btnEscolher"
+          title="Clique nas capas dos vídeos direto na página do perfil"
+        >
+          ☝ Escolher direto na página
+        </button>
+        <p class="dica" id="dica"></p>
+      </section>
+
+      <section class="prog" id="prog" hidden>
+        <div class="prog-txt">
+          <span id="progTxt">Preparando…</span
+          ><button class="link" id="btnCancelar">cancelar</button>
+        </div>
+        <div class="bar"><i id="progBar"></i></div>
+      </section>
+
+      <section class="res" id="res" hidden>
+        <div class="res-head">
+          <div><b id="resTitulo">0 vídeos</b><small id="resSub"></small></div>
+          <div class="res-acoes">
+            <button class="btn sm" id="btnParecidos" title="Perfis parecidos com este">
+              Parecidos
+            </button>
+            <button class="btn sm" id="btnDeNovo" title="Minerar de novo">↻</button>
+          </div>
+        </div>
+        <div class="parecidos" id="parecidos" hidden>
+          <div class="ptit">
+            <b id="parTitulo">Perfis parecidos</b
+            ><button class="link" id="btnFecharPar">fechar</button>
+          </div>
+          <div class="plista" id="parLista"></div>
+        </div>
+        <p class="aviso" id="resAviso" hidden></p>
+        <div class="ordem-res">
+          <label class="chk"><input type="checkbox" id="chkTodos" /> Todos</label>
+          <select id="optOrdem2" title="Ordenar"></select>
+        </div>
+        <div class="rapido">
+          <span>Selecionar:</span>
+          <button data-top="10">Top 10</button><button data-top="25">25</button
+          ><button data-top="50">50</button><button data-top="100">100</button
+          ><button data-top="150">150</button><button data-top="250">250</button
+          ><button data-top="500">500</button><button data-top="0">Nenhum</button>
+        </div>
+        <div class="lista" id="lista"></div>
+      </section>
+    </main>
+
+    <!-- ===================================================== LINK DO YOUTUBE -->
+    <main id="vLink" class="vista" hidden>
+      <div class="vhead">
+        <div>
+          <small>YOUTUBE</small>
+          <h2>Baixar por link</h2>
+        </div>
+      </div>
+      <section class="cfg lk">
+        <label
+          >Links do YouTube
+          <small class="lk-sub">um por linha · vídeo, live gravada ou Shorts</small>
+          <textarea
+            id="lkLinks"
+            rows="5"
+            spellcheck="false"
+            placeholder="https://www.youtube.com/watch?v=…&#10;https://youtu.be/…"
+          ></textarea>
+        </label>
+        <button class="btn sm ghost2" id="lkAbaAtual" hidden>
+          ＋ Usar o vídeo aberto nesta aba
+        </button>
+        <div class="linha">
+          <label
+            >Mandar para
+            <select id="lkDestino">
+              <option value="cortes">🔥 Cortes Virais</option>
+              <option value="mesa">Mesa do Editor</option>
+            </select></label
+          >
+          <label
+            >Qualidade
+            <select id="lkQualidade">
+              <option value="1080">Até 1080p</option>
+              <option value="720">720p (mais leve)</option>
+            </select></label
+          >
+        </div>
+        <label class="chk lk-aut"
+          ><input type="checkbox" id="lkAutorizo" />
+          <span
+            >Tenho autorização do dono do conteúdo para baixar e cortar estes vídeos.</span
+          ></label
+        >
+        <button class="btn primary full" id="lkBaixar" disabled>⬇ Baixar no Editor</button>
+        <p class="dica" id="lkDica"></p>
+      </section>
+      <section class="prog" id="lkProg" hidden>
+        <div class="prog-txt"><span id="lkTxt">Preparando…</span></div>
+        <div class="bar"><i id="lkBar"></i></div>
+      </section>
+      <div class="lk-lista" id="lkLista"></div>
+    </main>
+
+    <!-- ===================================================== HISTÓRICO -->
+    <main id="vHistorico" class="vista" hidden>
+      <div class="vhead">
+        <div>
+          <small>NESTE NAVEGADOR</small>
+          <h2>Perfis analisados</h2>
+        </div>
+        <button class="link perigo" id="btnLimparTudo">Limpar tudo</button>
+      </div>
+      <div class="hlista" id="hLista"></div>
+      <div class="vazio" id="hVazio">Nenhum perfil analisado ainda.</div>
+    </main>
+
+    <!-- ===================================================== AJUSTES -->
+    <main id="vAjustes" class="vista" hidden>
+      <div class="vhead">
+        <div>
+          <small>PREFERÊNCIAS</small>
+          <h2>Ajustes</h2>
+        </div>
+      </div>
+      <div class="ajustes">
+        <label class="aj"
+          ><span
+            ><b>Buscar somente novos</b
+            ><small>Esconde e pula os vídeos que você já baixou de cada perfil</small></span
+          ><input type="checkbox" class="sw" id="ajNovos"
+        /></label>
+        <label class="aj"
+          ><span
+            ><b>Analisar tudo antes do ranking</b
+            ><small
+              >Desligado: para assim que achar a quantidade pedida (mais rápido). Ligado: lê todo o
+              escopo e só depois escolhe os melhores.</small
+            ></span
+          ><input type="checkbox" class="sw" id="ajTudo"
+        /></label>
+        <label class="aj"
+          ><span
+            ><b>Completar curtidas e comentários</b
+            ><small
+              >Quando a leitura vier só com views (Instagram), busca o resto dos vídeos mais
+              vistos</small
+            ></span
+          ><input type="checkbox" class="sw" id="ajCompletar"
+        /></label>
+        <label class="aj"
+          ><span
+            ><b>Planilha (CSV) dentro do ZIP</b
+            ><small>Métricas de cada vídeo junto com os arquivos</small></span
+          ><input type="checkbox" class="sw" id="ajCsv"
+        /></label>
+        <label class="aj"
+          ><span><b>Organização do ZIP</b><small>Um arquivo com tudo ou vários lotes</small></span>
+          <select id="ajOrganizacao">
+            <option value="unico">Tudo em um ZIP</option>
+            <option value="lotes">Separar em lotes</option>
+          </select></label
+        >
+        <label class="aj" id="ajLoteLinha"
+          ><span><b>Vídeos por lote</b><small>De 1 a 500</small></span
+          ><input type="number" id="ajLote" min="1" max="500" value="50"
+        /></label>
+        <label class="aj"
+          ><span
+            ><b>Onde salvar</b
+            ><small>Automático salva em Downloads/Minerador sem perguntar</small></span
+          >
+          <select id="ajSalvar">
+            <option value="auto">Salvar automaticamente</option>
+            <option value="perguntar">Perguntar onde salvar</option>
+          </select></label
+        >
+        <label class="aj"
+          ><span
+            ><b>Modo demonstração</b
+            ><small>Testa o painel com dados de mentira, sem acessar as plataformas</small></span
+          ><input type="checkbox" class="sw" id="ajDemo"
+        /></label>
+        <div class="aj">
+          <span><b>Vídeos já baixados</b><small id="ajBaixadosTxt">—</small></span
+          ><button class="btn sm" id="btnEsquecerTodos">Esquecer todos</button>
+        </div>
+      </div>
+      <p class="versao" id="versao"></p>
+    </main>
+
+    <footer class="rodape" id="rodape" hidden>
+      <div class="sel"><b id="selN">0</b><small>selecionados</small></div>
+      <div class="acoes">
+        <button
+          class="btn primary"
+          id="btnApp"
+          title="O Editor em Massa baixa os vídeos e coloca na mesa"
+        >
+          ➜ Editor
+        </button>
+        <button class="btn" id="btnZip">⬇ ZIP</button>
+        <button class="btn ghost" id="btnMais" title="Mais opções">⋯</button>
+      </div>
+      <div class="menu" id="menuMais" hidden>
+        <button id="btnCsv">Baixar planilha (CSV)</button>
+        <button id="btnLinks">Copiar links</button>
+        <button id="btnLimparHist">Esquecer os baixados deste perfil</button>
+      </div>
+      <div class="dl" id="dl" hidden>
+        <div class="prog-txt"><span id="dlTxt"></span></div>
+        <div class="bar"><i id="dlBar"></i></div>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+    <script src="lib/core.js"></script>
+    <script src="painel.js"></script>
+  </body>
+</html>
