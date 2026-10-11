@@ -11,7 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { receberNoEditor } from "@/lib/viral/transferencia";
+
 type EditorWindow = Window & {
+  importarVideosMinerador?: (files: File[]) => Promise<number[]>;
   iniciarEditor?: (deps: {
     criarFFmpeg: typeof criarFFmpeg;
     servidor: typeof servidor;
@@ -68,6 +71,24 @@ export function EditorOriginal() {
         usuario: user?.id ?? "",
       });
       encerrar.current = (frame.current?.contentWindow as EditorWindow | null)?.api?.destruir;
+      const editor = frame.current?.contentWindow as EditorWindow | null;
+      if (user && editor?.importarVideosMinerador) {
+        try {
+          const lote = await receberNoEditor(user.id, (files) =>
+            editor.importarVideosMinerador!(files),
+          );
+          if (lote?.importados)
+            toast.success(`${lote.importados} vídeo(s) do minerador chegaram na mesa.`);
+          if (lote?.pendentes)
+            toast.error(
+              `${lote.pendentes} vídeo(s) não puderam ser importados e foram preservados. Recarregue para tentar novamente.`,
+            );
+        } catch (e) {
+          toast.error(
+            e instanceof Error ? e.message : "Não foi possível receber os vídeos do minerador.",
+          );
+        }
+      }
     } catch {
       setErro("Não foi possível abrir o editor. Recarregue esta página.");
     }

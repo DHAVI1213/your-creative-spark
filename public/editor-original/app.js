@@ -2447,4 +2447,16 @@ async function init() {
     scheduleMinis();
   });
 }
-init();
+window.editorPronto = init();
+window.importarVideosMinerador = async (files) => {
+  await window.editorPronto;
+  if (state.processing) throw new Error("Espere o processamento atual terminar.");
+  if (state.videos.length + files.length > 50)
+    throw new Error("A mesa comporta até 50 vídeos. Remova alguns antes de importar.");
+  const paths = files.map((f) => api.pathForFile(f));
+  const validos = paths.filter(Boolean);
+  await importPaths(validos);
+  return paths.flatMap((path, i) =>
+    state.videos.some((v) => v.path === path && v.status !== "erro") ? [i] : [],
+  );
+};
