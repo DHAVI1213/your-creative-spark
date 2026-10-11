@@ -191,6 +191,42 @@ export type Database = {
         }
         Relationships: []
       }
+      viral_buscas: {
+        Row: {
+          criado_em: string
+          download_iniciado: string | null
+          download_run: string | null
+          id: string
+          perfil: Json
+          run_id: string | null
+          status: string
+          user_id: string
+          videos: Json
+        }
+        Insert: {
+          criado_em?: string
+          download_iniciado?: string | null
+          download_run?: string | null
+          id?: string
+          perfil: Json
+          run_id?: string | null
+          status?: string
+          user_id: string
+          videos?: Json
+        }
+        Update: {
+          criado_em?: string
+          download_iniciado?: string | null
+          download_run?: string | null
+          id?: string
+          perfil?: Json
+          run_id?: string | null
+          status?: string
+          user_id?: string
+          videos?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
