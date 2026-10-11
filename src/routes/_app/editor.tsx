@@ -7,9 +7,16 @@ import { PainelEdicao } from "@/components/editor/PainelEdicao";
 import { SystemHeader, SystemWindow } from "@/components/system/System";
 import { Button } from "@/components/ui/button";
 import { EditorProvider, useEditor } from "@/lib/editor/store";
+import { GOOGLE_FONTES_EDITOR } from "@/lib/editor/camadas";
 
 export const Route = createFileRoute("/_app/editor")({
-  head: () => ({ meta: [{ title: "Editor em Massa · Fábrica de Conteúdo" }] }),
+  head: () => ({
+    meta: [{ title: "Editor em Massa · Fábrica de Conteúdo" }],
+    links: [
+      { rel: "stylesheet", href: "/fontes/editor.css" },
+      { rel: "stylesheet", href: GOOGLE_FONTES_EDITOR },
+    ],
+  }),
   component: EditorPage,
 });
 function EditorPage() {

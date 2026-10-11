@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 
 import { lerInfo } from "./ler-video";
-import { EDICAO_PADRAO, type AjusteVideo, type Edicao, type VideoItem } from "./tipos";
+import { EDICAO_PADRAO, type AjusteVideo, type Camada, type Edicao, type VideoItem } from "./tipos";
 
 export const LIMITE_VIDEOS = 50;
 export type EstadoEditor = {
@@ -20,6 +20,7 @@ export type EstadoEditor = {
   passado: Edicao[];
   futuro: Edicao[];
   inicioGesto: Edicao | null;
+  camadaSelecionadaId: string | null;
 };
 export const ESTADO_INICIAL: EstadoEditor = {
   videos: [],
@@ -28,6 +29,7 @@ export const ESTADO_INICIAL: EstadoEditor = {
   passado: [],
   futuro: [],
   inicioGesto: null,
+  camadaSelecionadaId: null,
 };
 export type AcaoEditor =
   | { tipo: "adicionar"; videos: VideoItem[] }
@@ -38,11 +40,20 @@ export type AcaoEditor =
   | { tipo: "confirmar" }
   | { tipo: "desfazer" }
   | { tipo: "refazer" }
-  | { tipo: "ajuste"; id: string; ajuste: AjusteVideo | undefined };
+  | { tipo: "ajuste"; id: string; ajuste: AjusteVideo | undefined }
+  | { tipo: "selecionar-camada"; id: string | null }
+  | { tipo: "atualizar-camada"; camada: Camada; transitoria: boolean }
+  | { tipo: "adicionar-camada"; camada: Camada };
+
+// Imagens em base64 podem ser grandes. Compare referências, sem serializar
+// todo o histórico a cada evento de arrastar ou de slider.
+function mesmaEdicao(a: Edicao, b: Edicao) {
+  return (Object.keys(a) as (keyof Edicao)[]).every((chave) => a[chave] === b[chave]);
+}
 
 function confirmarGesto(estado: EstadoEditor): EstadoEditor {
   if (!estado.inicioGesto) return estado;
-  const mudou = JSON.stringify(estado.inicioGesto) !== JSON.stringify(estado.edicao);
+  const mudou = !mesmaEdicao(estado.inicioGesto, estado.edicao);
   return {
     ...estado,
     inicioGesto: null,
@@ -74,7 +85,7 @@ export function editorReducer(estado: EstadoEditor, acao: AcaoEditor): EstadoEdi
     case "edicao": {
       const base = acao.transitoria ? estado : confirmarGesto(estado);
       const edicao = { ...base.edicao, ...acao.parcial };
-      if (JSON.stringify(edicao) === JSON.stringify(base.edicao)) return base;
+      if (mesmaEdicao(edicao, base.edicao)) return base;
       return {
         ...base,
         edicao,
@@ -116,6 +127,26 @@ export function editorReducer(estado: EstadoEditor, acao: AcaoEditor): EstadoEdi
           video.id === acao.id ? { ...video, ajuste: acao.ajuste } : video,
         ),
       };
+    case "selecionar-camada":
+      return { ...estado, camadaSelecionadaId: acao.id };
+    case "atualizar-camada":
+      return editorReducer(estado, {
+        tipo: "edicao",
+        parcial: {
+          camadas: estado.edicao.camadas.map((camada) =>
+            camada.id === acao.camada.id ? acao.camada : camada,
+          ),
+        },
+        transitoria: acao.transitoria,
+      });
+    case "adicionar-camada":
+      return {
+        ...editorReducer(estado, {
+          tipo: "edicao",
+          parcial: { camadas: [...estado.edicao.camadas, acao.camada] },
+        }),
+        camadaSelecionadaId: acao.camada.id,
+      };
   }
 }
 
@@ -131,6 +162,9 @@ type EditorStore = EstadoEditor & {
   ajustarVideo: (id: string, ajuste: AjusteVideo | undefined) => void;
   tempoModelo: React.MutableRefObject<HTMLVideoElement | null>;
   carregando: boolean;
+  selecionarCamada: (id: string | null) => void;
+  atualizarCamada: (camada: Camada, transitoria?: boolean) => void;
+  adicionarCamada: (camada: Camada) => void;
 };
 const EditorContext = createContext<EditorStore | null>(null);
 
@@ -248,6 +282,10 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         ajustarVideo: (id, ajuste) => dispatch({ tipo: "ajuste", id, ajuste }),
         tempoModelo,
         carregando: pendentes > 0,
+        selecionarCamada: (id) => dispatch({ tipo: "selecionar-camada", id }),
+        atualizarCamada: (camada, transitoria = false) =>
+          dispatch({ tipo: "atualizar-camada", camada, transitoria }),
+        adicionarCamada: (camada) => dispatch({ tipo: "adicionar-camada", camada }),
       },
     },
     children,

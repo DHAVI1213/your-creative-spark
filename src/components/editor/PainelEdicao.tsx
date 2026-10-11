@@ -16,6 +16,7 @@ import { EDICAO_PADRAO, type Edicao, type Filtro } from "@/lib/editor/tipos";
 import { FILTROS } from "@/lib/editor/filtros";
 import { VideoComEdicao } from "./VideoComEdicao";
 import { ControleCorte, ControleDeslizante } from "./ControlesEdicao";
+import { PainelCamadas } from "./PainelCamadas";
 
 const FORMATOS: { valor: Edicao["formato"]; titulo: string; proporcao: string }[] = [
   { valor: "original", titulo: "Original", proporcao: "4/3" },
@@ -86,7 +87,7 @@ function ConteudoPainel() {
         Ctrl+Z para desfazer · Ctrl+Shift+Z para refazer
       </p>
       <Tabs defaultValue="corte">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="flex h-auto w-full flex-wrap gap-1">
           <TabsTrigger className="px-1 text-xs sm:text-sm" value="corte">
             Corte
           </TabsTrigger>
@@ -99,7 +100,13 @@ function ConteudoPainel() {
           <TabsTrigger className="px-1 text-xs sm:text-sm" value="filtros">
             Filtros
           </TabsTrigger>
+          <TabsTrigger className="px-2 text-xs sm:text-sm" value="camadas">
+            Textos e logo
+          </TabsTrigger>
         </TabsList>
+        <TabsContent value="camadas" className="pt-4">
+          <PainelCamadas />
+        </TabsContent>
         <TabsContent value="corte" className="pt-4">
           <ControleCorte
             corte={edicao.corte}
@@ -207,6 +214,7 @@ function ConteudoPainel() {
                     <VideoComEdicao
                       video={{ ...modelo, ajuste: undefined }}
                       edicao={{ ...edicao, formato: "16:9", filtro }}
+                      numero={videos.findIndex((video) => video.id === modeloId) + 1}
                     />
                     <span className="block py-2">{filtro.nome}</span>
                   </button>
@@ -246,7 +254,15 @@ function ConteudoPainel() {
 
 export function PainelEdicao() {
   const { isMobile } = useDevice();
-  const { videos, modeloId, edicao, confirmarEdicao } = useEditor();
+  const {
+    videos,
+    modeloId,
+    edicao,
+    confirmarEdicao,
+    camadaSelecionadaId,
+    selecionarCamada,
+    atualizarCamada,
+  } = useEditor();
   const modelo = videos.find((video) => video.id === modeloId);
   const [aberto, setAberto] = useState(false);
   if (!videos.length) return null;
@@ -274,8 +290,19 @@ export function PainelEdicao() {
             A prévia muda na hora em toda a mesa.
           </SheetDescription>
           {modelo && (
-            <div className="mx-auto mb-4 w-24">
-              <VideoComEdicao video={modelo} edicao={edicao} automatico />
+            <div className="mx-auto mb-4 w-40">
+              <VideoComEdicao
+                video={modelo}
+                edicao={edicao}
+                numero={videos.findIndex((video) => video.id === modeloId) + 1}
+                editorCamadas={{
+                  selecionadaId: camadaSelecionadaId,
+                  selecionar: selecionarCamada,
+                  atualizar: atualizarCamada,
+                  confirmar: confirmarEdicao,
+                }}
+                automatico
+              />
             </div>
           )}
           <ConteudoPainel />

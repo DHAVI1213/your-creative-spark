@@ -10,6 +10,7 @@ import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { edicaoDoVideo, normalizarFiltro, paraCss, tonsDoFiltro } from "@/lib/editor/filtros";
 import type { Edicao, VideoItem } from "@/lib/editor/tipos";
+import { CamadasSobrepostas, type EdicaoCamadas } from "./CamadasSobrepostas";
 
 const GRAO = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.5' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
@@ -19,12 +20,16 @@ export function VideoComEdicao({
   controles = false,
   automatico = false,
   referencia,
+  numero = 1,
+  editorCamadas,
 }: {
   video: VideoItem;
   edicao: Edicao;
   controles?: boolean;
   automatico?: boolean;
   referencia?: MutableRefObject<HTMLVideoElement | null>;
+  numero?: number;
+  editorCamadas?: EdicaoCamadas | undefined;
 }) {
   const principal = useRef<HTMLVideoElement>(null);
   const fundo = useRef<HTMLVideoElement>(null);
@@ -184,7 +189,7 @@ export function VideoComEdicao({
       <div
         ref={moldura}
         className="relative isolate w-full overflow-hidden rounded bg-black"
-        style={{ aspectRatio: proporcao }}
+        style={{ aspectRatio: proporcao, containerType: "size" }}
       >
         {atual.enquadrar === "fundo-desfocado" && (
           <video
@@ -256,6 +261,16 @@ export function VideoComEdicao({
           className="pointer-events-none absolute inset-0"
           style={{ backgroundImage: GRAO, opacity: f.granulado * 0.3, mixBlendMode: "overlay" }}
         />
+        {(atual.camadas.length > 0 || editorCamadas) && (
+          <CamadasSobrepostas
+            video={video}
+            edicao={atual}
+            numero={numero}
+            player={principal}
+            proporcao={proporcao}
+            editor={editorCamadas}
+          />
+        )}
       </div>
       {controles && (
         <div className="flex items-center gap-2 pt-2">

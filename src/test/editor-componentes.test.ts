@@ -24,6 +24,9 @@ describe("Componentes da mesa", () => {
     const adicionar = vi.fn();
     vi.mocked(useEditor).mockReturnValue({
       ...ESTADO_INICIAL,
+      selecionarCamada: vi.fn(),
+      atualizarCamada: vi.fn(),
+      adicionarCamada: vi.fn(),
       confirmarEdicao: vi.fn(),
       desfazer: vi.fn(),
       refazer: vi.fn(),
@@ -75,6 +78,9 @@ describe("Componentes da mesa", () => {
     const remover = vi.fn();
     vi.mocked(useEditor).mockReturnValue({
       ...ESTADO_INICIAL,
+      selecionarCamada: vi.fn(),
+      atualizarCamada: vi.fn(),
+      adicionarCamada: vi.fn(),
       confirmarEdicao: vi.fn(),
       desfazer: vi.fn(),
       refazer: vi.fn(),

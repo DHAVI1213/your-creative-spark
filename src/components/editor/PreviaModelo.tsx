@@ -2,7 +2,16 @@ import { SystemWindow } from "@/components/system/System";
 import { useEditor } from "@/lib/editor/store";
 import { VideoComEdicao } from "./VideoComEdicao";
 export function PreviaModelo() {
-  const { videos, modeloId, edicao, tempoModelo } = useEditor();
+  const {
+    videos,
+    modeloId,
+    edicao,
+    tempoModelo,
+    camadaSelecionadaId,
+    selecionarCamada,
+    atualizarCamada,
+    confirmarEdicao,
+  } = useEditor();
   const modelo = videos.find((video) => video.id === modeloId);
   if (!modelo) return null;
   return (
@@ -14,6 +23,13 @@ export function PreviaModelo() {
           edicao={edicao}
           controles
           referencia={tempoModelo}
+          numero={videos.findIndex((video) => video.id === modeloId) + 1}
+          editorCamadas={{
+            selecionadaId: camadaSelecionadaId,
+            selecionar: selecionarCamada,
+            atualizar: atualizarCamada,
+            confirmar: confirmarEdicao,
+          }}
         />
         <p className="break-words text-sm font-medium">{modelo.nome}</p>
         <p className="text-xs text-muted-foreground">

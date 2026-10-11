@@ -12,7 +12,7 @@ import { ControleCorte, ControleDeslizante } from "./ControlesEdicao";
 import { VideoComEdicao } from "./VideoComEdicao";
 
 export function AjusteIndividual({ video }: { video: VideoItem }) {
-  const { edicao, ajustarVideo } = useEditor();
+  const { edicao, ajustarVideo, videos } = useEditor();
   const mudar = (parcial: AjusteVideo) => ajustarVideo(video.id, { ...video.ajuste, ...parcial });
   return (
     <Sheet>
@@ -32,7 +32,12 @@ export function AjusteIndividual({ video }: { video: VideoItem }) {
             {video.nome} · os outros vídeos continuam com a edição geral.
           </SheetDescription>
           <div className="mx-auto w-40">
-            <VideoComEdicao video={video} edicao={edicao} automatico />
+            <VideoComEdicao
+              video={video}
+              edicao={edicao}
+              numero={videos.findIndex((item) => item.id === video.id) + 1}
+              automatico
+            />
           </div>
           <ControleCorte
             corte={video.ajuste?.corte ?? edicao.corte}

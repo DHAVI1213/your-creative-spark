@@ -1,0 +1,42 @@
+@font-face {
+  font-family: "Bebas Neue";
+  src: url("./BebasNeue-Regular.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anton";
+  src: url("./Anton-Regular.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("./Montserrat-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bangers";
+  src: url("./Bangers-Regular.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Russo One";
+  src: url("./RussoOne-Regular.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("./Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("./Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}

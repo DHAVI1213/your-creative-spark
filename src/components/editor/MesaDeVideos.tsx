@@ -5,7 +5,7 @@ import type { VideoItem } from "@/lib/editor/tipos";
 import { VideoComEdicao } from "./VideoComEdicao";
 import { AjusteIndividual } from "./AjusteIndividual";
 
-function CartaoVideo({ video }: { video: VideoItem }) {
+function CartaoVideo({ video, numero }: { video: VideoItem; numero: number }) {
   const { modeloId, escolherModelo, remover, edicao } = useEditor();
   const modelo = modeloId === video.id;
   const segundos = Math.floor(video.duracao);
@@ -21,7 +21,7 @@ function CartaoVideo({ video }: { video: VideoItem }) {
         aria-pressed={modelo}
         onClick={() => escolherModelo(video.id)}
       >
-        <VideoComEdicao video={video} edicao={edicao} automatico />
+        <VideoComEdicao video={video} edicao={edicao} numero={numero} automatico />
         <div className="space-y-1 p-3">
           <p className="truncate text-sm font-medium" title={video.nome}>
             {video.nome}
@@ -52,8 +52,8 @@ export function MesaDeVideos() {
   const { videos } = useEditor();
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-      {videos.map((video) => (
-        <CartaoVideo key={video.id} video={video} />
+      {videos.map((video, index) => (
+        <CartaoVideo key={video.id} video={video} numero={index + 1} />
       ))}
     </div>
   );
