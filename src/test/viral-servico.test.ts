@@ -169,4 +169,48 @@ describe("coleta autenticada", () => {
     expect(f.mock.calls[2]?.[0]).toContain("download_run=is.null");
     expect(f).toHaveBeenCalledTimes(3);
   });
+  it.each([200, 201, 204])(
+    "inicia a coleta quando escritas mínimas respondem %s sem JSON",
+    async (status) => {
+      const f = vi
+        .fn()
+        .mockResolvedValueOnce(json([{ valor: "segredo" }]))
+        .mockResolvedValueOnce(new Response(null, { status }))
+        .mockResolvedValueOnce(json([]))
+        .mockResolvedValueOnce(new Response(null, { status }))
+        .mockResolvedValueOnce(json({ data: { id: "runABC" } }))
+        .mockResolvedValueOnce(new Response(null, { status }));
+      vi.stubGlobal("fetch", f);
+      const r = await executarMinerador({
+        token: "x",
+        acao: "iniciar",
+        perfil: "https://www.instagram.com/lolita/",
+        limite: 100,
+      });
+      expect(r.status).toBe("processando");
+      expect(r.busca).toBeTruthy();
+      expect(f).toHaveBeenCalledTimes(6);
+    },
+  );
+  it("explica resposta vazia da Apify e encerra a reserva", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(json([{ valor: "segredo" }]))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+      .mockResolvedValueOnce(json([]))
+      .mockResolvedValueOnce(new Response(null, { status: 201 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", f);
+    await expect(
+      executarMinerador({ token: "x", acao: "iniciar", perfil: "instagram.com/lolita" }),
+    ).rejects.toThrow("Apify devolveu uma resposta vazia");
+    expect(f.mock.calls[5]?.[1].body).toBe(JSON.stringify({ status: "erro" }));
+  });
+  it("não trata uma leitura vazia do banco como ausência de configuração", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 200 })));
+    await expect(executarMinerador({ token: "x", acao: "config" })).rejects.toThrow(
+      "banco devolveu uma resposta vazia",
+    );
+  });
 });

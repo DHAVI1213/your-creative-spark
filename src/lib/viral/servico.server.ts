@@ -38,6 +38,16 @@ const resposta = (p: Partial<Resposta>): Resposta => ({
   ...p,
 });
 const APIFY = "https://api.apify.com/v2";
+async function lerJson(r: Response, origem: string) {
+  const texto = await r.text();
+  if (!texto.trim())
+    throw new Error(`${origem} devolveu uma resposta vazia. Tente novamente em instantes.`);
+  try {
+    return JSON.parse(texto);
+  } catch {
+    throw new Error(`${origem} devolveu uma resposta inválida. Tente novamente em instantes.`);
+  }
+}
 export async function executarMinerador(d: Entrada): Promise<Resposta> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: auth, error } = await supabaseAdmin.auth.getUser(d.token);
@@ -63,7 +73,10 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
       throw new Error(
         "Não foi possível acessar o minerador. Aplique a migração viral_buscas pela Lovable.",
       );
-    return r.status === 204 ? [] : await r.json();
+    // Escritas com return=minimal podem responder 200/201 sem corpo, além de 204.
+    // Não tente interpretar essas confirmações como JSON.
+    if (new Headers(init.headers).get("Prefer") === "return=minimal" || r.status === 204) return [];
+    return lerJson(r, "O banco");
   }
   const segredos = (await banco("app_secrets?chave=eq.apify_token&select=valor")) as {
     valor: string;
@@ -86,7 +99,7 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
       throw new Error(
         `O serviço de coleta respondeu ${r.status}. Confira a chave, o saldo e os coletores da Apify.`,
       );
-    return await r.json();
+    return lerJson(r, "A Apify");
   }
   const endpoint = "viral_buscas";
   async function atualizar(id: string, campos: Record<string, unknown>) {
