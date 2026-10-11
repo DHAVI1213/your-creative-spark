@@ -3,10 +3,14 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AreaDeEnvio } from "@/components/editor/AreaDeEnvio";
 import { MesaDeVideos } from "@/components/editor/MesaDeVideos";
-import { useEditor } from "@/lib/editor/store";
+import { useEditor, ESTADO_INICIAL } from "@/lib/editor/store";
+import { EDICAO_PADRAO } from "@/lib/editor/tipos";
 import { toast } from "sonner";
 
-vi.mock("@/lib/editor/store", () => ({ useEditor: vi.fn() }));
+vi.mock("@/lib/editor/store", async (original) => ({
+  ...(await original<typeof import("@/lib/editor/store")>()),
+  useEditor: vi.fn(),
+}));
 vi.mock("@/lib/device", () => ({ useDevice: () => ({ maxVideoMB: 1 }) }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 beforeEach(() => vi.clearAllMocks());
@@ -19,9 +23,15 @@ describe("Componentes da mesa", () => {
   it("valida arquivos no seletor e ao arrastar", () => {
     const adicionar = vi.fn();
     vi.mocked(useEditor).mockReturnValue({
+      ...ESTADO_INICIAL,
+      confirmarEdicao: vi.fn(),
+      desfazer: vi.fn(),
+      refazer: vi.fn(),
+      ajustarVideo: vi.fn(),
+      tempoModelo: { current: null },
       videos: [],
       modeloId: null,
-      edicao: {},
+      edicao: EDICAO_PADRAO,
       adicionar,
       remover: vi.fn(),
       limparTudo: vi.fn(),
@@ -64,6 +74,12 @@ describe("Componentes da mesa", () => {
     const escolherModelo = vi.fn();
     const remover = vi.fn();
     vi.mocked(useEditor).mockReturnValue({
+      ...ESTADO_INICIAL,
+      confirmarEdicao: vi.fn(),
+      desfazer: vi.fn(),
+      refazer: vi.fn(),
+      ajustarVideo: vi.fn(),
+      tempoModelo: { current: null },
       videos: [
         {
           id: "a",
@@ -79,7 +95,7 @@ describe("Componentes da mesa", () => {
         },
       ],
       modeloId: "a",
-      edicao: {},
+      edicao: EDICAO_PADRAO,
       adicionar: vi.fn(),
       remover,
       limparTudo: vi.fn(),

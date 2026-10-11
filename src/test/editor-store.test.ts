@@ -92,4 +92,49 @@ describe("Mesa de vídeos", () => {
     expect(result.current.videos).toEqual([]);
     expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
+  it("desfaz e refaz um gesto de slider como uma única edição", () => {
+    const { result } = montar();
+    act(() => result.current.mudarEdicao({ zoom: 1.2 }, true));
+    act(() => result.current.mudarEdicao({ zoom: 1.5 }, true));
+    act(() => result.current.confirmarEdicao());
+    expect(result.current.passado).toHaveLength(1);
+    act(() => result.current.desfazer());
+    expect(result.current.edicao.zoom).toBe(1);
+    act(() => result.current.refazer());
+    expect(result.current.edicao.zoom).toBe(1.5);
+    act(() => result.current.desfazer());
+    act(() => result.current.mudarEdicao({ formato: "9:16" }));
+    expect(result.current.futuro).toEqual([]);
+  });
+  it("responde aos atalhos e preserva edição de texto", () => {
+    const { result } = montar();
+    act(() => result.current.mudarEdicao({ velocidade: 2 }));
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true })));
+    expect(result.current.edicao.velocidade).toBe(1);
+    act(() =>
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "z", ctrlKey: true, shiftKey: true }),
+      ),
+    );
+    expect(result.current.edicao.velocidade).toBe(2);
+    const input = document.createElement("input");
+    document.body.append(input);
+    act(() =>
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true })),
+    );
+    expect(result.current.edicao.velocidade).toBe(2);
+    input.remove();
+  });
+  it("altera só o vídeo escolhido e permite voltar à edição geral", async () => {
+    const { result } = montar();
+    await act(() => result.current.adicionar([file("a.mp4"), file("b.mp4")]));
+    const id = result.current.videos[0]!.id;
+    const edicao = result.current.edicao;
+    act(() => result.current.ajustarVideo(id, { posicaoX: 0.4, corte: { inicio: 1, fim: 3 } }));
+    expect(result.current.videos[0]?.ajuste?.posicaoX).toBe(0.4);
+    expect(result.current.videos[1]?.ajuste).toBeUndefined();
+    expect(result.current.edicao).toBe(edicao);
+    act(() => result.current.ajustarVideo(id, undefined));
+    expect(result.current.videos[0]?.ajuste).toBeUndefined();
+  });
 });

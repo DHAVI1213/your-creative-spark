@@ -3,6 +3,7 @@ import { Film, Trash2 } from "lucide-react";
 import { AreaDeEnvio } from "@/components/editor/AreaDeEnvio";
 import { MesaDeVideos } from "@/components/editor/MesaDeVideos";
 import { PreviaModelo } from "@/components/editor/PreviaModelo";
+import { PainelEdicao } from "@/components/editor/PainelEdicao";
 import { SystemHeader, SystemWindow } from "@/components/system/System";
 import { Button } from "@/components/ui/button";
 import { EditorProvider, useEditor } from "@/lib/editor/store";
@@ -26,7 +27,7 @@ function MesaEditor() {
         label="Mesa de vídeos"
         title="Editor em Massa"
         icon={Film}
-        description="Organize seus vídeos e escolha um modelo. As opções de edição chegam em breve."
+        description="Edite o modelo e veja a mudança em todos os vídeos, na hora."
       />
       <AreaDeEnvio />
       <div className="flex items-center justify-between gap-3">
@@ -39,12 +40,13 @@ function MesaEditor() {
         </Button>
       </div>
       {videos.length ? (
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,300px)]">
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
           <div className="order-2 min-w-0 lg:order-1">
             <MesaDeVideos />
           </div>
-          <div className="order-1 min-w-0 lg:order-2">
+          <div className="order-1 min-w-0 space-y-4 lg:order-2">
             <PreviaModelo />
+            <PainelEdicao />
           </div>
         </div>
       ) : (
@@ -53,7 +55,7 @@ function MesaEditor() {
             <Film className="mx-auto size-10 text-primary" />
             <p>Suba os vídeos, edite um e a edição vale para todos.</p>
             <p className="text-sm text-muted-foreground">
-              Comece escolhendo seus vídeos. A edição estará disponível nas próximas etapas.
+              Escolha os vídeos para começar. A exportação chega nas próximas etapas.
             </p>
           </div>
         </SystemWindow>

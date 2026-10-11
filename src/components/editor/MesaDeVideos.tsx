@@ -1,35 +1,12 @@
-import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEditor } from "@/lib/editor/store";
 import type { VideoItem } from "@/lib/editor/tipos";
+import { VideoComEdicao } from "./VideoComEdicao";
+import { AjusteIndividual } from "./AjusteIndividual";
 
 function CartaoVideo({ video }: { video: VideoItem }) {
-  const elemento = useRef<HTMLVideoElement>(null);
-  const { modeloId, escolherModelo, remover } = useEditor();
-  useEffect(() => {
-    const player = elemento.current;
-    if (!player || typeof IntersectionObserver === "undefined") return;
-    let visivel = false;
-    const atualizar = () => {
-      if (visivel && !document.hidden) void player.play().catch(() => undefined);
-      else player.pause();
-    };
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        visivel = entry?.isIntersecting ?? false;
-        atualizar();
-      },
-      { threshold: 0.1 },
-    );
-    observer.observe(player);
-    document.addEventListener("visibilitychange", atualizar);
-    return () => {
-      observer.disconnect();
-      document.removeEventListener("visibilitychange", atualizar);
-      player.pause();
-    };
-  }, [video.url]);
+  const { modeloId, escolherModelo, remover, edicao } = useEditor();
   const modelo = modeloId === video.id;
   const segundos = Math.floor(video.duracao);
   const duracao = `${String(Math.floor(segundos / 60)).padStart(2, "0")}:${String(segundos % 60).padStart(2, "0")}`;
@@ -44,15 +21,7 @@ function CartaoVideo({ video }: { video: VideoItem }) {
         aria-pressed={modelo}
         onClick={() => escolherModelo(video.id)}
       >
-        <video
-          ref={elemento}
-          src={video.url}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="aspect-video w-full bg-black object-contain"
-        />
+        <VideoComEdicao video={video} edicao={edicao} automatico />
         <div className="space-y-1 p-3">
           <p className="truncate text-sm font-medium" title={video.nome}>
             {video.nome}
@@ -60,9 +29,13 @@ function CartaoVideo({ video }: { video: VideoItem }) {
           <p className="text-xs text-muted-foreground">
             {duracao} · {video.tamanhoMB.toFixed(1)} MB
           </p>
-          {modelo && <span className="sys-label text-primary">MODELO</span>}
+          <div className="flex flex-wrap gap-2">
+            {modelo && <span className="sys-label text-primary">MODELO</span>}
+            {video.ajuste && <span className="text-xs text-primary">ajustado</span>}
+          </div>
         </div>
       </button>
+      <AjusteIndividual video={video} />
       <Button
         variant="secondary"
         size="icon"
@@ -75,7 +48,6 @@ function CartaoVideo({ video }: { video: VideoItem }) {
     </article>
   );
 }
-
 export function MesaDeVideos() {
   const { videos } = useEditor();
   return (

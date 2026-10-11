@@ -10,17 +10,46 @@ import {
 import { toast } from "sonner";
 
 import { lerInfo } from "./ler-video";
-import { EDICAO_PADRAO, type Edicao, type VideoItem } from "./tipos";
+import { EDICAO_PADRAO, type AjusteVideo, type Edicao, type VideoItem } from "./tipos";
 
 export const LIMITE_VIDEOS = 50;
-export type EstadoEditor = { videos: VideoItem[]; modeloId: string | null; edicao: Edicao };
-export const ESTADO_INICIAL: EstadoEditor = { videos: [], modeloId: null, edicao: EDICAO_PADRAO };
+export type EstadoEditor = {
+  videos: VideoItem[];
+  modeloId: string | null;
+  edicao: Edicao;
+  passado: Edicao[];
+  futuro: Edicao[];
+  inicioGesto: Edicao | null;
+};
+export const ESTADO_INICIAL: EstadoEditor = {
+  videos: [],
+  modeloId: null,
+  edicao: EDICAO_PADRAO,
+  passado: [],
+  futuro: [],
+  inicioGesto: null,
+};
 export type AcaoEditor =
   | { tipo: "adicionar"; videos: VideoItem[] }
   | { tipo: "remover"; id: string }
   | { tipo: "limpar" }
   | { tipo: "modelo"; id: string }
-  | { tipo: "edicao"; parcial: Partial<Edicao> };
+  | { tipo: "edicao"; parcial: Partial<Edicao>; transitoria?: boolean }
+  | { tipo: "confirmar" }
+  | { tipo: "desfazer" }
+  | { tipo: "refazer" }
+  | { tipo: "ajuste"; id: string; ajuste: AjusteVideo | undefined };
+
+function confirmarGesto(estado: EstadoEditor): EstadoEditor {
+  if (!estado.inicioGesto) return estado;
+  const mudou = JSON.stringify(estado.inicioGesto) !== JSON.stringify(estado.edicao);
+  return {
+    ...estado,
+    inicioGesto: null,
+    passado: mudou ? [...estado.passado, estado.inicioGesto].slice(-100) : estado.passado,
+    futuro: mudou ? [] : estado.futuro,
+  };
+}
 
 export function editorReducer(estado: EstadoEditor, acao: AcaoEditor): EstadoEditor {
   switch (acao.tipo) {
@@ -37,13 +66,56 @@ export function editorReducer(estado: EstadoEditor, acao: AcaoEditor): EstadoEdi
       };
     }
     case "limpar":
-      return { ...ESTADO_INICIAL, videos: [], edicao: {} };
+      return { ...ESTADO_INICIAL, videos: [] };
     case "modelo":
       return estado.videos.some((video) => video.id === acao.id)
         ? { ...estado, modeloId: acao.id }
         : estado;
-    case "edicao":
-      return { ...estado, edicao: { ...estado.edicao, ...acao.parcial } as Edicao };
+    case "edicao": {
+      const base = acao.transitoria ? estado : confirmarGesto(estado);
+      const edicao = { ...base.edicao, ...acao.parcial };
+      if (JSON.stringify(edicao) === JSON.stringify(base.edicao)) return base;
+      return {
+        ...base,
+        edicao,
+        inicioGesto: acao.transitoria ? (base.inicioGesto ?? base.edicao) : null,
+        passado: acao.transitoria ? base.passado : [...base.passado, base.edicao].slice(-100),
+        futuro: [],
+      };
+    }
+    case "confirmar":
+      return confirmarGesto(estado);
+    case "desfazer": {
+      const base = confirmarGesto(estado);
+      const anterior = base.passado.at(-1);
+      return anterior
+        ? {
+            ...base,
+            edicao: anterior,
+            passado: base.passado.slice(0, -1),
+            futuro: [base.edicao, ...base.futuro],
+          }
+        : base;
+    }
+    case "refazer": {
+      const base = confirmarGesto(estado);
+      const proxima = base.futuro[0];
+      return proxima
+        ? {
+            ...base,
+            edicao: proxima,
+            passado: [...base.passado, base.edicao],
+            futuro: base.futuro.slice(1),
+          }
+        : base;
+    }
+    case "ajuste":
+      return {
+        ...estado,
+        videos: estado.videos.map((video) =>
+          video.id === acao.id ? { ...video, ajuste: acao.ajuste } : video,
+        ),
+      };
   }
 }
 
@@ -52,7 +124,12 @@ type EditorStore = EstadoEditor & {
   remover: (id: string) => void;
   limparTudo: () => void;
   escolherModelo: (id: string) => void;
-  mudarEdicao: (parcial: Partial<Edicao>) => void;
+  mudarEdicao: (parcial: Partial<Edicao>, transitoria?: boolean) => void;
+  confirmarEdicao: () => void;
+  desfazer: () => void;
+  refazer: () => void;
+  ajustarVideo: (id: string, ajuste: AjusteVideo | undefined) => void;
+  tempoModelo: React.MutableRefObject<HTMLVideoElement | null>;
   carregando: boolean;
 };
 const EditorContext = createContext<EditorStore | null>(null);
@@ -63,6 +140,24 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const recursos = useRef(new Map<string, string>());
   const geracao = useRef(0);
   const vagas = useRef(0);
+  const tempoModelo = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const teclado = (event: KeyboardEvent) => {
+      const alvo = event.target;
+      if (
+        alvo instanceof HTMLElement &&
+        (alvo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(alvo.tagName))
+      )
+        return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        dispatch({ tipo: event.shiftKey ? "refazer" : "desfazer" });
+      }
+    };
+    window.addEventListener("keydown", teclado);
+    return () => window.removeEventListener("keydown", teclado);
+  }, []);
 
   useEffect(() => {
     const urls = recursos.current;
@@ -145,7 +240,13 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         remover,
         limparTudo,
         escolherModelo: (id) => dispatch({ tipo: "modelo", id }),
-        mudarEdicao: (parcial) => dispatch({ tipo: "edicao", parcial }),
+        mudarEdicao: (parcial, transitoria = false) =>
+          dispatch({ tipo: "edicao", parcial, transitoria }),
+        confirmarEdicao: () => dispatch({ tipo: "confirmar" }),
+        desfazer: () => dispatch({ tipo: "desfazer" }),
+        refazer: () => dispatch({ tipo: "refazer" }),
+        ajustarVideo: (id, ajuste) => dispatch({ tipo: "ajuste", id, ajuste }),
+        tempoModelo,
         carregando: pendentes > 0,
       },
     },
