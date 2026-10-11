@@ -442,3 +442,30 @@
     transform: none;
   }
 }
+/* Evita estouro de layout horizontal no mobile */
+html, body {
+  overflow-x: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Suporte a entalhes e barras inferiores (iPhone / Android) */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+/* Otimização de rolagem e renderização */
+main {
+  padding-bottom: calc(1rem + var(--sab));
+  content-visibility: auto;
+}
+
+/* Garante tamanho mínimo para áreas de toque em telas sensíveis ao toque */
+@media (pointer: coarse) {
+  button, a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
