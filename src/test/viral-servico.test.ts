@@ -213,4 +213,31 @@ describe("coleta autenticada", () => {
       "banco devolveu uma resposta vazia",
     );
   });
+  it("recupera reservas órfãs sem expirar execuções novas da Apify", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(json([{ valor: "segredo" }]))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+      .mockResolvedValueOnce(json([]))
+      .mockResolvedValueOnce(new Response(null, { status: 201 }))
+      .mockResolvedValueOnce(json({ data: { id: "runABC" } }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", f);
+    await executarMinerador({ token: "x", acao: "iniciar", perfil: "instagram.com/lolita" });
+    const u = new URL(f.mock.calls[1]![0]);
+    expect(u.searchParams.get("user_id")).toBe("eq.usuario-a");
+    expect(u.searchParams.get("status")).toBe("eq.processando");
+    expect(u.searchParams.get("or")).toContain("and(run_id.is.null,criado_em.lt.");
+  });
+  it.each([
+    ["23505", 409, "busca em andamento"],
+    ["42P01", 404, "estrutura"],
+    ["42501", 403, "permissão"],
+  ])("explica a falha %s sem acusar sempre migração", async (code, status, mensagem) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ code }), { status })),
+    );
+    await expect(executarMinerador({ token: "x", acao: "config" })).rejects.toThrow(mensagem);
+  });
 });

@@ -69,10 +69,24 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
       headers: { ...headers, ...init.headers },
       signal: AbortSignal.timeout(15000),
     });
-    if (!r.ok)
+    if (!r.ok) {
+      const falha = (await r.json().catch(() => ({}))) as { code?: string };
+      if (falha.code === "23505")
+        throw new Error(
+          "Você já tem uma busca em andamento. Aguarde ela terminar e tente novamente.",
+        );
+      if (["42P01", "42703", "PGRST205", "PGRST204"].includes(falha.code ?? ""))
+        throw new Error(
+          "A estrutura do minerador está incompleta. Aplique a migração viral_buscas pela Lovable.",
+        );
+      if (r.status === 401 || r.status === 403 || falha.code === "42501")
+        throw new Error(
+          "O servidor não tem permissão para acessar o minerador. Confira a configuração do banco na Lovable.",
+        );
       throw new Error(
-        "Não foi possível acessar o minerador. Aplique a migração viral_buscas pela Lovable.",
+        `O banco não conseguiu concluir a operação (${r.status}). Tente novamente em instantes.`,
       );
+    }
     // Escritas com return=minimal podem responder 200/201 sem corpo, além de 204.
     // Não tente interpretar essas confirmações como JSON.
     if (new Headers(init.headers).get("Prefer") === "return=minimal" || r.status === 204) return [];
@@ -113,8 +127,10 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
     const perfil = lerPerfil(d.perfil ?? ""),
       limite = d.limite ?? 100;
     // Uma coleta por usuário. Reservamos antes de chamar o serviço pago.
+    // Uma reserva sem run_id por 90 s ficou órfã (a chamada Apify tem timeout de 20 s).
+    // Recupera falhas anteriores sem encerrar execuções que já receberam run_id.
     await banco(
-      `${endpoint}?user_id=eq.${usuario}&status=eq.processando&criado_em=lt.${encodeURIComponent(new Date(Date.now() - 20 * 60000).toISOString())}`,
+      `${endpoint}?user_id=eq.${usuario}&status=eq.processando&or=(criado_em.lt.${encodeURIComponent(new Date(Date.now() - 20 * 60000).toISOString())},and(run_id.is.null,criado_em.lt.${encodeURIComponent(new Date(Date.now() - 90000).toISOString())}))`,
       {
         method: "PATCH",
         headers: { Prefer: "return=minimal" },
