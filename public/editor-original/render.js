@@ -128,9 +128,9 @@
 
   function demoFill(ctx, x, y, w, h) {
     const g = ctx.createLinearGradient(x, y, x + w, y + h);
-    g.addColorStop(0, "#6d28d9");
-    g.addColorStop(0.55, "#db2777");
-    g.addColorStop(1, "#f59e0b");
+    g.addColorStop(0, "#082338");
+    g.addColorStop(0.55, "#07436b");
+    g.addColorStop(1, "#008dc6");
     ctx.fillStyle = g;
     ctx.fillRect(x, y, w, h);
   }

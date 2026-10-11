@@ -1,0 +1,255 @@
+/* Tema do aplicativo. Não altera fontes, cores ou efeitos do vídeo exportado. */
+:root {
+  --bg: oklch(0.13 0.025 258);
+  --panel: oklch(0.15 0.035 255);
+  --panel2: oklch(0.21 0.035 255);
+  --card: oklch(0.17 0.035 255);
+  --text: oklch(0.95 0.015 240);
+  --muted: oklch(0.68 0.04 245);
+  --dim: oklch(0.58 0.04 245);
+  --accent: oklch(0.72 0.17 238);
+  --accent-2: oklch(0.62 0.16 238);
+  --cyan: var(--accent);
+  --sun: oklch(0.82 0.15 80);
+  --line: oklch(0.72 0.17 238 / 18%);
+  --line2: oklch(0.72 0.17 238 / 30%);
+  --accent-soft: oklch(0.72 0.17 238 / 12%);
+  --grad: linear-gradient(180deg, oklch(0.72 0.17 238 / 15%), oklch(0.72 0.17 238 / 8%));
+  --radius: 4px;
+}
+body {
+  background: var(--bg);
+  font-family: Inter, system-ui, sans-serif;
+}
+body::before,
+.sakura {
+  display: none;
+}
+header.top {
+  background: var(--panel);
+  border: 0;
+  border-bottom: 1px solid var(--line2);
+  border-image: none;
+}
+.app > .left,
+.app > .right,
+.sched-left {
+  background: var(--panel);
+  backdrop-filter: none;
+}
+h1,
+h2,
+.brand-title,
+.title-sm,
+.btn.big,
+.drop-overlay div {
+  font-family: Rajdhani, Inter, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  text-shadow: none;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+h1 {
+  font-size: 26px;
+}
+.title-sm {
+  font-size: 21px;
+}
+.brand-title {
+  font-size: 22px;
+}
+.brand-title::after,
+.eyebrow::before {
+  content: none;
+}
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+  font-size: 10px;
+}
+.brand-ico,
+.empty-ico {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--line2);
+  border-radius: 4px;
+  transform: none;
+  box-shadow: 0 0 12px oklch(0.72 0.17 238 / 12%);
+}
+.btn,
+.views,
+.seg,
+select,
+input[type="text"],
+input[type="number"],
+textarea,
+.search,
+.filters button,
+.card,
+.stage-wrap,
+.sc-card,
+.ct-rec {
+  border-radius: 4px;
+}
+.btn,
+.views,
+.seg,
+.filters button,
+.fr-temas button {
+  background: var(--panel2);
+}
+.btn:hover {
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+.btn.primary,
+.btn.primary.xs,
+.btn.primary.sm,
+.btn.big {
+  clip-path: none;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  text-shadow: none;
+  filter: none;
+  border-radius: 4px;
+  font-style: normal;
+}
+.btn.big {
+  font-size: 18px;
+}
+.btn.pulse {
+  animation: none;
+}
+.views button.on,
+.seg button.on,
+.filters button.on {
+  background: var(--accent-soft);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line2);
+}
+.tabs button.on {
+  color: var(--accent);
+  text-shadow: none;
+}
+.toggle input:checked + i {
+  background: var(--accent);
+  box-shadow: none;
+}
+select,
+input[type="text"],
+input[type="number"],
+textarea,
+.search {
+  background: var(--bg);
+}
+.card,
+.sc-card,
+.ct-rec,
+.ct-summary,
+.sched-main,
+.sched-left,
+.toast {
+  background: var(--card);
+}
+.card {
+  border-width: 1px;
+}
+.card:hover {
+  background: var(--panel2);
+  transform: none;
+  border-color: var(--line2);
+}
+.card.cur {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px oklch(0.72 0.17 238 / 12%);
+}
+.stage-wrap {
+  border-width: 1px;
+  box-shadow: none;
+  background: var(--bg);
+}
+.empty,
+.drop-overlay div {
+  background: none;
+}
+.drop-overlay {
+  background: oklch(0.13 0.025 258 / 95%);
+}
+.pill {
+  border-radius: 4px;
+  color: var(--accent);
+}
+.st.info {
+  color: var(--accent);
+}
+.mini .idx {
+  font-family: "JetBrains Mono", monospace;
+  transform: none;
+  background: var(--panel);
+  color: var(--accent);
+}
+.previa-tag {
+  font-family: Inter, sans-serif;
+  box-shadow: none;
+  border: 1px solid var(--line2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line2);
+  border-radius: 4px;
+}
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* O cabeçalho pode quebrar linha sem roubar espaço dos controles. */
+header.top {
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 12px 16px;
+}
+.app {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+@media (min-width: 1201px) {
+  .app {
+    grid-template-columns: 300px minmax(0, 1fr) 340px;
+  }
+}
+@media (max-width: 760px) {
+  header.top {
+    gap: 10px;
+    padding: 12px;
+  }
+  h1 {
+    font-size: 23px;
+  }
+}
+
+.scope,
+.apply,
+.ct-extra,
+.ct-prog,
+.ct-card,
+.item,
+.dest,
+.ct-recebidos,
+.ct-rec {
+  background: var(--panel);
+  border-radius: 4px;
+}
+.toggle i {
+  background: var(--panel2);
+  border: 1px solid var(--line2);
+}
+.toggle i::after {
+  background: var(--muted);
+}
+.dest.on {
+  box-shadow: none;
+}
+.chip.agendado {
+  color: var(--accent);
+  border-color: var(--line2);
+}

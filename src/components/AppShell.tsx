@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Crown, Cpu, Grid2x2, LayoutGrid, LogOut, ShieldCheck, UserRound, Zap } from "lucide-react";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -96,6 +96,7 @@ function UserCard() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const editorAberto = useRouterState({ select: (s) => s.location.pathname === "/editor" });
   const { isAdmin, sair } = useAuth();
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -162,8 +163,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-10 md:pb-12 md:pt-10">
-        <div className="mx-auto max-w-5xl">{children}</div>
+      <main
+        className={cn(
+          "min-w-0 flex-1 px-4 pb-28 pt-6 md:px-10 md:pb-12 md:pt-10",
+          editorAberto && "md:px-5 md:pb-5 md:pt-5",
+        )}
+      >
+        <div className={cn("mx-auto", editorAberto ? "w-full" : "max-w-5xl")}>{children}</div>
       </main>
 
       {/* Celular: barra de baixo */}

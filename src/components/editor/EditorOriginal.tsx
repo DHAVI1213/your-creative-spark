@@ -97,7 +97,7 @@ export function EditorOriginal() {
           label="Estúdio"
           title="Editor em Massa"
           icon={Film}
-          description="Estúdio original adaptado: edite e exporte vídeos locais."
+          description="Edite um vídeo, aplique ao lote e exporte."
         />
         <Button variant="outline" onClick={() => setConfigurando(true)}>
           <Settings className="size-4" />
@@ -114,8 +114,8 @@ export function EditorOriginal() {
           ref={frame}
           src="/editor-original/index.html"
           title="Estúdio do Editor em Massa"
-          className="w-full rounded-xl border border-primary/25 bg-background"
-          style={{ height: "max(850px, calc(100dvh - 180px))" }}
+          className="block w-full rounded-sm border border-primary/25 bg-background"
+          style={{ height: "max(680px, calc(100dvh - 155px))" }}
           onLoad={() => void iniciar()}
           allow="fullscreen"
         />
