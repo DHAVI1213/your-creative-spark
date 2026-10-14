@@ -1,53 +1,93 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Clock,
-  Download,
-  MonitorSmartphone,
-  ShieldCheck,
-  Sparkles,
-  Swords,
-  Wallet,
-  Zap,
-} from "lucide-react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
-import { Logo } from "@/components/AppShell";
-import { HeroCard } from "@/components/system/HeroCard";
-import { PlanCards } from "@/components/system/PlanCards";
-import { RankBadge, SystemWindow } from "@/components/system/System";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { APP_NAME, TOOLS } from "@/lib/app";
-import { ARTE } from "@/lib/arte";
-import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
+import { useAppConfig } from "@/lib/config";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import ariseCss from "./arise.css?url";
+
+// Página de vendas no estilo do site do Solo Leveling: ARISE OVERDRIVE (prévia visual).
+// Estilos em ./arise.css (tudo dentro de .arise); artes, vídeos e fontes em public/sl/.
+// No head(): a home herda title/description/og de __root.tsx; aqui só entra o CSS.
 export const Route = createFileRoute("/")({
+  head: () => ({ links: [{ rel: "stylesheet", href: ariseCss }] }),
   component: Vendas,
 });
 
-const PAINS = [
+const AMEACAS = [
   {
-    icon: Clock,
-    title: "Horas editando um por um",
-    text: "Cortar, legendar e exportar vídeo por vídeo come o seu dia inteiro.",
+    t: "Horas editando um por um",
+    d: "Cortar, legendar e exportar vídeo por vídeo come o seu dia inteiro.",
   },
   {
-    icon: Wallet,
-    title: "Uma assinatura para cada coisa",
-    text: "Editor, agendador, limpador, buscador de clientes… cada um cobra o seu.",
+    t: "Uma assinatura para cada coisa",
+    d: "Editor, agendador, limpador, buscador de clientes… cada um cobra o seu.",
   },
   {
-    icon: Swords,
-    title: "Cliente não cai do céu",
-    text: "Achar lojas que precisam de site e montar a proposta toma tempo.",
+    t: "Cliente não cai do céu",
+    d: "Achar lojas que precisam de site e montar a proposta toma tempo.",
+  },
+];
+
+type Hab = { nome: string; desc: string; status: string; breve?: boolean };
+const GRUPOS: { n: string; titulo: string; arte: string; lado: "dir" | "esq"; habs: Hab[] }[] = [
+  {
+    n: "1",
+    titulo: "Crie em escala",
+    arte: "/sl/img/174bf20366ef.png",
+    lado: "dir",
+    habs: [
+      {
+        nome: "Editor em Massa",
+        desc: "Edite um vídeo e aplique a mesma edição em todos de uma vez.",
+        status: "○ Em breve",
+        breve: true,
+      },
+      {
+        nome: "Agendador",
+        desc: "Agende Reels, Stories e posts. Publica mesmo com o aparelho desligado.",
+        status: "○ Em breve",
+        breve: true,
+      },
+    ],
+  },
+  {
+    n: "2",
+    titulo: "Venda sites e ache clientes",
+    arte: "/sl/img/9d21bbe85e09.png",
+    lado: "esq",
+    habs: [
+      {
+        nome: "Clonador de Sites",
+        desc: "Copie um site (com autorização do dono), edite os textos e baixe para o cliente.",
+        status: "● Rank A",
+      },
+      {
+        nome: "Minerador de Clientes",
+        desc: "Encontre lojas da sua cidade que precisam de site e organize seus leads.",
+        status: "○ Em breve",
+        breve: true,
+      },
+    ],
+  },
+  {
+    n: "3",
+    titulo: "Proteja e descubra",
+    arte: "/sl/img/453f3448ef57.png",
+    lado: "dir",
+    habs: [
+      {
+        nome: "Limpador de Metadados",
+        desc: "Remove localização, aparelho e datas das suas fotos e vídeos, sem upload.",
+        status: "● Rank C",
+      },
+      {
+        nome: "Minerador Viral",
+        desc: "Encontre os vídeos que mais estouram num perfil ou nicho e use como referência.",
+        status: "○ Em breve",
+        breve: true,
+      },
+    ],
   },
 ];
 
@@ -78,337 +118,369 @@ const FAQ = [
   },
 ];
 
+/** Link do checkout com o e-mail da conta (a Kiwify preenche o campo). */
+function linkCheckout(base: string, email: string | undefined) {
+  if (!base) return "#planos";
+  if (!email || !/^https?:\/\//.test(base)) return base;
+  try {
+    const u = new URL(base);
+    u.searchParams.set("email", email);
+    return u.toString();
+  } catch {
+    return base;
+  }
+}
+
 function Vendas() {
-  const live = TOOLS.filter((t) => t.status === "ativo").length;
+  const cfg = useAppConfig();
+  const { user } = useAuth();
+  const raiz = useRef<HTMLDivElement>(null);
+  const portal = useRef<HTMLDivElement>(null);
+  const monarca = useRef<HTMLDivElement>(null);
+
+  // revela os blocos ao rolar + parallax do portal e do Monarca
+  useEffect(() => {
+    const el = raiz.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (es) =>
+        es.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("mostrar");
+            io.unobserve(e.target);
+          }
+        }),
+      { threshold: 0.18 },
+    );
+    el.querySelectorAll(".rv").forEach((n) => io.observe(n));
+    let pend = false;
+    const aoRolar = () => {
+      if (pend) return;
+      pend = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (portal.current)
+          portal.current.style.transform = `translateY(${y * 0.35}px) scale(${1 + y / 5000})`;
+        const m = monarca.current;
+        if (m?.parentElement) {
+          const r = m.parentElement.getBoundingClientRect();
+          const d = Math.max(-90, Math.min(90, (r.top + r.height / 2 - innerHeight / 2) * -0.12));
+          m.style.transform = `translateY(${d}px) scale(1.15)`;
+        }
+        pend = false;
+      });
+    };
+    window.addEventListener("scroll", aoRolar, { passive: true });
+    aoRolar();
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", aoRolar);
+    };
+  }, []);
 
   return (
-    <div className="overflow-x-hidden">
-      {/* Navegação */}
-      <header className="sticky top-0 z-40 border-b border-primary/15 bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Logo to="/" />
-          <nav className="hidden items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground md:flex">
-            <a href="#habilidades" className="hover:text-primary">
-              Habilidades
-            </a>
-            <a href="#planos" className="hover:text-primary">
-              Planos
-            </a>
-            <a href="#duvidas" className="hover:text-primary">
-              Dúvidas
-            </a>
-          </nav>
-          <Button
-            asChild
-            size="sm"
-            variant="secondary"
-            className="shrink-0 uppercase tracking-wider"
-          >
-            <Link to="/painel">Entrar no app</Link>
-          </Button>
-        </div>
+    <div className="arise" ref={raiz}>
+      <header>
+        <a className="logo" href="#">
+          Fábrica de
+          <br />
+          Conteúdo<small>Sistema</small>
+        </a>
+        <nav>
+          <a href="#habilidades">Habilidades</a>
+          <a href="#como-funciona">Como funciona</a>
+          <a href="#planos">Planos</a>
+          <a href="#duvidas">Dúvidas</a>
+        </nav>
+        <Link className="btn sec" to="/painel">
+          Entrar no app
+        </Link>
       </header>
 
-      {/* Hero: ficha de personagem */}
-      <section className="mx-auto max-w-6xl px-4 pt-6 pb-16 md:pb-24">
-        <p className="sys-label mb-2">[ Sistema ] Um novo jogador foi detectado</p>
-        <HeroCard
-          theme="azul"
-          rank="S"
-          kicker="O seu arsenal"
-          title={
-            <>
-              Fábrica de
-              <br />
-              <span className="sys-glow-text">Conteúdo</span>
-            </>
-          }
-          subtitle="6 habilidades · PC e celular"
-          art={ARTE.heroi}
-          navTitle="Sobre"
-          nav={[
-            { label: "Habilidades", href: "#habilidades" },
-            { label: "Como funciona", href: "#como-funciona" },
-            { label: "Planos", href: "#planos" },
-            { label: "Garantia", href: "#planos" },
-            { label: "Dúvidas", href: "#duvidas" },
-          ]}
-        >
-          <h1 className="max-w-md text-base font-normal normal-case text-white/85 md:text-lg">
+      <section className="hero">
+        <div className="bg" ref={portal} />
+        <video src="/sl/vid/40c7f4fd9e0e.mp4" autoPlay muted loop playsInline />
+        <div className="conteudo">
+          <p className="label">[ Sistema ] Um novo jogador foi detectado</p>
+          <h1 className="disp glow">
+            Fábrica de<span>Conteúdo</span>
+          </h1>
+          <p>
             Edite vídeos em massa, limpe metadados, clone sites, encontre clientes e agende seus
             posts. Seis ferramentas num app só, que se adapta ao seu aparelho.
-          </h1>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="uppercase tracking-wider">
-              <a href="#planos">
-                Despertar agora <ArrowRight className="size-4" />
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="secondary" className="uppercase tracking-wider">
-              <a href="#habilidades">Ver habilidades</a>
-            </Button>
+          </p>
+          <div className="ctas">
+            <a className="btn" href="#planos">
+              Despertar agora →
+            </a>
+            <a className="btn sec" href="#habilidades">
+              Ver habilidades
+            </a>
           </div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs text-white/60">
-            <span className="flex items-center gap-1.5">
-              <MonitorSmartphone className="size-3.5 text-primary" /> PC e celular
+          <div className="selos">
+            <span>
+              <b>◆</b> PC e celular
             </span>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5 text-primary" /> 7 dias de garantia
+            <span>
+              <b>◆</b> 7 dias de garantia
             </span>
-            <span className="flex items-center gap-1.5">
-              <Download className="size-3.5 text-primary" /> Sem loja de apps
+            <span>
+              <b>◆</b> Sem loja de apps
             </span>
           </div>
-        </HeroCard>
+        </div>
+        <div className="seta">ROLE ▼</div>
       </section>
 
-      {/* Problema */}
-      <section className="border-y border-primary/10 bg-background/40">
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          <p className="sys-label mb-3">[ Alerta ] Ameaças detectadas</p>
-          <h2 className="mb-8 max-w-2xl text-3xl font-bold uppercase md:text-4xl">
-            Você está perdendo tempo e dinheiro em três frentes
+      <div className="barra" />
+
+      <section className="ameacas">
+        <div className="wrap">
+          <p className="label rv">[ Alerta ] Ameaças detectadas</p>
+          <h2 className="disp rv">
+            Você está perdendo tempo
+            <br />e dinheiro em três frentes
           </h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            {PAINS.map((p) => (
-              <SystemWindow key={p.title} muted>
-                <div className="space-y-2 p-5">
-                  <p.icon className="size-6 text-destructive" />
-                  <h3 className="text-lg font-bold uppercase">{p.title}</h3>
-                  <p className="text-sm text-muted-foreground">{p.text}</p>
-                </div>
-              </SystemWindow>
+          <div className="grade3">
+            {AMEACAS.map((a, i) => (
+              <div key={a.t} className="janela rv" style={{ transitionDelay: `${i * 0.12}s` }}>
+                <div className="ico">⚠ AMEAÇA 0{i + 1}</div>
+                <h3>{a.t}</h3>
+                <p>{a.d}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Habilidades */}
-      <section id="habilidades" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-20">
-        <p className="sys-label mb-3">[ Habilidades ] {live} liberadas · mais chegando</p>
-        <h2 className="mb-3 text-3xl font-bold uppercase md:text-4xl">Seu arsenal completo</h2>
-        <p className="mb-10 max-w-2xl text-muted-foreground">
-          Cada ferramenta é uma habilidade. Quem assina recebe todas, inclusive as que ainda vão ser
-          liberadas.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {TOOLS.map((t) => (
-            <SystemWindow key={t.id} muted={t.status !== "ativo"} className="h-full">
-              <div className="flex h-full flex-col gap-3 p-5">
-                <div className="flex items-center justify-between">
-                  <span className="sys-btn-glow flex size-11 items-center justify-center rounded-sm border border-primary/60 bg-primary/10 text-primary">
-                    <t.icon className="size-5" />
-                  </span>
-                  <RankBadge rank={t.rank} />
+      <section className="overview" id="habilidades">
+        <div className="wrap">
+          <p className="label rv">[ Habilidades ] 2 liberadas · mais chegando</p>
+          <h2 className="titulo disp rv">
+            Seu<span>Arsenal</span>
+          </h2>
+          {GRUPOS.map((g) => (
+            <div key={g.n} className={g.lado === "esq" ? "linha inv" : "linha"}>
+              <div className="texto rv">
+                <div className="emblema">
+                  <b>{g.n}</b>
                 </div>
-                <h3 className="text-xl font-bold uppercase tracking-wide">{t.name}</h3>
-                <p className="text-sm text-muted-foreground">{t.description}</p>
-                <span
-                  className={cn(
-                    "mt-auto font-mono text-[11px] uppercase tracking-widest",
-                    t.status === "ativo" ? "text-success" : "text-muted-foreground",
-                  )}
-                >
-                  {t.status === "ativo" ? "● Liberada" : "○ Chegando em breve"}
-                </span>
+                <h3>{g.titulo}</h3>
+                <div className="hab">
+                  {g.habs.map((h) => (
+                    <div key={h.nome}>
+                      <b>
+                        {h.nome} <i className={h.breve ? "breve" : undefined}>{h.status}</i>
+                      </b>
+                      <span>{h.desc}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </SystemWindow>
+              <div className={`arte rv ${g.lado}`}>
+                <img src={g.arte} alt="" loading="lazy" />
+              </div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* Como funciona */}
-      <section
-        id="como-funciona"
-        className="scroll-mt-20 border-y border-primary/10 bg-background/40"
-      >
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          <p className="sys-label mb-3">[ Missão ] Como começar</p>
-          <h2 className="mb-8 text-3xl font-bold uppercase md:text-4xl">
-            Três passos e você já está jogando
-          </h2>
-          <div className="grid items-center gap-10 md:grid-cols-[1fr_minmax(0,24rem)]">
-            <div className="grid gap-6">
-              {[
-                {
-                  n: "01",
-                  t: "Escolha seu rank",
-                  d: "Mensal ou vitalício. O acesso chega na hora.",
-                },
-                {
-                  n: "02",
-                  t: "Instale no aparelho",
-                  d: "Um toque em “Instalar o app”, no PC ou no celular. Sem loja.",
-                },
-                {
-                  n: "03",
-                  t: "Use as habilidades",
-                  d: "Edite, limpe, clone, minere e agende de um lugar só.",
-                },
-              ].map((s) => (
-                <div key={s.n} className="flex gap-4">
-                  <span className="sys-glow-text font-display text-5xl font-bold leading-none">
-                    {s.n}
-                  </span>
-                  <div>
-                    <h3 className="text-lg font-bold uppercase">{s.t}</h3>
-                    <p className="text-sm text-muted-foreground">{s.d}</p>
-                  </div>
+      <div className="barra" />
+
+      <section className="missao" id="como-funciona">
+        <div className="wrap">
+          <div>
+            <p className="label rv">[ Missão ] Como começar</p>
+            <h2 className="disp rv">
+              Três passos e você
+              <br />
+              já está jogando
+            </h2>
+            {[
+              ["01", "Escolha seu rank", "Mensal ou vitalício. O acesso chega na hora."],
+              [
+                "02",
+                "Instale no aparelho",
+                "Um toque em “Instalar o app”, no PC ou no celular. Sem loja.",
+              ],
+              ["03", "Use as habilidades", "Edite, limpe, clone, minere e agende de um lugar só."],
+            ].map(([n, t, d]) => (
+              <div key={n} className="passo rv">
+                <span className="n disp glow">{n}</span>
+                <div>
+                  <h3>{t}</h3>
+                  <p>{d}</p>
                 </div>
-              ))}
+              </div>
+            ))}
+          </div>
+          <div className="status rv dir">
+            <p className="t">STATUS</p>
+            <div className="lin">
+              <span>Nome</span>
+              <span>Você</span>
             </div>
-            <StatusWindow />
+            <div className="lin">
+              <span>Nível</span>
+              <span className="glow">1 → 99</span>
+            </div>
+            <div className="lin">
+              <span>Classe</span>
+              <span>Criador</span>
+            </div>
+            <div className="lin" style={{ marginBottom: 18 }}>
+              <span>Título</span>
+              <span>Fábrica</span>
+            </div>
+            <p className="label" style={{ margin: "0 0 12px" }}>
+              ✦ Missão diária
+            </p>
+            <Quest label="Postar 3 Reels" v="2/3" pct="66%" />
+            <Quest label="Limpar metadados" v="10/10" pct="100%" ok />
+            <Quest label="Chamar 5 clientes" v="1/5" pct="20%" />
           </div>
         </div>
       </section>
 
-      {/* Card do plano vitalício */}
-      <section className="mx-auto max-w-6xl px-4 pt-20">
-        <HeroCard
-          theme="dourado"
-          rank="S"
-          kicker="Plano vitalício"
-          title="Monarca Vitalício"
-          subtitle="pagamento único"
-          art={ARTE.heroi2}
-          navTitle="Inclui"
-          nav={[
-            { label: "Todas as habilidades", href: "#planos" },
-            { label: "Novas ferramentas", href: "#planos" },
-            { label: "Sem mensalidade", href: "#planos" },
-            { label: "Suporte prioritário", href: "#planos" },
-          ]}
-        >
-          <p className="max-w-md">
-            Pague uma vez e use para sempre, no PC e no celular. Toda habilidade nova que for
-            liberada chega para você sem custo extra.
-          </p>
-          <Button asChild size="lg" className="uppercase tracking-wider">
-            <a href="#planos">
-              Quero ser Monarca <ArrowRight className="size-4" />
+      <section className="monarca">
+        <div className="fundo" ref={monarca} />
+        <div className="wrap">
+          <div className="caixa">
+            <p className="label rv">[ Rank S ] Plano vitalício</p>
+            <h2 className="disp rv">
+              Monarca
+              <br />
+              <span>Vitalício</span>
+            </h2>
+            <p className="rv">
+              Pague uma vez e use para sempre, no PC e no celular. Toda habilidade nova que for
+              liberada chega para você sem custo extra.
+            </p>
+            <ul className="rv">
+              <li>Todas as habilidades</li>
+              <li>Novas ferramentas sem custo</li>
+              <li>Sem mensalidade</li>
+              <li>Suporte prioritário</li>
+            </ul>
+            <a className="btn ouro rv" href="#planos">
+              Quero ser Monarca →
             </a>
-          </Button>
-        </HeroCard>
+          </div>
+        </div>
       </section>
 
-      {/* Planos */}
-      <section id="planos" className="mx-auto max-w-4xl scroll-mt-20 px-4 py-20">
-        <p className="sys-label mb-3 text-center">[ Evolução ] Escolha o seu rank</p>
-        <h2 className="mb-10 text-center text-3xl font-bold uppercase md:text-4xl">
-          Quanto custa subir de nível
-        </h2>
-        <PlanCards />
-        <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
-          <ShieldCheck className="size-4 text-primary" /> 7 dias de garantia incondicional
-        </p>
-      </section>
-
-      {/* Dúvidas */}
-      <section id="duvidas" className="mx-auto max-w-3xl scroll-mt-20 px-4 pb-20">
-        <p className="sys-label mb-3">[ Registro ] Dúvidas frequentes</p>
-        <h2 className="mb-6 text-3xl font-bold uppercase">Perguntas</h2>
-        <SystemWindow muted>
-          <Accordion type="single" collapsible className="px-5">
-            {FAQ.map((f, i) => (
-              <AccordionItem key={f.q} value={`q${i}`} className="border-primary/15">
-                <AccordionTrigger className="text-left font-medium">{f.q}</AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">{f.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </SystemWindow>
-      </section>
-
-      {/* CTA final */}
-      <section className="mx-auto max-w-4xl px-4 pb-20">
-        <SystemWindow title="Missão de emergência" scan>
-          <div className="space-y-5 p-6 text-center md:p-10">
-            <p className="text-2xl font-bold uppercase md:text-4xl">
-              Aceitar a missão e <span className="sys-glow-text">subir de nível</span>?
-            </p>
-            <p className="text-muted-foreground">
-              Recompensa: mais conteúdo, menos horas de trabalho e mais clientes.
-            </p>
-            <div className="flex flex-col justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg" className="uppercase tracking-wider">
-                <a href="#planos">
-                  <Zap className="size-4" /> Aceitar
-                </a>
-              </Button>
-              <Button asChild size="lg" variant="secondary" className="uppercase tracking-wider">
-                <Link to="/painel">Testar o app</Link>
-              </Button>
+      <section className="planos" id="planos">
+        <div className="wrap">
+          <p className="label rv" style={{ textAlign: "center" }}>
+            [ Evolução ] Escolha o seu rank
+          </p>
+          <h2 className="disp rv">Quanto custa subir de nível</h2>
+          <div className="grade2">
+            <div className="plano rv esq">
+              <div className="rank">A</div>
+              <p className="label" style={{ margin: "0 0 6px" }}>
+                Rank A
+              </p>
+              <h3>Caçador Mensal</h3>
+              <div className="preco">
+                {cfg.preco_mensal} <small>/mês</small>
+              </div>
+              <ul>
+                <li>Todas as habilidades liberadas</li>
+                <li>Novas ferramentas sem custo extra</li>
+                <li>Agendador com publicação na nuvem</li>
+                <li>Cancele quando quiser</li>
+              </ul>
+              <a className="btn sec" href={linkCheckout(cfg.checkout_mensal, user?.email)}>
+                Quero o Caçador Mensal
+              </a>
+            </div>
+            <div className="plano top rv dir">
+              <span className="selo">MAIS VANTAJOSO</span>
+              <div className="rank">S</div>
+              <p className="label" style={{ margin: "0 0 6px", color: "var(--ouro)" }}>
+                Rank S
+              </p>
+              <h3>Monarca Vitalício</h3>
+              <div className="preco">
+                {cfg.preco_vitalicio} <small>pagamento único</small>
+              </div>
+              <ul>
+                <li>Tudo do plano mensal, para sempre</li>
+                <li>Sem mensalidade</li>
+                <li>Acesso antecipado às novidades</li>
+                <li>Suporte prioritário</li>
+              </ul>
+              <a className="btn ouro" href={linkCheckout(cfg.checkout_vitalicio, user?.email)}>
+                Quero o Monarca Vitalício
+              </a>
             </div>
           </div>
-        </SystemWindow>
+          <p className="garantia">◆ 7 dias de garantia incondicional</p>
+        </div>
       </section>
 
-      <footer className="border-t border-primary/10 py-8 text-center font-mono text-xs text-muted-foreground">
-        © {new Date().getFullYear()} {APP_NAME}. Todos os direitos reservados.
+      <section className="duvidas" id="duvidas">
+        <div className="wrap">
+          <p className="label rv" style={{ textAlign: "center" }}>
+            [ Registro ] Dúvidas frequentes
+          </p>
+          <h2 className="disp rv" style={{ textAlign: "center" }}>
+            Perguntas
+          </h2>
+          <div className="faq rv">
+            {FAQ.map((f) => (
+              <details key={f.q}>
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="final">
+        <div className="fundo" />
+        <div className="wrap">
+          <p className="label rv">[ Missão de emergência ]</p>
+          <h2 className="disp glow rv">
+            Aceitar a missão
+            <br />e subir de nível?
+          </h2>
+          <p className="rv" style={{ color: "#cfdaf2", margin: "-20px 0 30px" }}>
+            Recompensa: mais conteúdo, menos horas de trabalho e mais clientes.
+          </p>
+          <div
+            className="rv"
+            style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}
+          >
+            <a className="btn" href="#planos">
+              ⚡ Aceitar
+            </a>
+            <Link className="btn sec" to="/painel">
+              Testar o app
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        © {new Date().getFullYear()} Fábrica de Conteúdo. Todos os direitos reservados.
       </footer>
     </div>
   );
 }
 
-/** Janela de status estilo "Sistema" mostrada ao lado do título. */
-function StatusWindow() {
+function Quest({ label, v, pct, ok }: { label: string; v: string; pct: string; ok?: boolean }) {
   return (
-    <SystemWindow title="Status" scan className="sys-pop [animation-delay:150ms]">
-      <div className="space-y-5 p-5 font-mono text-sm">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-          <Row k="Nome" v="Você" />
-          <Row k="Nível" v="1 → 99" glow />
-          <Row k="Classe" v="Criador" />
-          <Row k="Título" v="Fábrica" />
-        </div>
-        <div className="space-y-2">
-          <p className="sys-label text-[10px]">Habilidades</p>
-          {TOOLS.slice(0, 4).map((t) => (
-            <div key={t.id} className="flex items-center gap-2 text-xs">
-              <t.icon className="size-3.5 text-primary" />
-              <span className="flex-1 truncate">{t.name}</span>
-              <RankBadge rank={t.rank} className="size-5 text-[11px]" />
-            </div>
-          ))}
-        </div>
-        <div className="space-y-2 rounded-sm border border-primary/25 bg-background/40 p-3">
-          <p className="flex items-center gap-1.5 text-xs text-primary">
-            <Sparkles className="sys-pulse size-3.5" /> Missão diária
-          </p>
-          <Quest label="Postar 3 Reels" value={2} max={3} />
-          <Quest label="Limpar metadados" value={10} max={10} />
-          <Quest label="Chamar 5 clientes" value={1} max={5} />
-        </div>
+    <>
+      <div className={ok ? "lin ok" : "lin"} style={{ border: 0 }}>
+        <span className={ok ? "ok" : undefined}>{label}</span>
+        <span>[{v}]</span>
       </div>
-    </SystemWindow>
-  );
-}
-
-function Row({ k, v, glow }: { k: string; v: string; glow?: boolean }) {
-  return (
-    <div className="flex justify-between gap-2 border-b border-primary/10 pb-1 text-xs">
-      <span className="text-muted-foreground">{k}</span>
-      <span className={cn(glow && "sys-glow-text font-semibold")}>{v}</span>
-    </div>
-  );
-}
-
-function Quest({ label, value, max }: { label: string; value: number; max: number }) {
-  const done = value >= max;
-  return (
-    <div className="text-xs">
-      <div className="mb-1 flex justify-between">
-        <span className={cn(done && "text-success")}>{label}</span>
-        <span className={done ? "text-success" : "text-muted-foreground"}>
-          [{value}/{max}]
-        </span>
+      <div className="barrinha">
+        <i style={{ "--v": pct, ...(ok ? { background: "#5ef0a5" } : {}) } as CSSProperties} />
       </div>
-      <div className="h-1 overflow-hidden rounded-full bg-primary/10">
-        <div
-          className={cn("h-full rounded-full", done ? "bg-success" : "bg-primary")}
-          style={{ width: `${(value / max) * 100}%` }}
-        />
-      </div>
-    </div>
+    </>
   );
 }
