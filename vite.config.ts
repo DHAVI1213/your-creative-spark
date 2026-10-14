@@ -18,6 +18,7 @@ export default defineConfig({
               if (id.includes("@supabase")) return "vendor-supabase";
               if (id.includes("@radix-ui") || id.includes("lucide-react")) return "vendor-ui";
             }
+            return undefined;
           },
         },
       },
