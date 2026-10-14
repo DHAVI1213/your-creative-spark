@@ -18,10 +18,12 @@ import { Route as AppAgendadorRouteImport } from './routes/_app/agendador'
 import { Route as AppClonadorRouteImport } from './routes/_app/clonador'
 import { Route as AppContaRouteImport } from './routes/_app/conta'
 import { Route as AppEditorRouteImport } from './routes/_app/editor'
+import { Route as AppLegendasRouteImport } from './routes/_app/legendas'
 import { Route as AppLimpadorRouteImport } from './routes/_app/limpador'
 import { Route as AppMineradorRouteImport } from './routes/_app/minerador'
 import { Route as AppPainelRouteImport } from './routes/_app/painel'
 import { Route as AppPlanosRouteImport } from './routes/_app/planos'
+import { Route as AppPropostasRouteImport } from './routes/_app/propostas'
 import { Route as AppViralRouteImport } from './routes/_app/viral'
 import { Route as ApiKiwifyRouteImport } from './routes/api/kiwify'
 
@@ -69,6 +71,11 @@ const AppEditorRoute = AppEditorRouteImport.update({
   path: '/editor',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLegendasRoute = AppLegendasRouteImport.update({
+  id: '/legendas',
+  path: '/legendas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppLimpadorRoute = AppLimpadorRouteImport.update({
   id: '/limpador',
   path: '/limpador',
@@ -87,6 +94,11 @@ const AppPainelRoute = AppPainelRouteImport.update({
 const AppPlanosRoute = AppPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPropostasRoute = AppPropostasRouteImport.update({
+  id: '/propostas',
+  path: '/propostas',
   getParentRoute: () => AppRoute,
 } as any)
 const AppViralRoute = AppViralRouteImport.update({
@@ -109,10 +121,12 @@ export interface FileRoutesByFullPath {
   '/clonador': typeof AppClonadorRoute
   '/conta': typeof AppContaRoute
   '/editor': typeof AppEditorRoute
+  '/legendas': typeof AppLegendasRoute
   '/limpador': typeof AppLimpadorRoute
   '/minerador': typeof AppMineradorRoute
   '/painel': typeof AppPainelRoute
   '/planos': typeof AppPlanosRoute
+  '/propostas': typeof AppPropostasRoute
   '/viral': typeof AppViralRoute
   '/api/kiwify': typeof ApiKiwifyRoute
 }
@@ -125,10 +139,12 @@ export interface FileRoutesByTo {
   '/clonador': typeof AppClonadorRoute
   '/conta': typeof AppContaRoute
   '/editor': typeof AppEditorRoute
+  '/legendas': typeof AppLegendasRoute
   '/limpador': typeof AppLimpadorRoute
   '/minerador': typeof AppMineradorRoute
   '/painel': typeof AppPainelRoute
   '/planos': typeof AppPlanosRoute
+  '/propostas': typeof AppPropostasRoute
   '/viral': typeof AppViralRoute
   '/api/kiwify': typeof ApiKiwifyRoute
 }
@@ -143,10 +159,12 @@ export interface FileRoutesById {
   '/_app/clonador': typeof AppClonadorRoute
   '/_app/conta': typeof AppContaRoute
   '/_app/editor': typeof AppEditorRoute
+  '/_app/legendas': typeof AppLegendasRoute
   '/_app/limpador': typeof AppLimpadorRoute
   '/_app/minerador': typeof AppMineradorRoute
   '/_app/painel': typeof AppPainelRoute
   '/_app/planos': typeof AppPlanosRoute
+  '/_app/propostas': typeof AppPropostasRoute
   '/_app/viral': typeof AppViralRoute
   '/api/kiwify': typeof ApiKiwifyRoute
 }
@@ -161,10 +179,12 @@ export interface FileRouteTypes {
     | '/clonador'
     | '/conta'
     | '/editor'
+    | '/legendas'
     | '/limpador'
     | '/minerador'
     | '/painel'
     | '/planos'
+    | '/propostas'
     | '/viral'
     | '/api/kiwify'
   fileRoutesByTo: FileRoutesByTo
@@ -177,10 +197,12 @@ export interface FileRouteTypes {
     | '/clonador'
     | '/conta'
     | '/editor'
+    | '/legendas'
     | '/limpador'
     | '/minerador'
     | '/painel'
     | '/planos'
+    | '/propostas'
     | '/viral'
     | '/api/kiwify'
   id:
@@ -194,10 +216,12 @@ export interface FileRouteTypes {
     | '/_app/clonador'
     | '/_app/conta'
     | '/_app/editor'
+    | '/_app/legendas'
     | '/_app/limpador'
     | '/_app/minerador'
     | '/_app/painel'
     | '/_app/planos'
+    | '/_app/propostas'
     | '/_app/viral'
     | '/api/kiwify'
   fileRoutesById: FileRoutesById
@@ -275,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEditorRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/legendas': {
+      id: '/_app/legendas'
+      path: '/legendas'
+      fullPath: '/legendas'
+      preLoaderRoute: typeof AppLegendasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/limpador': {
       id: '/_app/limpador'
       path: '/limpador'
@@ -303,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlanosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/propostas': {
+      id: '/_app/propostas'
+      path: '/propostas'
+      fullPath: '/propostas'
+      preLoaderRoute: typeof AppPropostasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/viral': {
       id: '/_app/viral'
       path: '/viral'
@@ -326,10 +364,12 @@ interface AppRouteChildren {
   AppClonadorRoute: typeof AppClonadorRoute
   AppContaRoute: typeof AppContaRoute
   AppEditorRoute: typeof AppEditorRoute
+  AppLegendasRoute: typeof AppLegendasRoute
   AppLimpadorRoute: typeof AppLimpadorRoute
   AppMineradorRoute: typeof AppMineradorRoute
   AppPainelRoute: typeof AppPainelRoute
   AppPlanosRoute: typeof AppPlanosRoute
+  AppPropostasRoute: typeof AppPropostasRoute
   AppViralRoute: typeof AppViralRoute
 }
 
@@ -339,10 +379,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppClonadorRoute: AppClonadorRoute,
   AppContaRoute: AppContaRoute,
   AppEditorRoute: AppEditorRoute,
+  AppLegendasRoute: AppLegendasRoute,
   AppLimpadorRoute: AppLimpadorRoute,
   AppMineradorRoute: AppMineradorRoute,
   AppPainelRoute: AppPainelRoute,
   AppPlanosRoute: AppPlanosRoute,
+  AppPropostasRoute: AppPropostasRoute,
   AppViralRoute: AppViralRoute,
 }
 

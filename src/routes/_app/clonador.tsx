@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { clonePage, type ClonePageResult } from "@/lib/clonador";
 import { detectarRecursos, prepararPrevia } from "@/lib/clonador-analise";
 import { cn } from "@/lib/utils";
+import { registrarUso } from "@/lib/uso";
 
 export const Route = createFileRoute("/_app/clonador")({
   head: () => ({ meta: [{ title: "Clonador de Sites · Fábrica de Conteúdo" }] }),
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/_app/clonador")({
 type Mode = "ver" | "editar" | "codigo";
 
 function downloadBlob(blob: Blob, name: string) {
+  registrarUso("clone", 1, name);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

@@ -1,4 +1,14 @@
-import { CalendarClock, Copy, Eraser, Film, Flame, Radar, type LucideIcon } from "lucide-react";
+import {
+  CalendarClock,
+  Copy,
+  Eraser,
+  FileSignature,
+  Film,
+  Flame,
+  Hash,
+  Radar,
+  type LucideIcon,
+} from "lucide-react";
 
 export const APP_NAME = "Fábrica de Conteúdo";
 export const APP_TAGLINE = "Suas ferramentas de criação e vendas em um app só";
@@ -6,7 +16,14 @@ export const APP_TAGLINE = "Suas ferramentas de criação e vendas em um app só
 export type ToolStatus = "ativo" | "em-breve";
 
 export type ToolPath =
-  "/limpador" | "/clonador" | "/editor" | "/viral" | "/minerador" | "/agendador";
+  | "/limpador"
+  | "/clonador"
+  | "/legendas"
+  | "/propostas"
+  | "/editor"
+  | "/viral"
+  | "/minerador"
+  | "/agendador";
 
 export type Tool = {
   id: string;
@@ -42,6 +59,28 @@ export const TOOLS: Tool[] = [
     description: "Copie um site (com autorização do dono), edite os textos e baixe para o cliente.",
     to: "/clonador",
     icon: Copy,
+    status: "ativo",
+  },
+  {
+    id: "legendas",
+    code: "HAB-07",
+    rank: "B",
+    name: "Legendas e Hashtags",
+    short: "Legendas",
+    description: "Gere legendas prontas por nicho e hashtags que ficam clicáveis no Instagram.",
+    to: "/legendas",
+    icon: Hash,
+    status: "ativo",
+  },
+  {
+    id: "propostas",
+    code: "HAB-08",
+    rank: "A",
+    name: "Gerador de Propostas",
+    short: "Propostas",
+    description: "Monte a proposta para o cliente: mensagem de WhatsApp e PDF com seu orçamento.",
+    to: "/propostas",
+    icon: FileSignature,
     status: "ativo",
   },
   {

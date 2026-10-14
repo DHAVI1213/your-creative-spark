@@ -3,6 +3,7 @@ import { ChevronRight, Lock, MonitorSmartphone } from "lucide-react";
 
 import { InstallButton } from "@/components/InstallButton";
 import { HeroCard } from "@/components/system/HeroCard";
+import { Resultados } from "@/components/system/Resultados";
 import { RankBadge, SystemWindow } from "@/components/system/System";
 import { TOOLS } from "@/lib/app";
 import { ARTE } from "@/lib/arte";
@@ -50,6 +51,8 @@ function Painel() {
           <Stat label="Lote" value={device.ready ? `${device.concurrency}x` : "—"} />
         </div>
       </HeroCard>
+
+      <Resultados />
 
       <section className="space-y-3">
         <p className="sys-label">[ Habilidades ]</p>

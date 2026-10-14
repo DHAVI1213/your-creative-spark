@@ -29,6 +29,7 @@ import {
   type MetaEntry,
 } from "@/lib/metadata/image";
 import { cleanVideo, loadFFmpeg, readVideoMeta } from "@/lib/metadata/video";
+import { registrarUso } from "@/lib/uso";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/limpador")({
@@ -237,6 +238,7 @@ function Limpador() {
     }
 
     setBusy(false);
+    if (done > 0) registrarUso("limpeza", done);
     toast.success(`${done} arquivo${done === 1 ? "" : "s"} limpo${done === 1 ? "" : "s"}.`);
   };
 
