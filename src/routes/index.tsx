@@ -162,7 +162,7 @@ function Vendas() {
         if (portal.current)
           portal.current.style.transform = `translateY(${y * 0.35}px) scale(${1 + y / 5000})`;
         const m = monarca.current;
-        if (m?.parentElement) {
+        if (m?.parentElement && innerWidth > 860) {
           const r = m.parentElement.getBoundingClientRect();
           const d = Math.max(-90, Math.min(90, (r.top + r.height / 2 - innerHeight / 2) * -0.12));
           m.style.transform = `translateY(${d}px) scale(1.15)`;

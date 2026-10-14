@@ -740,3 +740,158 @@ header {
     animation: none !important;
   }
 }
+
+/* ---------- ajustes finos para celular ---------- */
+@media (max-width: 860px) {
+  .arise .wrap {
+    padding: 0 18px;
+  }
+  .arise header {
+    padding: 10px 16px;
+    gap: 12px;
+    background: linear-gradient(#000e, #0000);
+  }
+  .arise .logo {
+    font-size: 14px;
+  }
+  .arise header .btn {
+    padding: 9px 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .arise .hero {
+    height: 100svh;
+    min-height: 620px;
+  }
+  .arise .hero .bg {
+    inset: 0;
+    background-position: 50% 40%;
+  }
+  .arise .hero video {
+    width: 170vw;
+    top: 40%;
+  }
+  .arise .hero .conteudo {
+    padding: 70px 18px 0;
+  }
+  .arise .hero .label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    line-height: 1.5;
+  }
+  .arise .hero h1 {
+    font-size: clamp(40px, 12vw, 64px);
+  }
+  .arise .hero p {
+    font-size: 15px;
+  }
+  .arise .hero .ctas .btn {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+  }
+  .arise .hero .selos {
+    gap: 10px 18px;
+    font-size: 10px;
+  }
+  .arise .barra {
+    height: 22px;
+  }
+  .arise h2 {
+    font-size: clamp(28px, 8.4vw, 40px);
+    margin-bottom: 28px;
+  }
+  .arise .ameacas,
+  .arise .missao,
+  .arise .planos {
+    padding: 70px 0;
+  }
+  .arise .janela {
+    min-height: 0;
+    padding: 30px 26px 28px;
+  }
+  .arise .overview {
+    padding: 70px 0 20px;
+  }
+  .arise .overview .titulo {
+    font-size: clamp(54px, 17vw, 80px);
+    margin-bottom: 10px;
+  }
+  .arise .linha {
+    gap: 0;
+    margin: 10px 0 56px;
+  }
+  .arise .linha .arte,
+  .arise .linha.inv .arte {
+    order: -1;
+  }
+  .arise .arte img {
+    max-width: 300px;
+  }
+  .arise .hab {
+    max-width: none;
+  }
+  .arise .missao .wrap {
+    gap: 36px;
+  }
+  .arise .passo .n {
+    font-size: 44px;
+  }
+  .arise .status {
+    padding: 44px 26px 36px;
+  }
+  /* Monarca: personagem em cima, texto embaixo */
+  .arise .monarca {
+    min-height: 0;
+    display: block;
+    padding: 0 0 64px;
+  }
+  .arise .monarca .fundo {
+    position: relative;
+    inset: auto;
+    height: 112vw;
+    max-height: 520px;
+    transform: none !important;
+    background: url(/sl/img/fa7718416bd4.jpg) 50% 10% / cover no-repeat;
+    -webkit-mask-image: linear-gradient(#000 60%, #0000);
+    mask-image: linear-gradient(#000 60%, #0000);
+  }
+  .arise .monarca::after {
+    display: none;
+  }
+  .arise .monarca .wrap {
+    margin-top: -70px;
+  }
+  .arise .monarca .caixa {
+    max-width: none;
+  }
+  .arise .grade2 {
+    gap: 40px;
+  }
+  .arise .plano {
+    min-height: 0;
+    padding: 50px 30px 40px;
+  }
+  .arise .plano .btn {
+    width: 100%;
+  }
+  .arise .preco {
+    font-size: 48px;
+  }
+  .arise .selo {
+    right: 24px;
+  }
+  .arise .faq {
+    padding: 40px 22px;
+  }
+  .arise summary {
+    font-size: 15px;
+    gap: 12px;
+  }
+  .arise .final {
+    min-height: 520px;
+  }
+  .arise .final h2 {
+    font-size: clamp(34px, 10vw, 52px);
+  }
+}
