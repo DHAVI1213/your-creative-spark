@@ -202,9 +202,11 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
       method: body ? "POST" : "GET",
       headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" },
       ...(body ? { body: JSON.stringify(body) } : {}),
-      redirect: "error",
+      redirect: "manual",
       signal: AbortSignal.timeout(20000),
     });
+    if (r.status >= 300 && r.status < 400)
+      throw new Error("O serviço tentou redirecionar a chamada, o que não é permitido.");
     if (!r.ok)
       throw new Error(
         `O serviço de coleta respondeu ${r.status}. Confira a chave, o saldo e os coletores da Apify.`,
@@ -363,9 +365,11 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
   const url = urlMidia(origem);
   const r = await fetch(url, {
     headers: url.hostname === "api.apify.com" ? { Authorization: `Bearer ${token}` } : {},
-    redirect: "error",
+    redirect: "manual",
     signal: AbortSignal.timeout(90000),
   });
+  if (r.status >= 300 && r.status < 400)
+    throw new Error("O serviço tentou redirecionar a chamada, o que não é permitido.");
   if (!r.ok || !r.body)
     throw new Error("O arquivo expirou ou a rede bloqueou o download. Faça uma nova busca.");
   const tipo = r.headers.get("content-type") ?? "";

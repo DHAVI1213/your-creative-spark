@@ -121,7 +121,48 @@ describe("coleta autenticada", () => {
     expect(r.nome).toBe("criador_v.mp4");
     expect(atob(r.base64!)).toContain("ftyp");
     expect(f.mock.calls[2]?.[1].headers).toEqual({});
-    expect(f.mock.calls[2]?.[1].redirect).toBe("error");
+    // O servidor da Lovable (edge) só aceita "follow" ou "manual"; "error" derruba a chamada.
+    expect(f.mock.calls[2]?.[1].redirect).toBe("manual");
+  });
+  it("recusa download que tenta redirecionar para outro endereço", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(json([{ valor: "segredo" }]))
+      .mockResolvedValueOnce(
+        json([
+          {
+            id: "b",
+            perfil: { nome: "criador" },
+            status: "pronto",
+            videos: [{ id: "v", arquivo: "https://video.cdninstagram.com/a.mp4" }],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: "https://outro.example/x" } }),
+      );
+    vi.stubGlobal("fetch", f);
+    await expect(
+      executarMinerador({ token: "x", acao: "arquivo", busca: "b", id: "v" }),
+    ).rejects.toThrow("redirecionar");
+  });
+  it("recusa a Apify respondendo com redirecionamento", async () => {
+    const f = vi.fn(async (url: string) =>
+      url.includes("api.apify.com")
+        ? new Response(null, { status: 301, headers: { location: "https://outro.example/x" } })
+        : url.includes("app_secrets")
+          ? json([{ valor: "segredo" }])
+          : json([]),
+    );
+    vi.stubGlobal("fetch", f);
+    await expect(
+      executarMinerador({
+        token: "x",
+        acao: "iniciar",
+        perfil: "https://www.tiktok.com/@criador",
+        limite: 25,
+      }),
+    ).rejects.toThrow("redirecionar");
   });
   it("não reinicia automaticamente downloads que falharam", async () => {
     const f = vi

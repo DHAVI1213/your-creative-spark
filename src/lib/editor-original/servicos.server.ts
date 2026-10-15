@@ -26,7 +26,9 @@ const candidato = z.object({
 const string = (v: unknown) => (typeof v === "string" ? v : "");
 
 async function jsonFetch(url: string, init: RequestInit) {
-  const r = await fetch(url, { ...init, redirect: "error", signal: AbortSignal.timeout(120000) });
+  const r = await fetch(url, { ...init, redirect: "manual", signal: AbortSignal.timeout(120000) });
+  if (r.status >= 300 && r.status < 400)
+    throw new Error("O serviço tentou redirecionar a chamada, o que não é permitido.");
   const json = (await r.json()) as Record<string, unknown>;
   if (!r.ok)
     throw new Error(
@@ -128,11 +130,13 @@ export async function executarServico(data: {
     const init: RequestInit = {
       method,
       headers: { authorization: `Bearer ${cfg.cloudKey}`, "content-type": mime },
-      redirect: "error",
+      redirect: "manual",
       signal: AbortSignal.timeout(120000),
     };
     if (body !== undefined) init.body = body;
     const r = await fetch(url + caminho, init);
+    if (r.status >= 300 && r.status < 400)
+      throw new Error("O serviço tentou redirecionar a chamada, o que não é permitido.");
     return { status: r.status, data: await r.json() };
   }
   if (data.acao === "transcrever") {
