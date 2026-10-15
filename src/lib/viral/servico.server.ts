@@ -1,5 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
-import { lerPerfil, normalizarVideos, urlMidia, type Perfil, type VideoViral } from "./modelo";
+import {
+  ehLinkCurto,
+  lerLink,
+  normalizarVideos,
+  urlMidia,
+  type Perfil,
+  type VideoViral,
+} from "./modelo";
 type Busca = {
   id: string;
   user_id: string;
@@ -18,6 +25,7 @@ type Entrada = {
   busca?: string | undefined;
   ids?: string[] | undefined;
   id?: string | undefined;
+  tipo?: "audio" | undefined;
   limite?: number | undefined;
 };
 type Resposta = {
@@ -47,6 +55,94 @@ async function lerJson(r: Response, origem: string) {
   } catch {
     throw new Error(`${origem} devolveu uma resposta inválida. Tente novamente em instantes.`);
   }
+}
+/** Descobre para onde um link curto do TikTok (vm.tiktok.com/…) aponta, sem seguir para outros sites. */
+async function resolverCurto(valor: string): Promise<string> {
+  const u = new URL(valor.trim().match(/^https?:/) ? valor.trim() : `https://${valor.trim()}`);
+  let atual = u;
+  for (let i = 0; i < 3; i++) {
+    const r = await fetch(atual, {
+      redirect: "manual",
+      headers: { "user-agent": "Mozilla/5.0 (compatible; FabricaDeConteudo)" },
+      signal: AbortSignal.timeout(10000),
+    });
+    const destino = r.headers.get("location");
+    if (!destino) break;
+    const prox = new URL(destino, atual);
+    if (!/(^|\.)tiktok\.com$/.test(prox.hostname) || prox.protocol !== "https:")
+      throw new Error("Não consegui abrir esse link curto. Cole o link completo do vídeo.");
+    prox.search = "";
+    prox.hash = "";
+    try {
+      lerLink(prox.href);
+      return prox.href;
+    } catch {
+      atual = prox;
+    }
+  }
+  throw new Error("Não consegui abrir esse link curto. Cole o link completo do vídeo.");
+}
+/** Qual coletor da Apify atende cada tipo de link. */
+function coletor(
+  perfil: Perfil,
+  limite: number,
+): { actor: string; input: Record<string, unknown> } {
+  const tipo = perfil.tipo ?? "perfil";
+  if (tipo === "musica")
+    return {
+      actor: "clockworks~tiktok-sound-scraper",
+      input: {
+        musics: [perfil.url],
+        resultsPerPage: limite,
+        shouldDownloadVideos: true,
+        shouldDownloadCovers: false,
+      },
+    };
+  if (tipo === "video") {
+    if (perfil.plataforma === "instagram")
+      return {
+        actor: "apify~instagram-scraper",
+        input: { directUrls: [perfil.url], resultsType: "posts", resultsLimit: 1 },
+      };
+    if (perfil.plataforma === "tiktok")
+      return {
+        actor: "clockworks~tiktok-scraper",
+        input: { postURLs: [perfil.url], resultsPerPage: 1, shouldDownloadVideos: true },
+      };
+    return {
+      actor: "streamers~youtube-scraper",
+      input: {
+        startUrls: [{ url: perfil.url }],
+        maxResults: 1,
+        maxResultsShorts: 1,
+        maxResultStreams: 0,
+      },
+    };
+  }
+  if (perfil.plataforma === "instagram")
+    return {
+      actor: "apify~instagram-reel-scraper",
+      input: { username: [perfil.nome], resultsLimit: limite },
+    };
+  if (perfil.plataforma === "tiktok")
+    return {
+      actor: "clockworks~tiktok-scraper",
+      input: {
+        profiles: [perfil.nome],
+        resultsPerPage: limite,
+        shouldDownloadVideos: true,
+        profileScrapeSections: ["videos"],
+      },
+    };
+  return {
+    actor: "streamers~youtube-scraper",
+    input: {
+      startUrls: [{ url: perfil.url }],
+      maxResults: Math.ceil(limite / 2),
+      maxResultsShorts: Math.floor(limite / 2),
+      maxResultStreams: 0,
+    },
+  };
 }
 export async function executarMinerador(d: Entrada): Promise<Resposta> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -124,8 +220,10 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
     });
   }
   if (d.acao === "iniciar") {
-    const perfil = lerPerfil(d.perfil ?? ""),
-      limite = d.limite ?? 100;
+    let entrada = d.perfil ?? "";
+    if (ehLinkCurto(entrada)) entrada = await resolverCurto(entrada);
+    const perfil = lerLink(entrada),
+      limite = perfil.tipo === "video" ? 1 : (d.limite ?? 100);
     // Uma coleta por usuário. Reservamos antes de chamar o serviço pago.
     // Uma reserva sem run_id por 90 s ficou órfã (a chamada Apify tem timeout de 20 s).
     // Recupera falhas anteriores sem encerrar execuções que já receberam run_id.
@@ -149,28 +247,7 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
       body: JSON.stringify({ id, user_id: usuario, perfil, status: "processando" }),
     });
     try {
-      const actor =
-        perfil.plataforma === "instagram"
-          ? "apify~instagram-reel-scraper"
-          : perfil.plataforma === "tiktok"
-            ? "clockworks~tiktok-scraper"
-            : "streamers~youtube-scraper";
-      const input =
-        perfil.plataforma === "instagram"
-          ? { username: [perfil.nome], resultsLimit: limite }
-          : perfil.plataforma === "tiktok"
-            ? {
-                profiles: [perfil.nome],
-                resultsPerPage: limite,
-                shouldDownloadVideos: true,
-                profileScrapeSections: ["videos"],
-              }
-            : {
-                startUrls: [{ url: perfil.url }],
-                maxResults: Math.ceil(limite / 2),
-                maxResultsShorts: Math.floor(limite / 2),
-                maxResultStreams: 0,
-              };
+      const { actor, input } = coletor(perfil, limite);
       const run = await apify(`acts/${actor}/runs?timeout=900&memory=1024`, input);
       await atualizar(id, { run_id: run.data.id });
       return resposta({ busca: id, status: "processando" });
@@ -275,9 +352,15 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
     return resposta({ busca: busca.id, videos: busca.videos });
   }
   const video = busca.videos.find((v) => v.id === d.id);
-  if (!video?.arquivo)
-    throw new Error("Este vídeo não possui arquivo para baixar. Tente atualizar a busca.");
-  const url = urlMidia(video.arquivo);
+  const querAudio = d.tipo === "audio";
+  const origem = querAudio ? video?.audio : video?.arquivo;
+  if (!video || !origem)
+    throw new Error(
+      querAudio
+        ? "Este vídeo não tem o som original disponível."
+        : "Este vídeo não possui arquivo para baixar. Tente atualizar a busca.",
+    );
+  const url = urlMidia(origem);
   const r = await fetch(url, {
     headers: url.hostname === "api.apify.com" ? { Authorization: `Bearer ${token}` } : {},
     redirect: "error",
@@ -286,13 +369,17 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
   if (!r.ok || !r.body)
     throw new Error("O arquivo expirou ou a rede bloqueou o download. Faça uma nova busca.");
   const tipo = r.headers.get("content-type") ?? "";
-  if (!tipo.includes("video/") && !tipo.includes("octet-stream"))
-    throw new Error("O serviço devolveu uma página em vez de um vídeo.");
+  if (!tipo.includes(querAudio ? "audio/" : "video/") && !tipo.includes("octet-stream"))
+    throw new Error(
+      querAudio
+        ? "O serviço devolveu uma página em vez de um áudio."
+        : "O serviço devolveu uma página em vez de um vídeo.",
+    );
   // Limite por arquivo protege a resposta serializada e a memória do celular.
   const max = 48 * 1024 * 1024;
   if (Number(r.headers.get("content-length")) > max) {
     await r.body.cancel();
-    throw new Error("Este vídeo passa de 48 MB. Escolha um vídeo menor.");
+    throw new Error("Este arquivo passa de 48 MB. Escolha um menor.");
   }
   const reader = r.body.getReader(),
     chunks: Uint8Array[] = [];
@@ -302,7 +389,7 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
       const { value, done } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > max) throw new Error("Este vídeo passa de 48 MB. Escolha um vídeo menor.");
+      if (size > max) throw new Error("Este arquivo passa de 48 MB. Escolha um menor.");
       chunks.push(value);
     }
   } finally {
@@ -314,13 +401,24 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
     bytes.set(chunk, offset);
     offset += chunk.length;
   }
-  // Verifica contêiner MP4/WebM; não repassa HTML nem arquivos executáveis.
+  const base = `${busca.perfil.nome.replace(/[^\p{L}\p{N}_-]/gu, "_")}_${video.id.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
   const mp4 = new TextDecoder().decode(bytes.slice(4, 8)) === "ftyp",
     webm = bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3;
-  if (!mp4 && !webm) throw new Error("O download não é um vídeo MP4 ou WebM válido.");
+  let nome: string;
+  if (querAudio) {
+    // Aceita só contêineres de áudio conhecidos: MP3 (ID3 ou quadro MPEG) e M4A.
+    const mp3 =
+      new TextDecoder().decode(bytes.slice(0, 3)) === "ID3" ||
+      (bytes[0] === 0xff && ((bytes[1] ?? 0) & 0xe0) === 0xe0);
+    if (!mp3 && !mp4) throw new Error("O download não é um áudio MP3 ou M4A válido.");
+    nome = `${base}_som.${mp3 ? "mp3" : "m4a"}`;
+  } else {
+    // Verifica contêiner MP4/WebM; não repassa HTML nem arquivos executáveis.
+    if (!mp4 && !webm) throw new Error("O download não é um vídeo MP4 ou WebM válido.");
+    nome = `${base}.${webm ? "webm" : "mp4"}`;
+  }
   let bin = "";
   for (let i = 0; i < bytes.length; i += 8192)
     bin += String.fromCharCode(...bytes.subarray(i, i + 8192));
-  const nome = `${busca.perfil.nome.replace(/[^\p{L}\p{N}_-]/gu, "_")}_${video.id.replace(/[^a-zA-Z0-9_-]/g, "_")}.${webm ? "webm" : "mp4"}`;
   return resposta({ busca: busca.id, base64: btoa(bin), nome });
 }

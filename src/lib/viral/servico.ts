@@ -7,6 +7,7 @@ const entrada = z.object({
   busca: z.string().uuid().optional(),
   ids: z.array(z.string().max(100)).max(50).optional(),
   id: z.string().max(100).optional(),
+  tipo: z.enum(["audio"]).optional(),
   limite: z.number().int().min(1).max(200).optional(),
 });
 export const minerar = createServerFn({ method: "POST" })

@@ -23,7 +23,14 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useDevice } from "@/lib/device";
 import { minerar } from "@/lib/viral/servico";
-import { filtrarVideos, lerPerfil, type Ranking, type VideoViral } from "@/lib/viral/modelo";
+import {
+  ehLinkCurto,
+  filtrarVideos,
+  lerLink,
+  type Ranking,
+  type TipoLink,
+  type VideoViral,
+} from "@/lib/viral/modelo";
 import { guardarNoEditor } from "@/lib/viral/transferencia";
 import { extrairMp3, nomeUnico, SemAudioError } from "@/lib/viral/audio";
 
@@ -113,8 +120,11 @@ export function MineradorViral() {
   }
   async function buscar(e: React.FormEvent) {
     e.preventDefault();
+    let tipo: TipoLink = "perfil";
     try {
-      lerPerfil(perfil);
+      // Link curto do TikTok só dá para ler no servidor; o resto confere aqui.
+      if (!ehLinkCurto(perfil)) tipo = lerLink(perfil).tipo;
+      else tipo = "video";
     } catch (e) {
       setMensagem(erro(e));
       return;
@@ -124,7 +134,13 @@ export function MineradorViral() {
     setMensagem("");
     setVideos([]);
     setSelecionados(new Set());
-    setProgresso("Localizando o perfil e coletando vídeos…");
+    setProgresso(
+      tipo === "perfil"
+        ? "Localizando o perfil e coletando vídeos…"
+        : tipo === "musica"
+          ? "Procurando os vídeos que usam essa música…"
+          : "Buscando o vídeo…",
+    );
     try {
       const inicio = await chamar("iniciar", { perfil, limite });
       if (!inicio.busca) throw new Error("Não foi possível iniciar a busca.");
@@ -134,7 +150,12 @@ export function MineradorViral() {
         const r = await chamar("consultar", { busca: inicio.busca });
         if (r.status === "pronto") {
           setVideos(r.videos);
-          if (!r.videos.length) setMensagem("Nenhum vídeo público encontrado neste perfil.");
+          if (!r.videos.length)
+            setMensagem(
+              tipo === "perfil"
+                ? "Nenhum vídeo público encontrado neste perfil."
+                : "Não encontrei esse conteúdo. Ele pode ser privado, ter sido apagado ou não ser um vídeo.",
+            );
           return;
         }
       }
@@ -165,37 +186,59 @@ export function MineradorViral() {
     setOcupado(true);
     cancelado.current = false;
     setMensagem("");
-    const arquivos: File[] = [];
+    const arquivos: File[] = [],
+      videoDe = new Map<string, File>(),
+      somDe = new Map<string, { nome: string; bytes: Uint8Array }>();
     let total = 0;
     try {
-      setProgresso("Preparando os vídeos selecionados…");
-      let pronto = false;
-      for (let i = 0; i < 300; i++) {
-        if (cancelado.current) throw new Error("Download interrompido.");
-        const r = await chamar("preparar", { busca, ids: escolhidos.map((v) => v.id) });
-        if (r.status === "pronto") {
-          pronto = true;
-          break;
+      // Quando só queremos o MP3 e o serviço já dá o som original, nem baixamos o vídeo.
+      const soSom = destino === "zip" && formato === "mp3";
+      const querVideo = (v: VideoViral) => !(soSom && v.audio);
+      const querSom = (v: VideoViral) => destino === "zip" && formato !== "video" && !!v.audio;
+      const baixarArquivo = async (v: VideoViral, tipo?: "audio") => {
+        const r = await chamar("arquivo", { busca, id: v.id, ...(tipo ? { tipo } : {}) });
+        if (!r.base64 || !r.nome) throw new Error("O serviço não devolveu o arquivo.");
+        return { nome: r.nome, bytes: Uint8Array.from(atob(r.base64), (c) => c.charCodeAt(0)) };
+      };
+      const guardarVideo = async (v: VideoViral) => {
+        const r = await baixarArquivo(v);
+        total += r.bytes.length;
+        if (total > Math.min(200, maxVideoMB) * 1024 * 1024)
+          throw new Error("O lote ficou grande demais. Selecione menos vídeos.");
+        const f = new File([new Uint8Array(r.bytes)], r.nome, {
+          type: r.nome.endsWith("webm") ? "video/webm" : "video/mp4",
+        });
+        arquivos.push(f);
+        videoDe.set(v.id, f);
+      };
+      if (escolhidos.some((v) => querVideo(v) || soSom)) {
+        setProgresso("Preparando os arquivos selecionados…");
+        let pronto = false;
+        for (let i = 0; i < 300; i++) {
+          if (cancelado.current) throw new Error("Download interrompido.");
+          const r = await chamar("preparar", { busca, ids: escolhidos.map((v) => v.id) });
+          if (r.status === "pronto") {
+            pronto = true;
+            break;
+          }
+          await esperar();
         }
-        await esperar();
+        if (!pronto) throw new Error("A preparação demorou demais. Tente novamente mais tarde.");
       }
-      if (!pronto) throw new Error("A preparação demorou demais. Tente novamente mais tarde.");
       for (const [i, v] of escolhidos.entries()) {
         if (cancelado.current || !vivo.current) throw new Error("Download interrompido.");
         setProgresso(`Baixando ${i + 1} de ${escolhidos.length}…`);
         try {
-          const r = await chamar("arquivo", { busca, id: v.id });
-          if (!r.base64 || !r.nome) throw new Error("O serviço não devolveu o arquivo.");
-          const bin = atob(r.base64),
-            bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-          total += bytes.length;
-          if (total > Math.min(200, maxVideoMB) * 1024 * 1024)
-            throw new Error("O lote ficou grande demais. Selecione menos vídeos.");
-          arquivos.push(
-            new File([bytes], r.nome, {
-              type: r.nome.endsWith("webm") ? "video/webm" : "video/mp4",
-            }),
-          );
+          if (querSom(v)) {
+            try {
+              const som = await baixarArquivo(v, "audio");
+              somDe.set(v.id, som);
+            } catch {
+              // Sem o som original, o MP3 sai do próprio vídeo.
+              if (!querVideo(v)) await guardarVideo(v);
+            }
+          }
+          if (querVideo(v)) await guardarVideo(v);
         } catch (e) {
           throw new Error(`${v.titulo.slice(0, 60)}: ${erro(e)}`);
         }
@@ -217,10 +260,19 @@ export function MineradorViral() {
               bytes: new Uint8Array(await f.arrayBuffer()),
             });
         if (formato !== "video") {
-          for (const [i, f] of arquivos.entries()) {
+          let n = 0;
+          for (const v of escolhidos) {
             if (cancelado.current || !vivo.current) throw new Error("Download interrompido.");
-            const rotulo = `Extraindo o áudio ${i + 1} de ${arquivos.length}…`;
-            setProgresso(i === 0 ? `${rotulo} (na primeira vez o conversor é carregado)` : rotulo);
+            n++;
+            const som = somDe.get(v.id);
+            if (som) {
+              saidas.push({ nome: nomeUnico(som.nome, usados), bytes: som.bytes });
+              continue;
+            }
+            const f = videoDe.get(v.id);
+            if (!f) continue;
+            const rotulo = `Extraindo o áudio ${n} de ${escolhidos.length}…`;
+            setProgresso(n === 1 ? `${rotulo} (na primeira vez o conversor é carregado)` : rotulo);
             try {
               const r = await extrairMp3(f, (p) =>
                 setProgresso(`${rotulo} ${Math.round(p * 100)}%`),
@@ -247,7 +299,9 @@ export function MineradorViral() {
         };
         if (formato === "mp3" && saidas.length === 1) {
           entregar(
-            new Blob([new Uint8Array(saidas[0]!.bytes)], { type: "audio/mpeg" }),
+            new Blob([new Uint8Array(saidas[0]!.bytes)], {
+              type: saidas[0]!.nome.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg",
+            }),
             saidas[0]!.nome,
           );
         } else {
@@ -326,20 +380,20 @@ export function MineradorViral() {
             : " O dono do aplicativo precisa concluir a configuração."}
         </div>
       )}
-      <SystemWindow title="[ Localizar perfil ]">
+      <SystemWindow title="[ Buscar por link ]">
         <form onSubmit={(e) => void buscar(e)} className="flex flex-wrap items-end gap-3 p-4">
           <div className="min-w-0 flex-1 space-y-2">
-            <Label htmlFor="perfil-viral">Link do perfil</Label>
+            <Label htmlFor="perfil-viral">Cole um link</Label>
             <Input
               id="perfil-viral"
               value={perfil}
               onChange={(e) => setPerfil(e.target.value)}
-              placeholder="instagram.com/perfil, tiktok.com/@perfil ou youtube.com/@canal"
+              placeholder="Perfil, vídeo ou música: instagram.com, tiktok.com ou youtube.com"
               disabled={ocupado}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="limite-viral">Vídeos para analisar</Label>
+            <Label htmlFor="limite-viral">Quantos vídeos trazer</Label>
             <select
               id="limite-viral"
               value={limite}
@@ -354,10 +408,12 @@ export function MineradorViral() {
           </div>
           <Button disabled={ocupado || configurado !== true || !perfil.trim()}>
             <Search className="size-4" />
-            Localizar perfil
+            Buscar
           </Button>
           <p className="w-full text-xs text-muted-foreground">
-            Instagram · TikTok · YouTube. O ranking compara os vídeos coletados; não garante
+            Aceita link de <b>perfil</b> (traz vários vídeos), de <b>um vídeo só</b> (Reel, TikTok,
+            Short ou vídeo do YouTube) e de <b>música do TikTok</b> (traz os vídeos que usam o som).
+            Link curto do TikTok também funciona. O ranking compara os vídeos coletados; não garante
             encontrar todo o histórico do perfil.
           </p>
         </form>
