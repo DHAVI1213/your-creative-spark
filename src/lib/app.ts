@@ -3,6 +3,7 @@ import {
   Copy,
   Eraser,
   FileSignature,
+  GalleryHorizontal,
   Film,
   Flame,
   Hash,
@@ -20,6 +21,7 @@ export type ToolPath =
   | "/clonador"
   | "/legendas"
   | "/propostas"
+  | "/carrosseis"
   | "/editor"
   | "/viral"
   | "/minerador"
@@ -81,6 +83,17 @@ export const TOOLS: Tool[] = [
     description: "Monte a proposta para o cliente: mensagem de WhatsApp e PDF com seu orçamento.",
     to: "/propostas",
     icon: FileSignature,
+    status: "ativo",
+  },
+  {
+    id: "carrosseis",
+    code: "HAB-09",
+    rank: "A",
+    name: "Criador de Carrosséis",
+    short: "Carrosséis",
+    description: "Monte carrosséis de Instagram com capa, regras, virada e CTA. Baixe os PNGs e a legenda.",
+    to: "/carrosseis",
+    icon: GalleryHorizontal,
     status: "ativo",
   },
   {
