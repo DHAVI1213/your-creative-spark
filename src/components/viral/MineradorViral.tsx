@@ -189,7 +189,8 @@ export function MineradorViral() {
     const arquivos: File[] = [],
       videoDe = new Map<string, File>(),
       somDe = new Map<string, { nome: string; bytes: Uint8Array }>();
-    let total = 0;
+    let total = 0,
+      pulados = 0;
     try {
       // Quando só queremos o MP3 e o serviço já dá o som original, nem baixamos o vídeo.
       const soSom = destino === "zip" && formato === "mp3";
@@ -240,9 +241,22 @@ export function MineradorViral() {
           }
           if (querVideo(v)) await guardarVideo(v);
         } catch (e) {
+          // Vídeo que o serviço não conseguiu baixar: pula e segue com os outros.
+          if (/não possui arquivo|não conseguiu baixar/.test(erro(e))) {
+            pulados++;
+            continue;
+          }
           throw new Error(`${v.titulo.slice(0, 60)}: ${erro(e)}`);
         }
       }
+      if (!arquivos.length && !somDe.size)
+        throw new Error(
+          "Nenhum dos vídeos selecionados pôde ser baixado. Tente outro vídeo ou tente de novo mais tarde.",
+        );
+      if (pulados)
+        toast.warning(
+          `${pulados} vídeo${pulados > 1 ? "s" : ""} indisponíve${pulados > 1 ? "is foram pulados" : "l foi pulado"}.`,
+        );
       if (cancelado.current || !vivo.current) throw new Error("Download interrompido.");
       if (destino === "editor") {
         if (!user) throw new Error("Entre novamente.");

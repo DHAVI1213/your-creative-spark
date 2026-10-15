@@ -310,17 +310,38 @@ export async function executarMinerador(d: Entrada): Promise<Resposta> {
     if (busca.download_run) {
       const itens = await resultadoRun(busca.download_run);
       if (itens === null) return resposta({ busca: busca.id, status: "baixando" });
-      const arquivos = itens as { videoId?: string; downloadUrl?: string }[];
-      busca.videos = busca.videos.map((v) => ({
-        ...v,
-        arquivo: arquivos.find((a) => a.videoId === v.id)?.downloadUrl ?? v.arquivo,
-      }));
+      const arquivos = itens as Record<string, unknown>[];
+      const texto = (x: unknown) => (typeof x === "string" ? x : "");
+      // Cada coletor nomeia os campos de um jeito; aceita os nomes mais comuns.
+      const doVideo = (id: string) =>
+        arquivos.find(
+          (a) =>
+            texto(a["videoId"] ?? a["id"]) === id ||
+            [a["url"], a["inputUrl"], a["videoUrl"]].some((u) => texto(u).includes(id)),
+        );
+      const link = (a?: Record<string, unknown>) => {
+        for (const k of ["downloadUrl", "download_url", "fileUrl", "file_url", "videoUrl"]) {
+          const x = texto(a?.[k]);
+          if (x.startsWith("https://")) return x;
+        }
+        return undefined;
+      };
+      busca.videos = busca.videos.map((v) => ({ ...v, arquivo: link(doVideo(v.id)) ?? v.arquivo }));
       const falharam = videos.filter((v) => !busca.videos.find((a) => a.id === v.id)?.arquivo);
       await atualizar(busca.id, { videos: busca.videos, download_run: null });
-      if (falharam.length)
+      if (falharam.length === videos.length) {
+        const motivo = texto(
+          doVideo(falharam[0]?.id ?? "")?.["error"] ??
+            doVideo(falharam[0]?.id ?? "")?.["message"] ??
+            doVideo(falharam[0]?.id ?? "")?.["status"],
+        ).slice(0, 120);
         throw new Error(
-          "O serviço não conseguiu baixar todos os vídeos selecionados. Remova os indisponíveis ou tente novamente depois.",
+          `O serviço não conseguiu baixar os vídeos selecionados${motivo ? ` (motivo informado: ${motivo})` : ""}. Tente outro vídeo ou tente novamente depois.`,
         );
+      }
+      // Parte dos vídeos veio: segue com eles (os indisponíveis são pulados na tela),
+      // sem abrir outra coleta paga.
+      return resposta({ busca: busca.id, videos: busca.videos });
     }
     const faltam = videos.filter((v) => !busca.videos.find((a) => a.id === v.id)?.arquivo);
     if (faltam.length) {

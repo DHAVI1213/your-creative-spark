@@ -188,6 +188,46 @@ describe("coleta autenticada", () => {
     ).rejects.toThrow("não conseguiu baixar");
     expect(f.mock.calls.filter((c) => String(c[0]).includes("/acts/"))).toHaveLength(0);
   });
+  it("com parte dos vídeos baixados, segue sem abrir outra coleta paga", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(json([{ valor: "segredo" }]))
+      .mockResolvedValueOnce(
+        json([
+          {
+            id: "b",
+            perfil: { plataforma: "youtube" },
+            status: "pronto",
+            download_run: "runABC",
+            videos: [
+              { id: "a", arquivo: null },
+              { id: "b2", arquivo: null },
+            ],
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(json({ data: { status: "SUCCEEDED", defaultDatasetId: "dataABC" } }))
+      .mockResolvedValueOnce(
+        json([
+          {
+            videoId: "a",
+            downloadUrl: "https://api.apify.com/v2/key-value-stores/abc123/records/a.mp4",
+          },
+          { videoId: "b2", status: "failed" },
+        ]),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", f);
+    const r = await executarMinerador({
+      token: "x",
+      acao: "preparar",
+      busca: "b",
+      ids: ["a", "b2"],
+    });
+    expect(r.status).toBe("pronto");
+    expect(r.videos.find((v) => v.id === "a")?.arquivo).toContain("api.apify.com");
+    expect(f.mock.calls.filter((c) => String(c[0]).includes("/acts/"))).toHaveLength(0);
+  });
   it("reserva do download evita execuções pagas duplicadas", async () => {
     const f = vi
       .fn()
