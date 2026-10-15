@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Eye,
   Heart,
+  Music,
 } from "lucide-react";
 import { toast } from "sonner";
 import { zip } from "fflate";
@@ -24,6 +25,9 @@ import { useDevice } from "@/lib/device";
 import { minerar } from "@/lib/viral/servico";
 import { filtrarVideos, lerPerfil, type Ranking, type VideoViral } from "@/lib/viral/modelo";
 import { guardarNoEditor } from "@/lib/viral/transferencia";
+import { extrairMp3, nomeUnico, SemAudioError } from "@/lib/viral/audio";
+
+type Formato = "video" | "mp3" | "ambos";
 
 const formatar = (n: number | null) =>
   n === null
@@ -44,7 +48,8 @@ export function MineradorViral() {
     [videos, setVideos] = useState<VideoViral[]>([]),
     [busca, setBusca] = useState("");
   const [selecionados, setSelecionados] = useState(new Set<string>()),
-    [ranking, setRanking] = useState<Ranking>("viral");
+    [ranking, setRanking] = useState<Ranking>("viral"),
+    [formato, setFormato] = useState<Formato>("video");
   const [views, setViews] = useState(0),
     [likes, setLikes] = useState(0),
     [viral, setViral] = useState(0),
@@ -202,22 +207,73 @@ export function MineradorViral() {
         await guardarNoEditor(user.id, arquivos);
         await navigate({ to: "/editor" });
       } else {
-        setProgresso("Montando o ZIP…");
-        const conteudo: Record<string, Uint8Array> = {};
-        for (const f of arquivos) conteudo[f.name] = new Uint8Array(await f.arrayBuffer());
-        const dados = await new Promise<Uint8Array>((resolve, reject) =>
-          zip(conteudo, { level: 0 }, (err, bytes) => (err ? reject(err) : resolve(bytes))),
-        );
+        const saidas: { nome: string; bytes: Uint8Array }[] = [];
+        const usados = new Set<string>();
+        let semAudio = 0;
+        if (formato !== "mp3")
+          for (const f of arquivos)
+            saidas.push({
+              nome: nomeUnico(f.name, usados),
+              bytes: new Uint8Array(await f.arrayBuffer()),
+            });
+        if (formato !== "video") {
+          for (const [i, f] of arquivos.entries()) {
+            if (cancelado.current || !vivo.current) throw new Error("Download interrompido.");
+            const rotulo = `Extraindo o áudio ${i + 1} de ${arquivos.length}…`;
+            setProgresso(i === 0 ? `${rotulo} (na primeira vez o conversor é carregado)` : rotulo);
+            try {
+              const r = await extrairMp3(f, (p) =>
+                setProgresso(`${rotulo} ${Math.round(p * 100)}%`),
+              );
+              saidas.push({
+                nome: nomeUnico(r.nome, usados),
+                bytes: new Uint8Array(await r.blob.arrayBuffer()),
+              });
+            } catch (e) {
+              if (e instanceof SemAudioError) semAudio++;
+              else throw new Error(`${f.name}: ${erro(e)}`);
+            }
+          }
+        }
         if (cancelado.current || !vivo.current) return;
-        const url = URL.createObjectURL(
+        if (!saidas.length) throw new Error("Nenhum dos vídeos selecionados tem áudio.");
+        const entregar = (blob: Blob, nome: string) => {
+          const url = URL.createObjectURL(blob),
+            a = document.createElement("a");
+          a.href = url;
+          a.download = nome;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        };
+        if (formato === "mp3" && saidas.length === 1) {
+          entregar(
+            new Blob([new Uint8Array(saidas[0]!.bytes)], { type: "audio/mpeg" }),
+            saidas[0]!.nome,
+          );
+        } else {
+          setProgresso("Montando o ZIP…");
+          const conteudo: Record<string, Uint8Array> = {};
+          for (const o of saidas) conteudo[o.nome] = o.bytes;
+          const dados = await new Promise<Uint8Array>((resolve, reject) =>
+            zip(conteudo, { level: 0 }, (err, bytes) => (err ? reject(err) : resolve(bytes))),
+          );
+          if (cancelado.current || !vivo.current) return;
+          entregar(
             new Blob([new Uint8Array(dados)], { type: "application/zip" }),
-          ),
-          a = document.createElement("a");
-        a.href = url;
-        a.download = "videos-virais.zip";
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-        toast.success("ZIP preparado com os vídeos selecionados.");
+            formato === "mp3" ? "audios-virais.zip" : "videos-virais.zip",
+          );
+        }
+        toast.success(
+          formato === "mp3"
+            ? "Áudios em MP3 prontos."
+            : formato === "ambos"
+              ? "Vídeos e áudios prontos."
+              : "ZIP preparado com os vídeos selecionados.",
+        );
+        if (semAudio)
+          toast.warning(
+            `${semAudio} vídeo${semAudio > 1 ? "s" : ""} sem áudio ${semAudio > 1 ? "foram ignorados" : "foi ignorado"}.`,
+          );
       }
     } catch (e) {
       if (vivo.current) setMensagem(erro(e));
@@ -420,14 +476,25 @@ export function MineradorViral() {
             >
               Limpar seleção
             </Button>
+            <select
+              aria-label="Baixar como"
+              value={formato}
+              onChange={(e) => setFormato(e.target.value as Formato)}
+              disabled={ocupado}
+              className="h-8 rounded-sm border border-input bg-background px-2 text-sm"
+            >
+              <option value="video">Vídeos (MP4)</option>
+              <option value="mp3">Só o áudio (MP3)</option>
+              <option value="ambos">Vídeo + áudio MP3</option>
+            </select>
             <Button
               variant="outline"
               size="sm"
               disabled={ocupado || !selecionados.size}
               onClick={() => void baixar("zip")}
             >
-              <Download className="size-4" />
-              Baixar ZIP
+              {formato === "mp3" ? <Music className="size-4" /> : <Download className="size-4" />}
+              {formato === "mp3" ? "Baixar MP3" : "Baixar ZIP"}
             </Button>
             <Button
               size="sm"
@@ -439,8 +506,8 @@ export function MineradorViral() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Até 50 vídeos por lote, 48 MB por vídeo. A seleção permanece ao mudar filtros. Use
-            conteúdos que você pode baixar e editar.
+            Até 50 vídeos por lote, 48 MB por vídeo. A seleção permanece ao mudar filtros. O MP3 é
+            extraído no seu aparelho. Use vídeos e músicas que você tem direito de baixar e usar.
           </p>
           {!filtrados.length && (
             <p className="py-8 text-center text-muted-foreground">
