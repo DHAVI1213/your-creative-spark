@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{--bg:#120d20;--card:#1b1430;--line:#30264e;--txt:#f3eefc;--dim:#a99cc6;--acc:#e8b94a;--roxo:#7c3aed}
+  *{box-sizing:border-box}
+  body{margin:0;width:340px;background:var(--bg);color:var(--txt);font:13.5px/1.45 "Segoe UI",system-ui,sans-serif;padding:16px}
+  h1{font-size:16px;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+  h1 img{width:22px;height:22px}
+  .site{color:var(--dim);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:14px}
+  .bloco{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+  .bloco h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin:0 0 8px}
+  label.op{display:flex;gap:9px;align-items:flex-start;padding:7px 8px;border-radius:10px;cursor:pointer}
+  label.op:hover{background:rgba(255,255,255,.04)}
+  label.op input{margin-top:3px;accent-color:var(--acc)}
+  label.op small{display:block;color:var(--dim);font-size:11.5px}
+  .linha{display:flex;align-items:center;gap:8px;margin-top:6px;padding-left:8px}
+  input[type=number]{width:58px;background:#0e0a19;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:5px 7px}
+  button{width:100%;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer}
+  .principal{background:linear-gradient(135deg,#f6d98a,var(--acc));color:#1a1030}
+  .sec{background:transparent;border:1px solid var(--line);color:var(--txt);margin-bottom:10px}
+  .sec:hover{border-color:var(--acc)}
+  .aviso{color:var(--dim);font-size:11px;margin-top:10px;text-align:center}
+  input[type=text],input[type=password]{flex:1;min-width:0;background:#0e0a19;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:6px 8px;font-size:12px}
+  .dica{color:var(--dim);font-size:11px;padding:6px 8px 0}
+  .escondido{display:none}
+</style>
+</head>
+<body>
+  <h1><img src="icons/48.png" alt="">Copiador de Sites</h1>
+  <div class="site" id="site">—</div>
+
+  <button class="sec" id="editar">✏️ Modo edição (mudar textos, fotos, cores…)</button>
+
+  <button class="sec" id="componente">🧩 Copiar só um componente (menu, card, seção…)</button>
+
+  <div class="bloco">
+    <h2>Tipo de cópia</h2>
+    <label class="op"><input type="radio" name="modo" value="visual" checked><span><b>Visual</b><small>Abre com 2 cliques e dá para editar. Animações e 3D viram imagem parada.</small></span></label>
+    <label class="op"><input type="radio" name="modo" value="completo"><span><b>Completa (com animações e 3D)</b><small>Baixa todos os scripts, modelos 3D, fontes e vídeos. Abre pelo ABRIR-SITE.bat que vem junto.</small></span></label>
+  </div>
+
+  <div class="bloco escondido" id="blocoCdp">
+    <h2>Captura</h2>
+    <label class="op"><input type="checkbox" id="cdp" checked><span><b>Gravação avançada de rede</b><small>Pega também o que o 3D e os workers baixam por trás (decodificadores .wasm, texturas). O Chrome mostra uma faixa "depurando este navegador" durante a cópia. Feche o F12 antes.</small></span></label>
+  </div>
+
+  <div class="bloco">
+    <h2>Páginas</h2>
+    <label class="op"><input type="radio" name="pag" value="1" checked><span><b>Só esta página</b></span></label>
+    <label class="op"><input type="radio" name="pag" value="varias"><span><b>Esta + páginas internas</b><small>Sobre, cardápio, contato… do mesmo site.</small></span></label>
+    <div class="linha" id="linhaQtd" style="opacity:.5">Até <input type="number" id="qtd" min="2" max="30" value="6"> páginas</div>
+  </div>
+
+  <div class="bloco" id="blocoFormato">
+    <h2>Formato</h2>
+    <label class="op"><input type="radio" name="fmt" value="zip" checked><span><b>Pasta (.zip)</b><small>Melhor para hospedar e para sites grandes.</small></span></label>
+    <label class="op"><input type="radio" name="fmt" value="unico"><span><b>Um arquivo .html só</b><small>Tudo dentro de um arquivo. Só a página atual.</small></span></label>
+    <label class="op"><input type="radio" name="fmt" value="lovable"><span><b>Projeto para Lovable/GitHub (.zip)</b><small>Já no formato do repositório da Lovable: rotas, CSS e imagens. Sem scripts (cópia visual).</small></span></label>
+  </div>
+
+  <div class="bloco escondido" id="blocoGh">
+    <h2>Enviar direto para o GitHub</h2>
+    <label class="op"><input type="checkbox" id="ghOn"><span><b>Fazer commit no repositório</b><small>Um commit novo na branch principal (a Lovable atualiza sozinha). Troca src/routes/index.tsx.</small></span></label>
+    <div class="linha">Repo <input type="text" id="ghRepo" placeholder="usuario/repositorio" autocomplete="off"></div>
+    <div class="linha">Token <input type="password" id="ghToken" placeholder="github_pat_…" autocomplete="off"></div>
+    <div class="dica">Token do GitHub (fine-grained) só para esse repositório, com "Contents: Read and write". Fica guardado só neste computador.</div>
+  </div>
+
+  <button class="principal" id="copiar">⬇ Copiar site</button>
+  <div class="aviso">Use somente em sites com autorização do dono.</div>
+<script src="popup.js"></script>
+</body>
+</html>

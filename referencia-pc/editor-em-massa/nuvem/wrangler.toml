@@ -1,0 +1,19 @@
+# Configuração do Worker. O "instalar-nuvem.bat" preenche o database_id sozinho.
+name = "agendador-editor"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+[triggers]
+crons = ["* * * * *"] # verifica a fila a cada minuto
+
+[[d1_databases]]
+binding = "DB"
+database_name = "agendador-editor"
+database_id = "90ec9587-0deb-4986-86e4-0d5ef7a339b6"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "agendador-editor-midia"
+
+[vars]
+GRAPH_VERSION = "v23.0"

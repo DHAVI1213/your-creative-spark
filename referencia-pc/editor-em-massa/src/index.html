@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Editor em Massa</title>
+  <link rel="stylesheet" href="../node_modules/@fontsource/poppins/400.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/poppins/700.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/poppins/800.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/poppins/900.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/700.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/800.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/900.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/anton/400.css">
+  <link rel="stylesheet" href="../node_modules/@fontsource/bebas-neue/400.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== TOPO ===================== -->
+  <header class="top">
+    <div class="brand">
+      <div class="brand-ico" id="brandIco" title="Clique para ligar/desligar as pétalas">✿</div>
+      <div>
+        <div class="eyebrow">Editor em massa</div>
+        <div class="brand-title">Estúdio</div>
+      </div>
+    </div>
+
+    <div class="views" id="views">
+      <button data-view="editor" class="on">✂ Editor</button>
+      <button data-view="cortes">🔥 Cortes Virais</button>
+      <button data-view="agenda">📅 Agendador</button>
+    </div>
+
+    <div class="profile">
+      <div class="eyebrow">Perfil</div>
+      <div class="profile-row" id="profileRow">
+        <select id="profileSel" title="Perfil usado nos vídeos importados"></select>
+        <button class="btn ghost sm" id="profileNew" title="Criar perfil com os ajustes do painel">+ Novo</button>
+        <button class="btn ghost sm" id="profileSave" title="Guardar os ajustes do painel neste perfil">Salvar painel no perfil</button>
+        <button class="btn ghost sm danger" id="profileDel" title="Excluir perfil">Excluir</button>
+      </div>
+      <div class="profile-row hidden" id="newProfBox">
+        <input id="newProfName" placeholder="Nome do novo perfil" maxlength="30">
+        <button class="btn sm primary" id="newProfOk">Criar</button>
+        <button class="btn ghost sm" id="newProfCancel">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="out">
+      <div>
+        <div class="eyebrow">Salvar em</div>
+        <button class="btn ghost sm path" id="outBtn" title="Trocar pasta de saída"></button>
+      </div>
+      <div>
+        <div class="eyebrow">Em paralelo</div>
+        <select id="concSel" title="Quantos vídeos processar ao mesmo tempo">
+          <option value="1">1 vídeo</option>
+          <option value="2">2 vídeos</option>
+          <option value="3">3 vídeos</option>
+          <option value="4">4 vídeos</option>
+          <option value="5">5 vídeos</option>
+          <option value="6">6 vídeos</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== ESQUERDA ===================== -->
+  <aside class="left">
+    <div class="block">
+      <button class="btn full" id="btnImport">⬆ Importar vídeos</button>
+      <button class="btn primary full big" id="btnProcess">▶ PROCESSAR VÍDEOS</button>
+      <div class="row2">
+        <button class="btn ghost sm" id="btnOpenOut">📂 Abrir saída</button>
+        <button class="btn ghost sm danger hidden" id="btnCancel">■ Cancelar</button>
+      </div>
+      <div class="status-line" id="statusLine"><i></i><span>Pronto</span></div>
+    </div>
+
+    <div class="scope">
+      <div class="eyebrow">Aplicar alterações em</div>
+      <div class="seg scope-seg" id="scopeSeg">
+        <button data-v="este">Este</button>
+        <button data-v="selecao">Seleção</button>
+        <button data-v="todos">Todos</button>
+      </div>
+      <p class="hint" id="scopeHint"></p>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button data-tab="recorte">✂ Recorte</button>
+      <button data-tab="efeitos">✦ Efeitos</button>
+      <button data-tab="filtros">◐ Filtros</button>
+      <button data-tab="template">▣ Template</button>
+      <button data-tab="texto">T Texto</button>
+      <button data-tab="legendas">💬 Legendas</button>
+      <button data-tab="capa">▦ Capa</button>
+      <button data-tab="audio">♪ Áudio</button>
+      <button data-tab="saida">⤓ Saída</button>
+    </nav>
+
+    <div class="panels">
+      <!-- RECORTE -->
+      <section data-panel="recorte">
+        <h3>Recorte manual</h3>
+        <p class="hint">Arraste um retângulo em cima do vídeo para escolher a parte que aparece.</p>
+        <button class="btn primary full" id="btnCropManual">✂ Recortar manualmente</button>
+
+        <h3>Recorte automático</h3>
+        <p class="hint">Detecta barras pretas (vídeo deitado dentro de vídeo em pé) em cada vídeo do escopo.</p>
+        <button class="btn full" id="btnDetect">⌗ Detectar bordas no escopo</button>
+
+        <h3>Recorte em pixels <button class="link" id="btnZeroCrop">zerar</button></h3>
+        <div class="grid2">
+          <label class="field"><span>Topo</span><input type="number" min="0" step="2" data-k="recorte.top"></label>
+          <label class="field"><span>Base</span><input type="number" min="0" step="2" data-k="recorte.bottom"></label>
+          <label class="field"><span>Esquerda</span><input type="number" min="0" step="2" data-k="recorte.left"></label>
+          <label class="field"><span>Direita</span><input type="number" min="0" step="2" data-k="recorte.right"></label>
+        </div>
+
+        <h3>Enquadramento</h3>
+        <label class="field"><span>Zoom <output data-for="recorte.zoom" data-fmt="x"></output></span>
+          <input type="range" min="0.5" max="2.5" step="0.01" data-k="recorte.zoom"></label>
+        <label class="field"><span>Posição vertical <output data-for="recorte.posV" data-fmt="pct"></output></span>
+          <input type="range" min="0" max="1" step="0.01" data-k="recorte.posV"></label>
+        <div class="seg small" data-k="recorte.posV" data-type="num">
+          <button data-v="0">Topo</button><button data-v="0.5">Centro</button><button data-v="1">Base</button>
+        </div>
+      </section>
+
+      <!-- EFEITOS -->
+      <section data-panel="efeitos">
+        <h3>Efeitos rápidos</h3>
+        <label class="toggle"><span>Espelhar vídeo</span><input type="checkbox" data-k="efeitos.espelhar"><i></i></label>
+        <label class="toggle"><span>Cortar 0,5s do início e do fim</span><input type="checkbox" data-k="efeitos.cortarPontas"><i></i></label>
+        <label class="toggle"><span>Ajuste automático de cor</span><input type="checkbox" data-k="efeitos.ajusteAuto"><i></i></label>
+        <label class="toggle"><span>Anti duplicidade <small>zoom 4%, cor e grão sutis, sem metadados</small></span><input type="checkbox" data-k="efeitos.antiDup"><i></i></label>
+        <label class="toggle"><span>Melhorar áudio <small>volume padronizado</small></span><input type="checkbox" data-k="efeitos.melhorarAudio"><i></i></label>
+
+        <h3>Velocidade</h3>
+        <label class="field"><span>Velocidade <output data-for="efeitos.velocidade" data-fmt="x"></output></span>
+          <input type="range" min="0.5" max="2" step="0.01" data-k="efeitos.velocidade"></label>
+        <div class="seg small" data-k="efeitos.velocidade" data-type="num">
+          <button data-v="0.9">0.90×</button><button data-v="1">Normal</button><button data-v="1.05">1.05×</button><button data-v="1.1">1.10×</button><button data-v="1.2">1.20×</button>
+        </div>
+
+        <h3>Corte manual (tempo)</h3>
+        <div class="trim" id="trim">
+          <div class="trim-track"><div class="trim-sel" id="trimSel"></div><div class="trim-head" id="trimHead"></div></div>
+          <input type="range" id="trimA" min="0" max="1000" step="1" value="0">
+          <input type="range" id="trimB" min="0" max="1000" step="1" value="1000">
+        </div>
+        <div class="row-between"><span class="hint" id="trimInfo">Abra um vídeo para usar a linha do tempo.</span></div>
+        <div class="row2">
+          <button class="btn ghost sm" id="btnMarkIn" title="O vídeo começa no ponto atual do preview">[ Início aqui</button>
+          <button class="btn ghost sm" id="btnMarkOut" title="O vídeo termina no ponto atual do preview">Fim aqui ]</button>
+        </div>
+        <button class="link" id="btnTrimReset">desfazer corte de tempo</button>
+        <div class="grid2">
+          <label class="field"><span>Tirar do início (s)</span><input type="number" min="0" step="0.1" data-k="efeitos.corteInicio"></label>
+          <label class="field"><span>Tirar do fim (s)</span><input type="number" min="0" step="0.1" data-k="efeitos.corteFim"></label>
+        </div>
+        <p class="hint">Relativo à duração de cada vídeo, então funciona em vídeos de tamanhos diferentes.</p>
+      </section>
+
+      <!-- FILTROS -->
+      <section data-panel="filtros">
+        <h3>Filtro de cor</h3>
+        <p class="hint">Toque num filtro para ver no preview. Ele vale para todos os vídeos do escopo.</p>
+        <div class="seg fx-grid" data-k="efeitos.filtro" id="fxGrid"></div>
+        <div data-show="efeitos.filtro=vivido|quente|frio|pb|sepia|vintage|cinema|desbotado|noir|dourado">
+          <label class="field"><span>Intensidade <output data-for="efeitos.filtroForca" data-fmt="pct"></output></span>
+            <input type="range" min="0" max="1" step="0.05" data-k="efeitos.filtroForca"></label>
+          <div class="seg small" data-k="efeitos.filtroForca" data-type="num">
+            <button data-v="0.25">25%</button><button data-v="0.5">50%</button><button data-v="0.75">75%</button><button data-v="1">100%</button>
+          </div>
+        </div>
+        <p class="hint">O filtro entra depois do “Ajuste automático de cor” e do “Anti duplicidade” (aba Efeitos), e o vídeo final sai igual ao preview.</p>
+      </section>
+
+      <!-- TEMPLATE -->
+      <section data-panel="template">
+        <h3>Fundo</h3>
+        <div class="seg" data-k="template.fundoTipo">
+          <button data-v="cor">Cor</button><button data-v="imagem">Imagem</button><button data-v="blur">Vídeo desfocado</button>
+        </div>
+        <label class="color-row" data-show="template.fundoTipo=cor|imagem"><span>Cor do fundo</span><input type="color" data-k="template.fundoCor"></label>
+        <div class="file-row" data-show="template.fundoTipo=imagem">
+          <span>Imagem</span><em data-fname="template.fundoImagem"></em>
+          <button class="btn ghost xs" data-pick="template.fundoImagem" data-kind="image">Escolher</button>
+          <button class="btn ghost xs" data-clear="template.fundoImagem">✕</button>
+        </div>
+
+        <h3>Logo / marca d'água</h3>
+        <div class="file-row">
+          <span>Logo</span><em data-fname="template.logo"></em>
+          <button class="btn ghost xs" data-pick="template.logo" data-kind="image">Escolher</button>
+          <button class="btn ghost xs" data-clear="template.logo">✕</button>
+        </div>
+        <div data-show="template.logo">
+          <div class="seg small wrap" data-k="template.logoPos">
+            <button data-v="sup-esq">↖</button><button data-v="sup-centro">↑</button><button data-v="sup-dir">↗</button>
+            <button data-v="inf-esq">↙</button><button data-v="inf-centro">↓</button><button data-v="inf-dir">↘</button>
+          </div>
+          <label class="field"><span>Tamanho <output data-for="template.logoTamanho" data-fmt="pct"></output></span>
+            <input type="range" min="0.05" max="0.6" step="0.01" data-k="template.logoTamanho"></label>
+          <label class="field"><span>Opacidade <output data-for="template.logoOpacidade" data-fmt="pct"></output></span>
+            <input type="range" min="0.1" max="1" step="0.01" data-k="template.logoOpacidade"></label>
+        </div>
+
+        <h3>Moldura do vídeo</h3>
+        <label class="field"><span>Espessura <output data-for="template.molduraEsp" data-fmt="px"></output></span>
+          <input type="range" min="0" max="60" step="1" data-k="template.molduraEsp"></label>
+        <label class="color-row"><span>Cor da moldura</span><input type="color" data-k="template.molduraCor"></label>
+      </section>
+
+      <!-- TEXTO -->
+      <section data-panel="texto">
+        <h3>✨ Frases com IA</h3>
+        <p class="hint">Para vídeos sem texto: a IA cria uma frase diferente para cada vídeo do escopo (Este / Seleção / Todos) e coloca na tela. Usa a IA escolhida em 🔥 Cortes Virais.</p>
+        <label class="field"><span>Tema</span><input type="text" id="frTema" maxlength="200" placeholder="Ex.: disciplina e foco nos estudos"></label>
+        <div class="fr-temas" id="frTemas"></div>
+        <div class="grid2">
+          <label class="field"><span>Tipo de texto</span>
+            <select id="frEstilo"><option value="curta">Frase curta e forte</option><option value="reflexao">Reflexão (2–3 frases)</option><option value="pergunta">Pergunta + resposta</option><option value="lista">Lista em 3 linhas</option></select></label>
+          <label class="field"><span>Público <small>(opcional)</small></span><input type="text" id="frPublico" maxlength="200" placeholder="Ex.: jovens que estudam para concurso"></label>
+        </div>
+        <label class="toggle"><span>Terminar com 1 emoji</span><input type="checkbox" id="frEmoji"><i></i></label>
+        <label class="toggle"><span>Gerar também a legenda do post <small>com hashtags, usada no Agendador</small></span><input type="checkbox" id="frPost" checked><i></i></label>
+        <label class="toggle"><span>Só nos vídeos sem texto <small>não troca o que você já escreveu</small></span><input type="checkbox" id="frSoVazios" checked><i></i></label>
+        <button class="btn primary full" id="btnFrases">✨ Gerar frases</button>
+        <div class="row-between"><span class="hint" id="frStatus"></span><button class="link" id="frLimparHist" title="Esquece as frases já usadas (podem voltar a aparecer)">esquecer usadas</button></div>
+
+        <h3>Limpeza em massa</h3>
+        <label class="field"><span>Remover</span>
+          <select id="cleanMode"><option value="nenhum">Desativar limpeza</option><option value="headline">Headline</option><option value="legenda">Legenda</option><option value="ambos">Headline + legenda</option></select></label>
+        <label class="field"><span>Origem do texto</span>
+          <select id="cleanSource"><option value="gravado">Gravado na imagem do vídeo</option><option value="editor">Camada adicionada pelo editor</option><option value="ambos">Gravado + camada do editor</option></select></label>
+        <label class="field"><span>Método para texto gravado</span>
+          <select id="cleanMethod"><option value="recorte">Recorte das faixas</option><option value="reconstruir">Reconstrução simples da região</option></select></label>
+        <label class="field"><span>Faixa superior (% da altura original)</span><input id="cleanTop" type="number" min="0" max="90" step="1" value="20"></label>
+        <label class="field"><span>Faixa inferior (% da altura original)</span><input id="cleanBottom" type="number" min="0" max="90" step="1" value="25"></label>
+        <label class="field"><span>O bloco de texto do editor representa</span>
+          <select id="cleanRole"><option value="headline">Headline</option><option value="legenda">Legenda</option></select></label>
+        <div id="cleanRegions"><h3>Regiões da reconstrução (% da imagem original)</h3>
+          <p class="hint">Ajuste os retângulos para cobrir o texto em todos os momentos do vídeo. Valores em porcentagem permitem usar o mesmo ajuste em vídeos com tamanhos diferentes.</p>
+          <h4>Headline</h4><div class="grid2"><label class="field"><span>Esquerda (%)</span><input id="clean-headline-x" type="number" min="0" max="100" step="0.5" value="10"></label><label class="field"><span>Topo (%)</span><input id="clean-headline-y" type="number" min="0" max="100" step="0.5" value="48"></label><label class="field"><span>Largura (%)</span><input id="clean-headline-w" type="number" min="0" max="100" step="0.5" value="80"></label><label class="field"><span>Altura (%)</span><input id="clean-headline-h" type="number" min="0" max="100" step="0.5" value="15"></label></div><h4>Legenda</h4><div class="grid2"><label class="field"><span>Esquerda (%)</span><input id="clean-legenda-x" type="number" min="0" max="100" step="0.5" value="20"></label><label class="field"><span>Topo (%)</span><input id="clean-legenda-y" type="number" min="0" max="100" step="0.5" value="48"></label><label class="field"><span>Largura (%)</span><input id="clean-legenda-w" type="number" min="0" max="100" step="0.5" value="60"></label><label class="field"><span>Altura (%)</span><input id="clean-legenda-h" type="number" min="0" max="100" step="0.5" value="8"></label></div>
+        </div>
+        <div class="row2"><button class="btn ghost sm" id="cleanMark">Ver regiões no quadro</button><button class="btn ghost sm" id="cleanPreview">Testar resultado neste quadro</button></div>
+        <p class="hint" id="cleanPreviewStatus">Abra um vídeo e pause no momento desejado. A reprodução normal mostra o original; use este teste para ver a reconstrução. A prévia abaixo mostra a limpeza e o recorte do vídeo, sem template, efeitos, áudio ou capa.</p>
+        <canvas id="cleanCanvas" style="display:none;width:100%;height:auto"></canvas>
+        <img id="cleanResult" alt="Resultado da limpeza no quadro escolhido" style="display:none;width:100%;height:auto">
+        <p class="hint">Reconstrução simples preenche a região usando os pixels da borda: pode manchar ou deformar rostos e fundos; não recupera os detalhes originais. Confira vários momentos antes de exportar.</p>
+        <p class="hint">Texto gravado: remove a faixa inteira da imagem, sem reconstruir o fundo. Ajuste conforme cada grupo de vídeos. O editor possui um único bloco de texto; indique acima se ele é headline ou legenda. Logo, CTA e texto da capa são preservados.</p>
+        <button class="btn primary sm" id="cleanApply">Aplicar limpeza somente nos selecionados</button>
+        <p class="hint">Marque os vídeos na mesa, aplique e confira a prévia antes de processar. A limpeza gera novas exportações e preserva os arquivos originais e o texto usado na postagem. Para desfazer, aplique “Desativar limpeza” na seleção.</p>
+
+        <h3>Legenda deste vídeo</h3>
+        <textarea id="legenda" rows="3" placeholder="Escreva a legenda do vídeo aberto…"></textarea>
+        <div class="row-between">
+          <span class="hint" id="legCount">0 caracteres</span>
+          <button class="link" id="btnBatchLeg">Legendas em lote</button>
+        </div>
+        <div class="batch hidden" id="batchBox">
+          <p class="hint">Uma legenda por linha, na ordem da mesa. Use <b>|</b> para quebrar linha dentro da legenda.</p>
+          <textarea id="batchText" rows="6" placeholder="Legenda do vídeo 01&#10;Legenda do vídeo 02&#10;…"></textarea>
+          <div class="row2">
+            <button class="btn primary sm" id="batchApply">Distribuir legendas</button>
+            <button class="btn ghost sm" id="batchClose">Fechar</button>
+          </div>
+        </div>
+        <p class="hint">A legenda é individual. O estilo abaixo segue o escopo.</p>
+
+        <h3>Posição</h3>
+        <div class="seg" data-k="texto.pos">
+          <button data-v="topo">Topo</button><button data-v="centro">Centro</button><button data-v="base">Base</button>
+        </div>
+        <div class="grid2">
+          <label class="field"><span>Horizontal <output data-for="texto.h" data-fmt="int%"></output></span>
+            <input type="range" min="10" max="90" step="1" data-k="texto.h"></label>
+          <label class="field"><span>Vertical <output data-for="texto.v" data-fmt="int%"></output></span>
+            <input type="range" min="3" max="97" step="1" data-k="texto.v"></label>
+        </div>
+        <label class="field"><span>Largura do bloco <output data-for="texto.largura" data-fmt="int%"></output></span>
+          <input type="range" min="30" max="100" step="1" data-k="texto.largura"></label>
+
+        <h3>Estilo</h3>
+        <div class="grid2">
+          <label class="field"><span>Fonte</span>
+            <select data-k="texto.fonte">
+              <option>Poppins</option><option>Montserrat</option><option>Anton</option><option>Bebas Neue</option>
+              <option>Arial</option><option>Arial Black</option><option>Impact</option><option>Segoe UI</option><option>Verdana</option>
+            </select></label>
+          <label class="field"><span>Peso</span>
+            <select data-k="texto.peso" data-type="num">
+              <option value="400">Normal</option><option value="700">Negrito</option><option value="800">Extra</option><option value="900">Black</option>
+            </select></label>
+        </div>
+        <label class="field"><span>Tamanho <output data-for="texto.tamanho" data-fmt="int"></output></span>
+          <input type="range" min="24" max="150" step="1" data-k="texto.tamanho"></label>
+        <label class="field"><span>Espaçamento das linhas <output data-for="texto.espacamento" data-fmt="n2"></output></span>
+          <input type="range" min="0.9" max="1.8" step="0.01" data-k="texto.espacamento"></label>
+        <label class="toggle"><span>MAIÚSCULAS</span><input type="checkbox" data-k="texto.maiusculas"><i></i></label>
+        <label class="color-row"><span>Cor da fonte</span><input type="color" data-k="texto.cor"></label>
+        <label class="toggle"><span>Contorno para leitura</span><input type="checkbox" data-k="texto.contorno"><i></i></label>
+        <label class="color-row" data-show="texto.contorno"><span>Cor do contorno</span><input type="color" data-k="texto.contornoCor"></label>
+        <label class="toggle"><span>Fundo atrás do texto</span><input type="checkbox" data-k="texto.fundo"><i></i></label>
+        <label class="color-row" data-show="texto.fundo"><span>Cor do fundo</span><input type="color" data-k="texto.fundoCor"></label>
+
+        <h3>CTA · texto secundário</h3>
+        <label class="toggle"><span>Mostrar CTA <small>igual em todos os vídeos do escopo</small></span><input type="checkbox" data-k="texto.ctaAtivo"><i></i></label>
+        <div data-show="texto.ctaAtivo">
+          <label class="field"><span>Texto</span><input type="text" data-k="texto.ctaTexto" maxlength="60"></label>
+          <label class="field"><span>Posição vertical <output data-for="texto.ctaV" data-fmt="int%"></output></span>
+            <input type="range" min="3" max="97" step="1" data-k="texto.ctaV"></label>
+          <label class="field"><span>Tamanho <output data-for="texto.ctaTamanho" data-fmt="int"></output></span>
+            <input type="range" min="20" max="90" step="1" data-k="texto.ctaTamanho"></label>
+          <div class="grid2">
+            <label class="color-row"><span>Texto</span><input type="color" data-k="texto.ctaCor"></label>
+            <label class="color-row"><span>Fundo</span><input type="color" data-k="texto.ctaFundo"></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEGENDAS ANIMADAS -->
+      <section data-panel="legendas">
+        <label class="toggle"><span>Legenda animada <small>palavra por palavra, no tempo da fala</small></span><input type="checkbox" data-k="legendaAnim.ativo"><i></i></label>
+        <div class="leg-status" id="legStatus"></div>
+
+        <h3>Gerar legenda automática</h3>
+        <p class="hint">Transcreve a fala dos vídeos do escopo no seu PC (Whisper). Os cortes virais já chegam com a legenda pronta.</p>
+        <div class="grid2">
+          <label class="field"><span>Idioma</span>
+            <select id="legIdioma"><option value="pt">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option><option value="auto">Detectar</option></select></label>
+          <label class="field"><span>Qualidade</span>
+            <select id="legModelo"><option value="turbo">Melhor (Turbo)</option><option value="small">Rápida (Small)</option></select></label>
+        </div>
+        <button class="btn primary full" id="btnTranscrever">🎙 Gerar legenda automática</button>
+        <div class="leg-prog hidden" id="legProgBox">
+          <div class="bar"><i id="legBar"></i></div>
+          <div class="row-between"><span class="hint" id="legProg"></span><button class="link" id="legCancel">cancelar</button></div>
+        </div>
+
+        <h3>Estilo</h3>
+        <div class="seg wrap leg-estilos" data-k="legendaAnim.estilo">
+          <button data-v="destaque">Palavra colorida</button><button data-v="karaoke">Karaokê</button><button data-v="caixa">Caixa</button><button data-v="palavra">1 palavra</button><button data-v="simples">Simples</button>
+        </div>
+        <div class="seg small" data-k="legendaAnim.animacao">
+          <button data-v="pop">Pop</button><button data-v="subir">Subir</button><button data-v="nenhuma">Sem animação</button>
+        </div>
+        <label class="field" data-show="legendaAnim.estilo=destaque|karaoke|caixa|simples"><span>Palavras na tela <output data-for="legendaAnim.palavras" data-fmt="int"></output></span>
+          <input type="range" min="1" max="6" step="1" data-k="legendaAnim.palavras"></label>
+        <div class="grid2">
+          <label class="field"><span>Fonte</span>
+            <select data-k="legendaAnim.fonte">
+              <option>Montserrat</option><option>Poppins</option><option>Anton</option><option>Bebas Neue</option>
+              <option>Arial Black</option><option>Impact</option><option>Arial</option><option>Segoe UI</option>
+            </select></label>
+          <label class="field"><span>Peso</span>
+            <select data-k="legendaAnim.peso" data-type="num">
+              <option value="400">Normal</option><option value="700">Negrito</option><option value="800">Extra</option><option value="900">Black</option>
+            </select></label>
+        </div>
+        <label class="field"><span>Tamanho <output data-for="legendaAnim.tamanho" data-fmt="int"></output></span>
+          <input type="range" min="36" max="160" step="1" data-k="legendaAnim.tamanho"></label>
+        <label class="field"><span>Posição vertical <output data-for="legendaAnim.v" data-fmt="int%"></output></span>
+          <input type="range" min="8" max="94" step="1" data-k="legendaAnim.v"></label>
+        <div class="seg small" data-k="legendaAnim.v" data-type="num">
+          <button data-v="22">Topo</button><button data-v="50">Meio</button><button data-v="70">Baixo</button><button data-v="82">Rodapé</button>
+        </div>
+        <label class="field"><span>Largura máxima <output data-for="legendaAnim.largura" data-fmt="int%"></output></span>
+          <input type="range" min="40" max="100" step="1" data-k="legendaAnim.largura"></label>
+        <label class="toggle"><span>MAIÚSCULAS</span><input type="checkbox" data-k="legendaAnim.maiusculas"><i></i></label>
+        <label class="toggle"><span>Tirar pontuação <small>deixa o “?” no fim das perguntas</small></span><input type="checkbox" data-k="legendaAnim.semPontuacao"><i></i></label>
+
+        <h3>Cores</h3>
+        <label class="color-row"><span>Texto</span><input type="color" data-k="legendaAnim.cor"></label>
+        <div class="grid3">
+          <label class="color-row"><span>Destaque 1</span><input type="color" data-k="legendaAnim.destaque"></label>
+          <label class="color-row"><span>2</span><input type="color" data-k="legendaAnim.destaque2"></label>
+          <label class="color-row"><span>3</span><input type="color" data-k="legendaAnim.destaque3"></label>
+        </div>
+        <label class="toggle"><span>Trocar a cor a cada frase <small>alterna entre os destaques 1, 2 e 3</small></span><input type="checkbox" data-k="legendaAnim.trocarCor"><i></i></label>
+        <label class="color-row" data-show="legendaAnim.estilo=caixa"><span>Texto dentro da caixa</span><input type="color" data-k="legendaAnim.caixaTexto"></label>
+        <label class="toggle"><span>Contorno</span><input type="checkbox" data-k="legendaAnim.contorno"><i></i></label>
+        <label class="color-row" data-show="legendaAnim.contorno"><span>Cor do contorno</span><input type="color" data-k="legendaAnim.contornoCor"></label>
+        <label class="toggle"><span>Sombra</span><input type="checkbox" data-k="legendaAnim.sombra"><i></i></label>
+
+        <h3>Emojis</h3>
+        <label class="toggle"><span>Emojis automáticos <small>aparecem em cima da legenda nas palavras importantes</small></span><input type="checkbox" data-k="legendaAnim.emojis"><i></i></label>
+        <div data-show="legendaAnim.emojis">
+          <label class="field"><span>Tamanho do emoji <output data-for="legendaAnim.emojiTam" data-fmt="int"></output></span>
+            <input type="range" min="50" max="220" step="1" data-k="legendaAnim.emojiTam"></label>
+          <div class="emoji-list" id="emojiList"></div>
+          <div class="emoji-add">
+            <input id="emojiNovo" maxlength="8" placeholder="😎">
+            <button class="btn ghost sm" id="emojiAdd" title="Coloca o emoji no momento atual do preview">+ No momento atual</button>
+            <button class="link" id="emojiAuto">refazer automáticos</button>
+          </div>
+          <div class="emoji-rapidos" id="emojiRapidos"></div>
+        </div>
+
+        <h3>Texto da legenda deste vídeo</h3>
+        <textarea id="legTexto" rows="6" placeholder="Gere a legenda automática para aparecer o texto aqui."></textarea>
+        <div class="row-between">
+          <span class="hint">Corrija palavras erradas: os tempos são mantidos.</span>
+          <button class="btn ghost sm" id="legTextoSalvar">Salvar texto</button>
+        </div>
+      </section>
+
+      <!-- CAPA -->
+      <section data-panel="capa">
+        <label class="toggle"><span>Gerar capa <small>para Reels, TikTok e Shorts</small></span><input type="checkbox" data-k="capa.ativo"><i></i></label>
+        <div data-show="capa.ativo">
+          <h3>Imagem da capa</h3>
+          <div class="seg" data-k="capa.fonte">
+            <button data-v="frame">Momento do vídeo</button><button data-v="imagem">Imagem própria</button>
+          </div>
+          <div data-show="capa.fonte=frame">
+            <label class="field"><span>Momento <output data-for="capa.tempo" data-fmt="seg"></output></span>
+              <input type="range" min="0" max="60" step="0.1" data-k="capa.tempo" id="capaTempo"></label>
+            <button class="btn ghost sm full" id="btnCapaAgora">⏱ Usar o momento atual do preview</button>
+          </div>
+          <div class="file-row" data-show="capa.fonte=imagem">
+            <span>Imagem</span><em data-fname="capa.imagem"></em>
+            <button class="btn ghost xs" data-pick="capa.imagem" data-kind="image">Escolher</button>
+            <button class="btn ghost xs" data-clear="capa.imagem">✕</button>
+          </div>
+          <label class="field" data-show="capa.texto=titulo|legenda"><span>Escurecer <output data-for="capa.escurecer" data-fmt="pct"></output></span>
+            <input type="range" min="0" max="0.7" step="0.01" data-k="capa.escurecer"></label>
+
+          <h3>Texto na capa</h3>
+          <div class="seg" data-k="capa.texto">
+            <button data-v="titulo">Título</button><button data-v="legenda">Legenda</button><button data-v="nenhum">Nenhum</button>
+          </div>
+          <p class="hint" data-show="capa.texto=nenhum">Capa limpa: sem título e sem legenda.</p>
+          <p class="hint" data-show="capa.texto=legenda">A capa usa a legenda de cada vídeo (aba Texto).</p>
+          <div data-show="capa.texto=titulo">
+          <h3>Título da capa deste vídeo</h3>
+          <textarea id="capaTitulo" rows="2" placeholder="Ex.: O GOL MAIS BONITO DO ANO"></textarea>
+          <div class="row-between">
+            <span class="hint">Individual por vídeo.</span>
+            <button class="link" id="btnBatchCapa">Títulos em lote</button>
+          </div>
+          <div class="batch hidden" id="batchCapaBox">
+            <p class="hint">Um título por linha, na ordem da mesa. Use <b>|</b> para quebrar linha.</p>
+            <textarea id="batchCapaText" rows="6" placeholder="Título do vídeo 01&#10;Título do vídeo 02&#10;…"></textarea>
+            <div class="row2">
+              <button class="btn primary sm" id="batchCapaApply">Distribuir títulos</button>
+              <button class="btn ghost sm" id="batchCapaClose">Fechar</button>
+            </div>
+          </div>
+
+          <p class="hint">Deixe vazio para este vídeo sair sem título.</p>
+          </div>
+
+          <div data-show="capa.texto=titulo|legenda">
+          <h3>Estilo do texto</h3>
+          <label class="field"><span>Posição vertical <output data-for="capa.v" data-fmt="int%"></output></span>
+            <input type="range" min="5" max="95" step="1" data-k="capa.v"></label>
+          <div class="seg small" data-k="capa.v" data-type="num">
+            <button data-v="18">Topo</button><button data-v="50">Centro</button><button data-v="80">Base</button>
+          </div>
+          <label class="field"><span>Tamanho <output data-for="capa.tamanho" data-fmt="int"></output></span>
+            <input type="range" min="40" max="200" step="1" data-k="capa.tamanho"></label>
+          <label class="toggle"><span>MAIÚSCULAS</span><input type="checkbox" data-k="capa.maiusculas"><i></i></label>
+          <label class="color-row"><span>Cor do título</span><input type="color" data-k="capa.cor"></label>
+          <label class="toggle"><span>Contorno</span><input type="checkbox" data-k="capa.contorno"><i></i></label>
+          <label class="color-row" data-show="capa.contorno"><span>Cor do contorno</span><input type="color" data-k="capa.contornoCor"></label>
+          <label class="toggle"><span>Tarja atrás do título</span><input type="checkbox" data-k="capa.destaque"><i></i></label>
+          <label class="color-row" data-show="capa.destaque"><span>Cor da tarja</span><input type="color" data-k="capa.destaqueCor"></label>
+          <p class="hint">A fonte é a mesma escolhida na aba Texto.</p>
+          </div>
+
+          <h3>Capa embutida no vídeo</h3>
+          <label class="toggle"><span>Miniatura dentro do MP4 <small>aparece no Windows e na galeria do celular</small></span><input type="checkbox" data-k="capa.embutir"><i></i></label>
+          <label class="toggle"><span>Capa como primeiro quadro <small>Instagram/TikTok usam ela como capa</small></span><input type="checkbox" data-k="capa.noInicio"><i></i></label>
+          <div data-show="capa.noInicio">
+            <div class="seg small" data-k="capa.duracao" data-type="num">
+              <button data-v="0.1">0,1s</button><button data-v="0.5">0,5s</button><button data-v="1">1s</button><button data-v="2">2s</button>
+            </div>
+            <p class="hint">0,1s quase não aparece pra quem assiste, mas vira o primeiro quadro.</p>
+          </div>
+          <label class="toggle"><span>Também salvar JPG separado <small>nome_editado_capa.jpg, ao lado do vídeo</small></span><input type="checkbox" data-k="capa.salvarJpg"><i></i></label>
+        </div>
+      </section>
+
+      <!-- ÁUDIO -->
+      <section data-panel="audio">
+        <h3>Áudio · individual ou em massa</h3>
+        <div class="seg" data-k="audio.modo">
+          <button data-v="original">Original</button><button data-v="mudo">Mudo</button><button data-v="substituir">Substituir</button><button data-v="mixar">Mixar</button>
+        </div>
+        <label class="field" data-show="audio.modo=original|mixar"><span>Volume original <output data-for="audio.volume" data-fmt="pct"></output></span>
+          <input type="range" min="0" max="2" step="0.01" data-k="audio.volume"></label>
+        <div data-show="audio.modo=substituir|mixar">
+          <div class="file-row">
+            <span>Música</span><em data-fname="audio.musica"></em>
+            <button class="btn ghost xs" data-pick="audio.musica" data-kind="audio">Escolher</button>
+            <button class="btn ghost xs" data-clear="audio.musica">✕</button>
+          </div>
+          <label class="field"><span>Volume da música <output data-for="audio.musicaVolume" data-fmt="pct"></output></span>
+            <input type="range" min="0" max="1.5" step="0.01" data-k="audio.musicaVolume"></label>
+          <p class="hint">A música começa junto com cada vídeo e se repete se for mais curta.</p>
+        </div>
+      </section>
+
+      <!-- SAÍDA -->
+      <section data-panel="saida">
+        <h3>Qualidade de saída</h3>
+        <div class="seg" data-k="saida.res" data-type="num">
+          <button data-v="720">720p</button><button data-v="1080">1080p HD</button><button data-v="1440">2K</button><button data-v="2160">4K</button><button data-v="4320">8K</button>
+        </div>
+        <div class="seg small" data-k="saida.fps" data-type="num">
+          <button data-v="24">24 fps</button><button data-v="30">30 fps</button><button data-v="60">60 fps</button>
+        </div>
+        <label class="field"><span>Bitrate <output data-for="saida.bitrate" data-fmt="mbps"></output></span>
+          <input type="range" min="2" max="200" step="1" data-k="saida.bitrate"></label>
+        <p class="hint">2K: 2560×1440 · 4K: 3840×2160 · 8K: 7680×4320. Dimensões invertidas para vídeos verticais; outras proporções cabem nesse limite sem distorção. 720p/1080p mantêm o quadro vertical existente. Ajuste o bitrate para a resolução escolhida (sugestão: 2K 16, 4K 40, 8K 100 Mbps).</p>
+        <label class="toggle"><span>Melhorar vídeo de baixa resolução <small>Ampliação Lanczos, redução de ruído e nitidez moderada. Não recupera detalhes inexistentes. Prévia sem redução de ruído.</small></span><input type="checkbox" data-k="saida.melhorarVideo"><i></i></label>
+        <label class="toggle"><span>Super-resolução por IA local (Real-ESRGAN)<small>Modelo 4× para vídeos de baixa resolução, até 1080p na origem. Aplica apenas na exportação, uma tarefa por vez. Pode criar artefatos e variar entre quadros; não recupera detalhes inexistentes. Exige GPU com Vulkan e espaço temporário.</small></span><input type="checkbox" data-k="saida.superResolucaoIA"><i></i></label>
+        <h3>Encoder</h3>
+        <div class="seg" data-k="saida.encoder">
+          <button data-v="auto">Automático</button><button data-v="gpu">GPU NVIDIA</button><button data-v="cpu">CPU</button>
+        </div>
+        <p class="hint" id="saidaInfo"></p>
+        <h3>Privacidade</h3>
+        <label class="toggle"><span>Excluir todos os metadados <small>data, aparelho, localização, programa usado e dados escondidos no vídeo</small></span><input type="checkbox" data-k="saida.semMetadados"><i></i></label>
+      </section>
+    </div>
+
+    <div class="apply">
+      <label class="toggle auto-apply"><span>⚡ Aplicar na hora <small>cada ajuste já vale para o escopo, sem clicar em Aplicar</small></span><input type="checkbox" id="autoApply"><i></i></label>
+      <button class="btn primary full" id="btnApply">Aplicar</button>
+      <p class="hint center">Original preservado · edição não destrutiva</p>
+    </div>
+  </aside>
+
+  <!-- ===================== CENTRO ===================== -->
+  <main class="center">
+    <div class="center-head">
+      <div>
+        <div class="eyebrow">Seu estúdio</div>
+        <h1>Mesa de produção</h1>
+      </div>
+      <span class="pill" id="countPill">0 vídeos</span>
+    </div>
+    <div class="filters" id="filters">
+      <button data-f="todos">Todos <b>0</b></button>
+      <button data-f="pendentes">Pendentes <b>0</b></button>
+      <button data-f="prontos">Prontos <b>0</b></button>
+      <button data-f="erros">Erros <b>0</b></button>
+    </div>
+    <div class="toolbar">
+      <input id="search" class="search" placeholder="🔎  Buscar vídeo">
+      <div class="seg small mini-size" id="miniSize" title="Tamanho das miniaturas">
+        <button data-v="p">P</button><button data-v="m">M</button><button data-v="g">G</button>
+      </div>
+      <button class="btn ghost sm" id="btnSelAll">Selecionar tudo</button>
+      <button class="btn ghost sm danger" id="btnRemoveAll">Remover todos</button>
+      <button class="btn primary sm" id="btnImport2">⬆ Importar</button>
+    </div>
+    <p class="hint live-hint">✦ Mesa ao vivo: cada vídeo já aparece editado. Mexa no painel e os vídeos do escopo mudam na hora (marcados com <b>PRÉVIA</b>). Passe o mouse num vídeo para ver ele tocando.</p>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty">
+      <div class="empty-ico">⬆</div>
+      <h2>Nenhum vídeo aqui</h2>
+      <p>Arraste vídeos para esta janela ou clique em importar.<br>MP4, MOV, M4V, WebM ou MKV. O original é preservado.</p>
+      <button class="btn primary" id="btnImport3">Escolher vídeos</button>
+    </div>
+  </main>
+
+  <!-- ===================== DIREITA ===================== -->
+  <section class="right">
+    <div class="pv-head">
+      <div>
+        <div class="title-sm">Preview</div>
+        <div class="hint">Visualização em tempo real</div>
+      </div>
+      <span class="pill" id="pvRes">1080×1920</span>
+    </div>
+    <div class="stage-wrap" id="stageWrap">
+      <div class="stage" id="stage">
+        <canvas id="bgCanvas"></canvas>
+        <video id="bgVideo" muted playsinline preload="auto"></video>
+        <div id="fgBox"><div id="fgInner"><video id="fgVideo" playsinline preload="auto"></video><div id="fgVin"></div></div></div>
+        <canvas id="ovCanvas"></canvas>
+        <canvas id="capCanvas"></canvas>
+        <canvas id="capaCanvas"></canvas>
+      </div>
+      <div class="crop-ui hidden" id="cropUI">
+        <div class="crop-area" id="cropArea">
+          <canvas id="cropCanvas"></canvas>
+          <div class="crop-rect" id="cropRect">
+            <i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i>
+            <i data-h="n"></i><i data-h="s"></i><i data-h="w"></i><i data-h="e"></i>
+            <span class="crop-size" id="cropSize"></span>
+          </div>
+        </div>
+        <div class="crop-bar">
+          <div class="seg small" id="cropAspect">
+            <button data-r="0" class="on">Livre</button><button data-r="0.5625">9:16</button><button data-r="0.8">4:5</button><button data-r="1">1:1</button><button data-r="1.7778">16:9</button>
+          </div>
+          <div class="row2">
+            <button class="btn ghost sm" id="cropFull">Vídeo inteiro</button>
+            <button class="btn ghost sm" id="cropCancel">Cancelar</button>
+            <button class="btn primary sm" id="cropOk">✓ Usar recorte</button>
+          </div>
+        </div>
+      </div>
+      <div class="pv-empty" id="pvEmpty"><div class="empty-ico">⌗</div>Selecione um vídeo<br><small>A composição final aparece aqui.</small></div>
+    </div>
+    <div class="pv-controls">
+      <button class="btn ghost sm" id="pvPlay">▶</button>
+      <input type="range" id="pvSeek" min="0" max="1000" value="0">
+      <span id="pvTime">0:00 / 0:00</span>
+    </div>
+    <div class="pv-meta" id="pvMeta"></div>
+    <audio id="pvMusic" loop></audio>
+  </section>
+
+  <!-- ===================== AGENDADOR ===================== -->
+  <section class="sched" id="schedView">
+    <aside class="sched-left">
+      <div class="sc-card">
+        <div class="eyebrow">Conexão</div>
+        <div class="conn-row"><i class="dot" id="dotCloud"></i><span id="txtCloud">Nuvem não configurada</span>
+          <button class="link" id="btnCloudCfg">configurar</button></div>
+
+        <div class="sc-box hidden" id="cloudBox">
+          <p class="hint">Rode o <b>instalar-nuvem.bat</b> uma vez: ele cria a nuvem e o app lê o endereço e a chave sozinho. Ou cole aqui:</p>
+          <label class="field"><span>Endereço da nuvem</span><input type="text" id="cloudUrl" placeholder="https://agendador-editor.SEU-NOME.workers.dev"></label>
+          <label class="field"><span>Chave da nuvem</span><input type="text" id="cloudKey" placeholder="chave criada pelo instalador"></label>
+          <div class="row2"><button class="btn ghost sm" id="cloudRead">Ler do instalador</button><button class="btn primary sm" id="cloudSave">Salvar</button></div>
+        </div>
+
+        <div class="contas-head"><span class="eyebrow">Contas</span><span class="hint" id="contasConta">0 contas</span></div>
+        <input type="text" class="search hidden" id="contasBusca" placeholder="🔎  Buscar conta">
+        <div class="contas" id="contasList"></div>
+        <p class="hint hidden" id="nuvemLimite">Sua nuvem ainda está com o limite antigo de 5 contas. Rode o <b>instalar-nuvem.bat</b> de novo para liberar contas ilimitadas.</p>
+        <div class="add-contas" id="addContas">
+          <button class="btn ghost xs net-ig" data-add="instagram">＋ Instagram</button>
+          <button class="btn ghost xs net-yt" data-add="youtube">＋ YouTube</button>
+          <button class="btn ghost xs net-tt" data-add="tiktok">＋ TikTok</button>
+        </div>
+        <p class="hint" id="trocarChaves">Trocar as chaves do app: <button class="link" data-chaves="ytBox">YouTube</button> · <button class="link" data-chaves="ttBox">TikTok</button></p>
+        <p class="hint hidden" id="nuvemVelha">A nuvem está numa versão antiga. Rode o <b>instalar-nuvem.bat</b> de novo para liberar várias contas, YouTube e TikTok.</p>
+
+        <div class="sc-box hidden" id="igBox">
+          <details>
+            <summary>Como pegar o token do Instagram</summary>
+            <ol class="steps">
+              <li>Abra <a href="#" data-ext="https://developers.facebook.com/apps/">developers.facebook.com/apps</a> e entre no seu app (ou crie um com o caso de uso <b>“Gerenciar mensagens e conteúdo no Instagram”</b>).</li>
+              <li>Em <b>Funções do app → Funções</b>, adicione a conta como <b>Testador do Instagram</b> e aceite o convite no Instagram (Configurações → Apps e sites → Convites de testador).</li>
+              <li>Em <b>API do Instagram → Configuração da API com login do Instagram → Gerar tokens de acesso</b>, clique em <b>Adicionar conta</b> e entre com a conta.</li>
+              <li>Clique em <b>Gerar token</b>, copie e cole abaixo. A nuvem renova ele sozinha.</li>
+            </ol>
+            <p class="hint">Para cada conta nova do Instagram, repita a partir do passo 2.</p>
+          </details>
+          <label class="field"><span>Token de acesso</span><textarea id="igToken" rows="3" placeholder="IGAA…"></textarea></label>
+          <div class="row2"><button class="btn ghost sm" data-fechar="igBox">Cancelar</button><button class="btn primary sm" id="igSave">Conectar conta</button></div>
+        </div>
+
+        <div class="sc-box hidden" id="ytBox">
+          <p class="hint"><b>Primeira vez com YouTube:</b> crie as chaves do seu app no Google (uma vez só, vale para todos os canais).</p>
+          <details>
+            <summary>Passo a passo (uns 10 minutos)</summary>
+            <ol class="steps">
+              <li>Abra <a href="#" data-ext="https://console.cloud.google.com/projectcreate">console.cloud.google.com</a> e crie um projeto (ex.: “Agendador”).</li>
+              <li>Em <b>APIs e serviços → Biblioteca</b>, ative a <b>YouTube Data API v3</b>.</li>
+              <li>Em <b>Tela de consentimento OAuth</b>: tipo <b>Externo</b>, preencha nome e e-mail. Em <b>Público</b>, clique em <b>Publicar app</b> (em modo “Teste” o Google desconecta o canal a cada 7 dias).</li>
+              <li>Em <b>Credenciais → Criar credenciais → ID do cliente OAuth</b>, tipo <b>Aplicativo da Web</b>. Em <b>URIs de redirecionamento autorizados</b>, cole o endereço abaixo.</li>
+              <li>Copie o <b>ID do cliente</b> e a <b>Chave secreta</b> para os campos abaixo.</li>
+            </ol>
+            <p class="hint">Enquanto o Google não verificar o seu app, ele mostra um aviso na hora de entrar (“app não verificado”: clique em Avançado → continuar) e os vídeos enviados podem ficar <b>privados</b>. Para postar público direto, peça a verificação/auditoria do app no Google.</p>
+          </details>
+          <label class="field"><span>Endereço de redirecionamento <button class="link" data-copiar="ytRedirect">copiar</button></span><input type="text" id="ytRedirect" readonly></label>
+          <label class="field"><span>ID do cliente</span><input type="text" id="ytId" placeholder="123….apps.googleusercontent.com"></label>
+          <label class="field"><span>Chave secreta do cliente</span><input type="text" id="ytSecret" placeholder="GOCSPX-…"></label>
+          <div class="row2"><button class="btn ghost sm" data-fechar="ytBox">Cancelar</button><button class="btn primary sm" id="ytSave">Salvar e conectar canal</button></div>
+        </div>
+
+        <div class="sc-box hidden" id="ttBox">
+          <p class="hint"><b>Primeira vez com TikTok:</b> crie as chaves do seu app no TikTok for Developers (uma vez só).</p>
+          <details>
+            <summary>Passo a passo</summary>
+            <ol class="steps">
+              <li>Abra <a href="#" data-ext="https://developers.tiktok.com/apps/">developers.tiktok.com</a>, entre e crie um app.</li>
+              <li>Adicione os produtos <b>Login Kit</b> e <b>Content Posting API</b> (ligue o <b>Direct Post</b>).</li>
+              <li>Em <b>Login Kit → Redirect URI</b>, cole o endereço abaixo. Peça os escopos <b>user.info.basic</b> e <b>video.publish</b>.</li>
+              <li>Envie o app para revisão e, enquanto não for aprovado, adicione a sua conta como usuária de teste (Sandbox).</li>
+              <li>Copie o <b>Client key</b> e o <b>Client secret</b> para os campos abaixo.</li>
+            </ol>
+            <p class="hint">Enquanto o TikTok não auditar o app, os vídeos só podem ser postados como <b>“Só eu”</b> (privados). Depois da auditoria, sai público.</p>
+          </details>
+          <label class="field"><span>Endereço de redirecionamento <button class="link" data-copiar="ttRedirect">copiar</button></span><input type="text" id="ttRedirect" readonly></label>
+          <label class="field"><span>Client key</span><input type="text" id="ttId" placeholder="aw…"></label>
+          <label class="field"><span>Client secret</span><input type="text" id="ttSecret"></label>
+          <div class="row2"><button class="btn ghost sm" data-fechar="ttBox">Cancelar</button><button class="btn primary sm" id="ttSave">Salvar e conectar conta</button></div>
+        </div>
+      </div>
+
+      <div class="sc-scroll">
+        <h3>1 · O que postar</h3>
+        <div class="row2">
+          <button class="btn sm" id="addFromTable">＋ Prontos da mesa</button>
+          <button class="btn sm" id="addFiles">＋ Arquivos do PC</button>
+        </div>
+
+        <h3>2 · Onde publicar</h3>
+        <div class="destinos" id="schDestinos"></div>
+        <p class="hint" id="schDestHint">Escolha uma ou mais contas. O mesmo vídeo vai para todas as marcadas, no mesmo horário.</p>
+
+        <div id="optIg">
+          <div class="net-title net-ig">Instagram</div>
+          <div class="seg" id="schTipo">
+            <button data-v="reels" class="on">Reels</button><button data-v="story">Story</button><button data-v="foto">Foto no feed</button>
+          </div>
+          <p class="hint">Fotos em lote de Reels viram “Foto no feed”. Dá pra trocar o tipo de cada item na lista.</p>
+          <label class="toggle"><span>Reels também no feed</span><input type="checkbox" id="schFeed" checked><i></i></label>
+          <label class="toggle"><span>Usar a capa JPG gerada <small>quando o vídeo tiver</small></span><input type="checkbox" id="schCapa" checked><i></i></label>
+        </div>
+        <div id="optYt" class="hidden">
+          <div class="net-title net-yt">YouTube Shorts</div>
+          <label class="field"><span>Visibilidade</span>
+            <select id="schYtPriv"><option value="public">Público</option><option value="unlisted">Não listado</option><option value="private">Privado</option></select></label>
+          <p class="hint">O título é a 1ª linha da legenda (dá pra mudar em cada item). Vídeo em pé de até 3 minutos vira Short.</p>
+        </div>
+        <div id="optTt" class="hidden">
+          <div class="net-title net-tt">TikTok</div>
+          <label class="field"><span>Quem pode ver</span>
+            <select id="schTtPriv"><option value="PUBLIC_TO_EVERYONE">Todos</option><option value="MUTUAL_FOLLOW_FRIENDS">Amigos</option><option value="FOLLOWER_OF_CREATOR">Seguidores</option><option value="SELF_ONLY">Só eu</option></select></label>
+          <p class="hint">Se o TikTok não liberar a opção para a conta (app ainda não auditado), o post sai como “Só eu” e aparece um aviso.</p>
+        </div>
+
+        <h3>3 · Quando</h3>
+        <label class="field"><span>Começar em</span><input type="date" id="schStart"></label>
+        <label class="field"><span>Horários do dia</span><input type="text" id="schTimes" value="12:00, 18:00, 21:00"></label>
+        <div class="days" id="schDays">
+          <button data-d="1" class="on">Seg</button><button data-d="2" class="on">Ter</button><button data-d="3" class="on">Qua</button><button data-d="4" class="on">Qui</button><button data-d="5" class="on">Sex</button><button data-d="6" class="on">Sáb</button><button data-d="0" class="on">Dom</button>
+        </div>
+        <p class="hint" id="schRate"></p>
+
+        <h3>4 · Legenda do post</h3>
+        <div class="seg small" id="schLegMode">
+          <button data-v="video" class="on">A de cada vídeo</button><button data-v="nova">Uma para todos</button><button data-v="linhas">Uma por linha</button>
+        </div>
+        <textarea id="schLegNova" rows="4" class="hidden" placeholder="Legenda usada em todos os posts…"></textarea>
+        <textarea id="schLegLinhas" rows="6" class="hidden" placeholder="Legenda do post 1&#10;Legenda do post 2&#10;…  (use | para quebrar linha)"></textarea>
+        <p class="hint" id="schLegHint">Usa a legenda escrita na aba Texto de cada vídeo.</p>
+        <label class="field"><span>Hashtags (vão no fim de todas)</span><input type="text" id="schTags" placeholder="#futebol #gol #viral"></label>
+
+        <button class="btn primary full" id="schGen">⚡ Montar agenda do lote</button>
+      </div>
+    </aside>
+
+    <main class="sched-main">
+      <div class="center-head">
+        <div>
+          <div class="eyebrow">Agendador</div>
+          <h1>Posts em massa</h1>
+        </div>
+        <div class="row2 head-actions">
+          <button class="btn ghost sm" id="schRefresh">↻ Atualizar</button>
+          <button class="btn ghost sm" id="schRunNow" title="Publica agora o que já passou do horário">▶ Rodar fila agora</button>
+        </div>
+      </div>
+      <div class="filters two" id="schTabs">
+        <button data-t="lote" class="on">Lote para enviar <b id="nLote">0</b></button>
+        <button data-t="nuvem">Na nuvem <b id="nNuvem">0</b></button>
+      </div>
+
+      <div class="sch-pane" id="paneLote">
+        <div class="sch-list" id="loteList"></div>
+        <div class="empty small" id="loteEmpty">
+          <div class="empty-ico">📅</div>
+          <h2>Nenhum post no lote</h2>
+          <p>Adicione os vídeos prontos da mesa ou arquivos do PC, escolha os horários e clique em “Montar agenda do lote”.</p>
+        </div>
+        <div class="sch-foot" id="loteFoot">
+          <span class="hint" id="loteInfo"></span>
+          <button class="btn ghost sm danger" id="loteClear">Limpar lote</button>
+          <button class="btn primary" id="loteSend">☁ Enviar para a nuvem</button>
+        </div>
+      </div>
+
+      <div class="sch-pane hidden" id="paneNuvem">
+        <div class="row-between nuvem-bar"><div class="cloud-sum" id="cloudSum"></div>
+          <select id="nuvemConta" title="Mostrar posts de"><option value="">Todas as contas</option></select></div>
+        <div class="sch-list" id="nuvemList"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ===================== CORTES VIRAIS ===================== -->
+  <section class="cortes-view" id="cortesView">
+    <aside class="sched-left ct-left">
+      <div class="sc-card">
+        <div class="eyebrow">1 · Vídeo longo</div>
+        <button class="btn primary full ct-escolher" id="ctEscolher">🎬 Escolher vídeo <small>até 10 horas</small></button>
+        <div class="ct-info hidden" id="ctInfo"></div>
+        <div class="ct-recebidos hidden" id="ctRecebidos"></div>
+        <p class="hint">Podcast, live, palestra, pregação, vídeo motivacional… Pode arrastar o arquivo para esta tela ou mandar um link do YouTube pela aba 🔗 Link da extensão Minerador Viral.</p>
+      </div>
+
+      <div class="ct-scroll">
+        <div class="sc-card">
+          <div class="eyebrow">2 · Quantos cortes</div>
+          <div class="ct-qtd">
+            <input type="number" id="ctQtd" min="1" max="100" value="10">
+            <div class="seg small" id="ctQtdSeg">
+              <button data-v="5">5</button><button data-v="10" class="on">10</button><button data-v="20">20</button><button data-v="30">30</button><button data-v="50">50</button>
+            </div>
+          </div>
+
+          <div class="eyebrow mt">Duração de cada corte</div>
+          <div class="seg small" id="ctDurSeg">
+            <button data-min="15" data-max="30">15–30s</button><button data-min="30" data-max="60" class="on">30–60s</button><button data-min="45" data-max="90">45–90s</button><button data-min="60" data-max="180">1–3 min</button>
+          </div>
+          <div class="grid2">
+            <label class="field"><span>Mínimo (s)</span><input type="number" id="ctMin" min="5" max="600" value="30"></label>
+            <label class="field"><span>Máximo (s)</span><input type="number" id="ctMax" min="10" max="900" value="60"></label>
+          </div>
+
+          <div class="grid2">
+            <label class="field"><span>Tipo de conteúdo</span>
+              <select id="ctTipo">
+                <option value="auto">Automático</option><option value="podcast">Podcast / conversa</option><option value="motivacao">Motivação</option>
+                <option value="palestra">Palestra / pregação</option><option value="entrevista">Entrevista</option><option value="aula">Aula / curso</option><option value="humor">Humor</option>
+              </select></label>
+            <label class="field"><span>Idioma da fala</span>
+              <select id="ctIdioma"><option value="pt">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option><option value="auto">Detectar</option></select></label>
+          </div>
+        </div>
+
+        <div class="sc-card">
+          <div class="eyebrow">3 · Como os cortes chegam na mesa</div>
+          <div class="seg small" id="ctFormato">
+            <button data-v="cheio" class="on" title="Corta as laterais e enche a tela em pé">9:16 tela cheia</button>
+            <button data-v="meio" title="Vídeo deitado no meio com o fundo desfocado">Meio + desfoque</button>
+            <button data-v="perfil" title="Usa os ajustes do perfil atual">Meu perfil</button>
+          </div>
+          <label class="toggle"><span>Legenda animada <small>estilo da aba 💬 Legendas</small></span><input type="checkbox" id="ctLegenda" checked><i></i></label>
+          <label class="toggle"><span>Emojis automáticos</span><input type="checkbox" id="ctEmojis" checked><i></i></label>
+          <label class="toggle"><span>Título do corte no topo <small>escrito pela IA</small></span><input type="checkbox" id="ctTitulo" checked><i></i></label>
+          <label class="toggle"><span>Mandar direto para a mesa</span><input type="checkbox" id="ctMesa" checked><i></i></label>
+        </div>
+
+        <div class="sc-card">
+          <div class="eyebrow">4 · Inteligência que escolhe os momentos</div>
+          <label class="field"><span>Motor</span>
+            <select id="ctIa">
+              <option value="ollama">Ollama (no seu PC, grátis)</option>
+              <option value="gemini">Google Gemini (chave grátis)</option>
+              <option value="openai">OpenAI / compatível</option>
+              <option value="claude">Claude (Anthropic)</option>
+              <option value="nenhum">Sem IA (regras rápidas)</option>
+            </select></label>
+          <div id="ctIaCampos">
+            <label class="field" data-ia="ollama openai"><span id="ctIaUrlRotulo">Endereço</span><input type="text" id="ctIaUrl" placeholder="http://127.0.0.1:11434"></label>
+            <label class="field" data-ia="gemini openai claude"><span>Chave da API</span><input type="password" id="ctIaChave" placeholder="cole a chave aqui" autocomplete="off"></label>
+            <label class="field" data-ia="ollama gemini openai claude"><span>Modelo</span><input type="text" id="ctIaModelo" list="ctIaModelos"><datalist id="ctIaModelos"></datalist></label>
+          </div>
+          <p class="hint" id="ctIaDica"></p>
+          <div class="row2">
+            <button class="btn ghost sm" id="ctIaTestar">Testar conexão</button>
+            <button class="btn ghost sm" id="ctOllamaBaixar" data-ia="ollama">⬇ Baixar modelo</button>
+          </div>
+          <div class="ct-ia-status" id="ctIaStatus"></div>
+          <label class="field"><span>Pedido extra para a IA <small>(opcional)</small></span>
+            <textarea id="ctInstr" rows="2" placeholder="Ex.: prefira falas sobre dinheiro e família; evite política"></textarea></label>
+        </div>
+
+        <div class="sc-card">
+          <div class="eyebrow">Transcrição (Whisper, no seu PC)</div>
+          <div class="grid2">
+            <label class="field"><span>Qualidade</span>
+              <select id="ctModelo"><option value="turbo">Melhor (Turbo)</option><option value="small">Rápida (Small)</option></select></label>
+            <label class="field"><span>Processar na</span>
+              <select id="ctPlaca"><option value="auto">Automático</option><option value="gpu">Placa NVIDIA</option><option value="cpu">CPU</option></select></label>
+          </div>
+          <p class="hint">Na primeira vez o app baixa o Whisper e o modelo (~2,3 GB). Depois funciona sem internet. A transcrição fica salva: gerar de novo no mesmo vídeo é rápido.</p>
+        </div>
+      </div>
+
+      <div class="ct-foot">
+        <button class="btn primary full big" id="ctGerar">🔥 GERAR CORTES</button>
+      </div>
+    </aside>
+
+    <main class="sched-main ct-main">
+      <div class="center-head">
+        <div>
+          <div class="eyebrow">Cortes virais</div>
+          <h1>Melhores momentos</h1>
+        </div>
+        <div class="row2 head-actions">
+          <button class="btn ghost sm" id="ctAbrirPasta" disabled>📂 Abrir pasta</button>
+          <button class="btn primary sm" id="ctMandarTodos" disabled>➜ Mandar todos para a mesa</button>
+        </div>
+      </div>
+
+      <div class="ct-prog hidden" id="ctProg">
+        <ol class="ct-etapas" id="ctEtapas">
+          <li data-e="preparar">Preparar</li><li data-e="audio">Áudio</li><li data-e="transcrever">Transcrever</li><li data-e="ia">Achar momentos</li><li data-e="cortar">Cortar</li>
+        </ol>
+        <div class="bar big"><i id="ctBar"></i></div>
+        <div class="row-between"><span class="ct-msg" id="ctMsg">Começando…</span><span class="ct-pct" id="ctPct">0%</span></div>
+        <button class="btn ghost sm danger" id="ctCancelar">■ Cancelar</button>
+      </div>
+
+      <div class="ct-results" id="ctResults">
+        <div class="ct-grid" id="ctLista"></div>
+        <div class="ct-extras hidden" id="ctExtrasBox">
+          <div class="row-between">
+            <h3>Outros momentos encontrados</h3>
+            <button class="btn ghost sm" id="ctCortarExtras" disabled>✂ Cortar selecionados</button>
+          </div>
+          <div class="ct-extras-list" id="ctExtras"></div>
+        </div>
+        <div class="empty" id="ctVazio">
+          <div class="empty-ico">🔥</div>
+          <h2>Corte um vídeo longo em vários virais</h2>
+          <p>Escolha o vídeo, diga quantos cortes quer e clique em <b>Gerar cortes</b>.<br>O app transcreve a fala, a IA escolhe os melhores momentos e cada corte chega na mesa com legenda animada, emojis e título.</p>
+        </div>
+      </div>
+    </main>
+  </section>
+</div>
+
+<div class="sakura" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="drop-overlay" id="dropOverlay"><div>Solte os vídeos aqui</div></div>
+<div class="toasts" id="toasts"></div>
+
+<script src="shared.js"></script>
+<script src="render.js"></script>
+<script src="legendas.js"></script>
+<script src="app.js"></script>
+<script src="agendador.js"></script>
+<script src="cortes-ui.js"></script>
+</body>
+</html>
+

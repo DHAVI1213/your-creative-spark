@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Copiando site…</title>
+<style>
+  :root{--bg:#0f0b1a;--card:#18122a;--line:#2d2447;--txt:#f3eefc;--dim:#a99cc6;--acc:#e8b94a;--roxo:#7c3aed;--ok:#3ddc84;--warn:#ffb547;--err:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(70% 60% at 50% 0%,#2a1550,var(--bg));color:var(--txt);font:15px/1.5 "Segoe UI",system-ui,sans-serif;min-height:100vh;display:grid;place-items:start center;padding:48px 16px}
+  .card{width:min(760px,100%);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+  h1{margin:0 0 4px;font-size:22px}
+  .sub{color:var(--dim);font-size:13px;word-break:break-all}
+  .tag{display:inline-block;margin-top:10px;padding:4px 10px;border-radius:999px;background:rgba(232,185,74,.12);color:var(--acc);font-weight:700;font-size:12px}
+  #etapa{margin:22px 0 10px;font-weight:600}
+  #barra{height:8px;border-radius:8px;background:#241b3b;overflow:hidden}
+  #barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--roxo),var(--acc));transition:width .3s}
+  #contagem{color:var(--dim);font-size:12px;margin-top:6px;min-height:18px}
+  ul{list-style:none;margin:16px 0 0;padding:12px;max-height:340px;overflow:auto;background:#120d20;border:1px solid var(--line);border-radius:12px;font:12.5px/1.6 Consolas,monospace;color:var(--dim)}
+  li.ok{color:var(--ok)} li.aviso{color:var(--warn)} li.erro{color:var(--err);white-space:pre-wrap}
+  #fim{margin-top:18px;padding:16px;border-radius:12px;background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.35)}
+  .escondido{display:none}
+  button{margin-top:10px;padding:10px 16px;border-radius:10px;border:0;background:var(--acc);color:#1a1030;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Copiador de Sites</h1>
+    <div class="sub" id="site"></div>
+    <span class="tag" id="modo"></span>
+    <div id="etapa">Preparando…</div>
+    <div id="barra"><i></i></div>
+    <div id="contagem"></div>
+    <ul id="log"></ul>
+    <div id="fim" class="escondido">
+      <b>Cópia salva na pasta Downloads › copias-de-sites.</b><br>
+      Abra pelo Chrome: <b>Ctrl+J</b> mostra os downloads.<br>
+      <button id="abrirPasta">Mostrar na pasta</button>
+    </div>
+  </div>
+<script src="lib/zip.js"></script>
+<script src="rede.js"></script>
+<script src="lovable.js"></script>
+<script src="copiador.js"></script>
+
+</body>
+</html>

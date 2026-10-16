@@ -1,0 +1,66 @@
+COPIADOR DE SITES - como instalar no Chrome
+===========================================
+
+1. Abra o Chrome e digite na barra: chrome://extensions
+2. Ligue "Modo do desenvolvedor" (canto superior direito).
+3. Clique em "Carregar sem compactação" e escolha ESTA pasta (copiador-de-sites).
+4. Clique no ícone de quebra-cabeça do Chrome e fixe o "Copiador de Sites".
+5. (Opcional) Em "Detalhes" da extensão, ligue "Permitir acesso a URLs de arquivo"
+   para poder editar também as cópias abertas do seu PC.
+6. Depois de instalar, recarregue (F5) as abas que já estavam abertas.
+
+COMO USAR
+- Abra o site e clique no ícone da extensão.
+- "Cópia visual": a página exatamente como aparece na tela, sem scripts.
+  Abre com dois cliques, ótima para editar e refazer o layout. 3D e canvas viram imagem.
+- "Cópia completa": copia também o JavaScript, as animações (GSAP, scroll etc.)
+  e o 3D (Three.js/WebGL, modelos .glb). Para abrir, extraia o .zip e dê dois cliques
+  em ABRIR-SITE.bat (cria um mini servidor no seu PC e abre o navegador).
+- "Várias páginas": segue os links internos do site (até 30 páginas).
+- "Editar antes de copiar": clique em qualquer parte do site para trocar texto,
+  imagem, link, apagar ou mover seções, trocar nome da loja em tudo, número de
+  WhatsApp e cores. Ctrl+Z desfaz. No fim, use os botões de exportar do painel.
+
+NOVIDADE DA VERSÃO 1.3: COPIAR SÓ UM COMPONENTE
+- No menu da extensão, clique em "Copiar só um componente".
+- Passe o mouse no site: o pedaço embaixo dele fica destacado. Clique para escolher.
+- Ajuste com "↑ Pai" (pega o bloco maior em volta) e "↓ Filho" (entra num pedaço
+  menor). As setas ↑ e ↓ do teclado fazem o mesmo. Esc sai.
+- Exporte:
+  • HTML: um arquivo que abre sozinho no navegador, com o componente pronto.
+  • React (.tsx): para a Lovable. Salve em src/components e use numa rota.
+  • Copiar código: copia o .tsx para colar direto no Codex/ChatGPT/Lovable.
+- Os estilos, as fontes, as imagens, os ::before/::after e as animações vão
+  dentro do arquivo. O efeito de passar o mouse (hover) e a adaptação ao
+  celular não vêm junto: o componente sai no tamanho que estava na tela.
+- Os arquivos vão para Downloads\copias-de-sites\componentes.
+
+NOVIDADES DA VERSÃO 1.2
+- "Projeto para Lovable/GitHub (.zip)": gera um projeto TanStack Start pronto
+  (cada página vira uma rota em src/routes, imagens e CSS em public/site).
+  Fica idêntico ao original (testado: 0% de diferença na comparação de prints).
+  Para mandar direto para o GitHub (e aparecer na Lovable): marque "Enviar para
+  o GitHub", escreva o repositório (ex.: DHAVI1213/meu-site) e cole um token.
+  Como criar o token: github.com > Settings > Developer settings > Personal
+  access tokens > Fine-grained > só o repositório escolhido > permissão
+  "Contents: Read and write". O token fica guardado só no seu Chrome.
+  O envio é um commit novo na main, sem apagar nada do que já existe.
+- "Gravação avançada" (cópia completa): escuta a rede da aba, inclusive workers
+  e iframes. Pega os arquivos que o 3D carrega por trás (.wasm, texturas KTX2,
+  decodificadores) e que antes ficavam de fora.
+  Na primeira vez o Chrome pede a permissão nova "depurador" ao recarregar a
+  extensão. Durante a cópia aparece a faixa "depurando este navegador": é normal.
+  Se o F12 (DevTools) estiver aberto na aba, feche antes de copiar.
+
+ATUALIZAR PARA UMA VERSÃO NOVA
+- Em chrome://extensions, clique no botão de recarregar (seta circular) do Copiador de Sites.
+- Depois dê F5 no site que vai copiar.
+
+SITES DE CARDÁPIO / LOJA (Anota AI, MenuDino, iFood etc.)
+- Esses sites buscam os produtos na internet depois de abrir. A cópia completa grava
+  tudo o que o site buscou enquanto você estava nele e abre as categorias sozinha.
+- Se alguma parte ainda ficar vazia, abra essa parte no site original (clique na
+  categoria/produto) antes de copiar.
+
+Os arquivos vão para a pasta Downloads\copias-de-sites.
+Use somente em sites com autorização do dono.

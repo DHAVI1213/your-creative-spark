@@ -1,0 +1,63 @@
+{
+  "name": "editor-em-massa",
+  "productName": "Editor em Massa",
+  "version": "0.3.0",
+  "description": "Editor de vídeos em massa: edite um, aplique em todos.",
+  "main": "main.js",
+  "author": "Nataniel",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/resolution.test.js && node tests/ai-upscale.test.js",
+    "dist": "electron-builder --win portable",
+    "test:ui": "electron tests/ui-smoke.js"
+  },
+  "dependencies": {
+    "@fontsource/anton": "^5.1.0",
+    "@fontsource/bebas-neue": "^5.1.0",
+    "@fontsource/montserrat": "^5.1.0",
+    "@fontsource/poppins": "^5.1.0",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.nataniel.editoremmassa",
+    "productName": "Editor em Massa",
+    "files": [
+      "main.js",
+      "preload.js",
+      "ffmpeg-builder.js",
+      "cortes.js",
+      "src/**/*",
+      "node_modules/**/*",
+      "minerador-ponte.js",
+      "nuvem/config.json",
+      "ai-upscale.js"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**",
+      "node_modules/ffprobe-static/**"
+    ],
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false
+    },
+    "extraResources": [
+      {
+        "from": "vendor/realesrgan/runtime",
+        "to": "realesrgan",
+        "filter": [
+          "realesrgan-ncnn-vulkan.exe",
+          "vcomp140.dll",
+          "models/realesrgan-x4plus.*",
+          "LICENSE*",
+          "README*"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minerador de Clientes</title>
+  <link rel="stylesheet" href="painel.css">
+</head>
+<body>
+  <header class="top">
+    <img src="icones/48.png" width="30" height="30" alt="">
+    <div class="marca"><b>Minerador de Clientes</b><small>Google Maps · quem precisa de site</small></div>
+  </header>
+
+  <nav class="abas">
+    <button class="aba on" data-aba="buscar">Buscar</button>
+    <button class="aba" data-aba="historico">Histórico</button>
+    <button class="aba" data-aba="ajustes">Ajustes</button>
+  </nav>
+
+  <!-- ===================================================== BUSCAR -->
+  <main id="vBuscar" class="vista">
+    <section class="cfg">
+      <label>O que procurar
+        <input id="termo" placeholder="ex.: hamburgueria" autocomplete="off">
+      </label>
+      <div class="chips" id="chips"></div>
+      <div class="linha">
+        <label>Cidade
+          <input id="cidade" placeholder="ex.: Formosa GO" autocomplete="off">
+        </label>
+        <label class="curto">Até
+          <select id="max">
+            <option>20</option><option selected>40</option><option>60</option><option>100</option><option>120</option>
+          </select>
+        </label>
+      </div>
+      <label class="chk"><input type="checkbox" id="detalhar" checked><span>Ver site e telefone de cada loja <small>(mais lento, ~2 s por loja)</small></span></label>
+      <button class="btn primary full" id="btnBuscar">🔎 Buscar no Maps</button>
+      <button class="btn full ghost2" id="btnLer" title="Use depois de fazer a busca você mesmo no Maps">Ler a lista que está aberta</button>
+      <p class="dica" id="dica"></p>
+    </section>
+
+    <section class="prog" id="prog" hidden>
+      <div class="prog-txt"><span id="progTxt">Preparando…</span><button class="link" id="btnCancelar">cancelar</button></div>
+      <div class="bar"><i id="progBar"></i></div>
+    </section>
+
+    <section class="res" id="res" hidden>
+      <div class="resumo">
+        <button class="nv quente" data-nivel="quente"><b id="nQuente">0</b><small>quentes</small></button>
+        <button class="nv morna" data-nivel="morna"><b id="nMorna">0</b><small>mornas</small></button>
+        <button class="nv fria" data-nivel="fria"><b id="nFria">0</b><small>frias</small></button>
+        <button class="nv todas on" data-nivel=""><b id="nTodas">0</b><small>todas</small></button>
+      </div>
+      <div class="filtros">
+        <input id="filtroTxt" placeholder="filtrar por nome ou rua…">
+        <select id="ordem" title="Ordenar">
+          <option value="chance">Maior chance</option>
+          <option value="avaliacoes">Mais avaliações</option>
+          <option value="nota">Melhor nota</option>
+          <option value="nome">Nome (A–Z)</option>
+        </select>
+      </div>
+      <div class="filtros2">
+        <label class="chk"><input type="checkbox" id="soSemSite"> só sem site próprio</label>
+        <label class="chk"><input type="checkbox" id="esconderContatados"> esconder já contatados</label>
+        <button class="link" id="btnCompletar" hidden></button>
+      </div>
+      <div class="lista" id="lista"></div>
+    </section>
+  </main>
+
+  <!-- ===================================================== HISTÓRICO -->
+  <main id="vHistorico" class="vista" hidden>
+    <div class="vhead"><div><small>NESTE NAVEGADOR</small><h2>Buscas salvas</h2></div><button class="link perigo" id="btnLimpar">Limpar tudo</button></div>
+    <div class="hlista" id="hLista"></div>
+    <div class="vazio" id="hVazio">Nenhuma busca ainda.</div>
+  </main>
+
+  <!-- ===================================================== AJUSTES -->
+  <main id="vAjustes" class="vista" hidden>
+    <div class="vhead"><div><small>PREFERÊNCIAS</small><h2>Ajustes</h2></div></div>
+    <div class="ajustes">
+      <label class="bloco"><b>Mensagem do WhatsApp</b>
+        <small>Use {nome}, {nota}, {avaliacoes}, {cidade} e {categoria}. A mensagem só abre no WhatsApp; quem envia é você.</small>
+        <textarea id="msg" rows="7"></textarea>
+        <button class="link" id="btnMsgPadrao">voltar ao texto padrão</button>
+      </label>
+      <label class="bloco"><b>Atalhos de busca</b>
+        <small>Separados por vírgula</small>
+        <input id="atalhos">
+      </label>
+      <div class="bloco"><b>Como a chance é calculada</b>
+        <small>
+          <b class="t-q">Quente</b>: sem site, ou o "site" é Instagram, Linktree, WhatsApp, iFood ou cardápio digital, ou o site não abre.<br>
+          <b class="t-m">Morna</b>: tem site, mas sem versão para celular, sem cadeado (https), lento, antigo ou feito em construtor grátis.<br>
+          <b class="t-f">Fria</b>: já tem um site que parece bom.<br>
+          Lojas com nota boa e muitas avaliações sobem na lista: vendem bem e têm como investir. Lojas fechadas de vez ficam de fora.
+        </small>
+      </div>
+    </div>
+    <p class="versao" id="versao"></p>
+  </main>
+
+  <footer class="rodape" id="rodape" hidden>
+    <div class="sel"><b id="nVisiveis">0</b><small>na lista</small></div>
+    <div class="acoes">
+      <button class="btn" id="btnCsv">⬇ Planilha</button>
+      <button class="btn ghost" id="btnCopiar">Copiar</button>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+  <script src="coletor.js"></script>
+  <script src="pontuar.js"></script>
+  <script src="painel.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+EDITOR EM MASSA — LIMPEZA
+
+1. Extraia este ZIP inteiro em uma NOVA pasta, sem sobrescrever o editor anterior.
+2. Abra ABRIR-EDITOR-COM-LIMPEZA.bat (ou dist/Editor-em-Massa-Limpeza.exe).
+3. Importe os vídeos e marque os que deseja limpar na mesa.
+4. Abra a aba Texto > Limpeza em massa.
+5. Escolha headline, legenda ou ambas e a origem do texto.
+6. Para texto gravado na imagem, escolha Recorte ou Reconstrução simples.
+   Recorte: ajuste as porcentagens superior/inferior. Remove parte da cena.
+   Reconstrução: ajuste esquerda, topo, largura e altura das duas regiões.
+   Vermelho = headline; verde = legenda. As regiões usam porcentagens da imagem original.
+7. Pause no momento desejado. Clique Ver regiões no quadro e Testar resultado neste quadro.
+   Confira outros momentos também. A reprodução normal continua mostrando o original.
+   O teste de quadro mostra o vídeo limpo/recortado, sem template, efeitos, áudio ou capa.
+8. Clique Aplicar limpeza somente nos selecionados. Depois processe a seleção.
+9. Para desfazer, escolha Desativar limpeza e aplique aos selecionados.
+
+A reconstrução usa pixels da borda do retângulo. Pode manchar rostos e fundos;
+não recupera detalhes originais e não detecta/rastreia texto automaticamente.
+Use grupos de vídeos com textos na mesma posição; ajuste outros grupos separadamente.
+O editor possui um único bloco de texto adicionado: indique se é headline ou legenda.
+Logo, CTA, texto da capa e texto da postagem continuam preservados.
+Quadros da capa que usam o vídeo recebem a limpeza visual aplicada ao vídeo.
+
+O ZIP original, os vídeos baixados e a nuvem não foram modificados.
+Esta cópia mantém o mesmo identificador do aplicativo para ler configurações existentes;
+nenhum banco ou estado foi migrado. Evite abrir duas versões ao mesmo tempo.
+
+Verificações: 36 combinações com limpeza desligada geraram comandos idênticos ao original;
+12 exportações curtas nos dois vídeos de exemplo; prévias e leitura de quadro para capa;
+seleção, seleção vazia, desativação e preservação do texto de postagem na interface.
+Nenhum upload ou postagem real foi realizado como teste.
