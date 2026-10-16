@@ -65,11 +65,9 @@ const PLANOS = [
     destaque: true,
     cta: "Assinar o Pro",
     itens: [
-      "Todas as 8 ferramentas",
+      "Todas as ferramentas, exceto o Agendador",
       "Editor em Massa ilimitado",
       "Minerador Viral e de Clientes",
-      "Agendador de posts",
-      "Suporte prioritário",
     ],
   },
   {
@@ -80,10 +78,43 @@ const PLANOS = [
     cta: "Assinar o Elite",
     itens: [
       "Tudo do Pro",
+      "Agendador de posts",
+      "Suporte prioritário",
       "Acesso antecipado a novidades",
       "Sessão de onboarding 1:1",
       "Grupo fechado de criadores",
     ],
+  },
+];
+
+const DEPOIMENTOS = [
+  {
+    foto: "/depoimentos/camila.jpg",
+    nome: "Camila R.",
+    profissao: "Social media",
+    texto:
+      "Eu gastava horas criando legenda e pesquisando hashtag. Agora monto o calendário do mês inteiro numa tarde. O minerador viral virou meu ponto de partida para todo conteúdo.",
+  },
+  {
+    foto: "/depoimentos/diego.jpg",
+    nome: "Diego M.",
+    profissao: "Videomaker",
+    texto:
+      "O editor em massa salvou minha semana: edito um corte e aplico em 30 vídeos de uma vez. E o limpador de metadados me livra de dor de cabeça com cliente exigente.",
+  },
+  {
+    foto: "/depoimentos/fernanda.jpg",
+    nome: "Fernanda L.",
+    profissao: "Dona de loja",
+    texto:
+      "Nunca tinha feito uma proposta profissional na vida. Com o gerador, mandei 10 propostas em dois dias e fechei 3 clientes para fazer os sites deles.",
+  },
+  {
+    foto: "/depoimentos/thiago.jpg",
+    nome: "Thiago S.",
+    profissao: "Criador de conteúdo",
+    texto:
+      "O agendador sozinho já vale a assinatura. Programo a semana toda no domingo e esqueço. Meu alcance subiu porque parei de falhar dia.",
   },
 ];
 
@@ -293,6 +324,33 @@ export default function Landing() {
               </Link>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* DEPOIMENTOS */}
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-24">
+          <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+            Quem usa, <span className="text-lime">recomenda</span>
+          </h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {DEPOIMENTOS.map((d) => (
+              <div key={d.nome} className="rounded-2xl border border-border bg-surface1 p-6">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={d.foto}
+                    alt={d.nome}
+                    className="size-14 rounded-full border border-border object-cover"
+                  />
+                  <div>
+                    <h3 className="font-semibold">{d.nome}</h3>
+                    <p className="text-sm text-tmuted">{d.profissao}</p>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-tsecondary">"{d.texto}"</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
