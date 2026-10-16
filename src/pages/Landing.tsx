@@ -1,0 +1,333 @@
+import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Check,
+  ChevronDown,
+  Clock3,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import { SiteFooter, SiteHeader } from "../components/Layout";
+import { FERRAMENTAS } from "../lib/tools";
+import { cn } from "../lib/utils";
+
+const TICKER = [
+  "Limpador de Metadados",
+  "Clonador de Sites",
+  "Editor em Massa",
+  "Minerador Viral",
+  "Minerador de Clientes",
+  "Agendador",
+  "Legendas e Hashtags",
+  "Gerador de Propostas",
+];
+
+const PASSOS = [
+  {
+    n: "01",
+    titulo: "Crie sua conta grátis",
+    texto: "Leva menos de 1 minuto. Sem cartão, sem enrolação.",
+  },
+  {
+    n: "02",
+    titulo: "Escolha a ferramenta",
+    texto: "8 ferramentas profissionais num painel só, tudo em português.",
+  },
+  {
+    n: "03",
+    titulo: "Produza e publique",
+    texto: "Limpe, edite, clone, agende e venda — direto do navegador.",
+  },
+];
+
+const PLANOS = [
+  {
+    nome: "Gratuito",
+    preco: "R$ 0",
+    periodo: "para sempre",
+    destaque: false,
+    cta: "Começar grátis",
+    itens: [
+      "Limpador de Metadados",
+      "Clonador de Sites",
+      "Legendas e Hashtags",
+      "Gerador de Propostas",
+      "Uso pessoal",
+    ],
+  },
+  {
+    nome: "Pro",
+    preco: "R$ 47",
+    periodo: "/mês",
+    destaque: true,
+    cta: "Assinar o Pro",
+    itens: [
+      "Todas as 8 ferramentas",
+      "Editor em Massa ilimitado",
+      "Minerador Viral e de Clientes",
+      "Agendador de posts",
+      "Suporte prioritário",
+    ],
+  },
+  {
+    nome: "Elite",
+    preco: "R$ 97",
+    periodo: "/mês",
+    destaque: false,
+    cta: "Assinar o Elite",
+    itens: [
+      "Tudo do Pro",
+      "Acesso antecipado a novidades",
+      "Sessão de onboarding 1:1",
+      "Grupo fechado de criadores",
+    ],
+  },
+];
+
+const FAQS = [
+  {
+    q: "Preciso instalar alguma coisa?",
+    a: "Não. Tudo roda no navegador: você envia os arquivos, processa e baixa o resultado. Nada sai do seu computador sem você mandar.",
+  },
+  {
+    q: "Meus arquivos são enviados para algum servidor?",
+    a: "Não. O processamento é 100% local, no seu navegador. Fotos, vídeos e sites clonados nunca passam pelos nossos servidores.",
+  },
+  {
+    q: "Posso cancelar quando quiser?",
+    a: "Sim. Não tem fidelidade nem multa. Você cancela em dois cliques e mantém o acesso até o fim do ciclo.",
+  },
+  {
+    q: "O Clonador de Sites é legal?",
+    a: "Ele foi feito para clonar com autorização do dono — por exemplo, refazer o site de um cliente que perdeu o acesso. Sempre tenha permissão antes de copiar qualquer site.",
+  },
+  {
+    q: "Funciona no celular?",
+    a: "Sim. O painel é responsivo e funciona bem no celular e no computador.",
+  },
+];
+
+function Faq({ q, a }: { q: string; a: string }) {
+  const [aberto, setAberto] = useState(false);
+  return (
+    <div className="rounded-2xl border border-border bg-surface1">
+      <button
+        onClick={() => setAberto(!aberto)}
+        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left cursor-pointer"
+      >
+        <span className="font-semibold text-tprimary">{q}</span>
+        <ChevronDown
+          className={cn("size-5 shrink-0 text-lime transition-transform", aberto && "rotate-180")}
+        />
+      </button>
+      {aberto && <p className="px-6 pb-6 text-sm leading-relaxed text-tsecondary">{a}</p>}
+    </div>
+  );
+}
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen bg-bg text-tprimary">
+      <SiteHeader />
+
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(600px 300px at 50% 0%, rgba(200,245,60,0.08), transparent 70%)",
+          }}
+        />
+        <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center md:pt-32">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-lime/30 bg-lime/10 px-4 py-1.5 text-sm text-lime">
+            <Sparkles className="size-4" /> 8 ferramentas profissionais para criadores
+          </div>
+          <h1
+            className="mx-auto max-w-4xl font-semibold tracking-tight"
+            style={{ fontSize: "clamp(40px, 7vw, 68px)", letterSpacing: "-0.04em", lineHeight: 1.05 }}
+          >
+            Produza conteúdo como um <span className="text-lime">estúdio</span>, sozinho.
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-tsecondary">
+            Limpe metadados, clone sites, edite vídeos em massa, ache clientes e agende posts —
+            tudo num painel só, direto do navegador.
+          </p>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link
+              to="/entrar"
+              className="inline-flex items-center gap-2 rounded-xl bg-lime px-8 py-4 font-semibold text-black hover:brightness-110 hover:shadow-[0_0_32px_rgba(200,245,60,0.4)] transition-all"
+            >
+              Começar grátis <ArrowRight className="size-5" />
+            </Link>
+            <a
+              href="#precos"
+              className="rounded-xl border border-border px-8 py-4 font-semibold text-tprimary hover:border-lime transition-colors"
+            >
+              Ver planos
+            </a>
+          </div>
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-tmuted">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="size-4 text-lime" /> 100% no navegador
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 className="size-4 text-lime" /> Sem instalação
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Zap className="size-4 text-lime" /> Cancele quando quiser
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* TICKER */}
+      <div className="overflow-hidden border-y border-border bg-surface1 py-4">
+        <div className="flex w-max animate-[ticker_30s_linear_infinite] gap-10">
+          {[...TICKER, ...TICKER].map((t, i) => (
+            <span key={i} className="flex items-center gap-2 whitespace-nowrap text-sm text-tsecondary">
+              <BadgeCheck className="size-4 text-lime" /> {t}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* COMO FUNCIONA */}
+      <section id="como-funciona" className="mx-auto max-w-7xl px-6 py-24">
+        <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+          Do zero ao publicado em <span className="text-lime">3 passos</span>
+        </h2>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {PASSOS.map((p) => (
+            <div key={p.n} className="rounded-2xl border border-border bg-surface1 p-8">
+              <p className="text-4xl font-bold text-lime/40">{p.n}</p>
+              <h3 className="mt-4 text-xl font-semibold">{p.titulo}</h3>
+              <p className="mt-2 text-tsecondary">{p.texto}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FERRAMENTAS */}
+      <section id="ferramentas" className="border-y border-border bg-surface1/50">
+        <div className="mx-auto max-w-7xl px-6 py-24">
+          <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+            Um arsenal <span className="text-lime">completo</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-tsecondary">
+            Cada ferramenta resolve um gargalo real de quem cria conteúdo ou vende serviços digitais.
+          </p>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {FERRAMENTAS.map((f) => (
+              <div
+                key={f.id}
+                className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
+              >
+                <div className="aspect-video overflow-hidden bg-surface2">
+                  <img
+                    src={f.imagem}
+                    alt={f.nome}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-2">
+                    <f.icone className="size-5 text-lime" />
+                    <h3 className="font-semibold">{f.nome}</h3>
+                  </div>
+                  <p className="mt-2 text-sm text-tsecondary">{f.descricao}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PREÇOS */}
+      <section id="precos" className="mx-auto max-w-7xl px-6 py-24">
+        <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+          Preço que <span className="text-lime">se paga</span> no primeiro cliente
+        </h2>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {PLANOS.map((p) => (
+            <div
+              key={p.nome}
+              className={cn(
+                "relative rounded-2xl border p-8",
+                p.destaque
+                  ? "border-lime bg-surface1 shadow-[0_0_40px_rgba(200,245,60,0.12)]"
+                  : "border-border bg-surface1",
+              )}
+            >
+              {p.destaque && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-lime px-4 py-1 text-xs font-bold text-black">
+                  MAIS POPULAR
+                </span>
+              )}
+              <h3 className="text-lg font-semibold">{p.nome}</h3>
+              <p className="mt-4">
+                <span className="text-4xl font-bold">{p.preco}</span>
+                <span className="text-tmuted">{p.periodo}</span>
+              </p>
+              <ul className="mt-6 space-y-3">
+                {p.itens.map((it) => (
+                  <li key={it} className="flex items-start gap-2 text-sm text-tsecondary">
+                    <Check className="mt-0.5 size-4 shrink-0 text-lime" /> {it}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                to="/entrar"
+                className={cn(
+                  "mt-8 block rounded-xl py-3 text-center font-semibold transition-all",
+                  p.destaque
+                    ? "bg-lime text-black hover:brightness-110"
+                    : "border border-border text-tprimary hover:border-lime",
+                )}
+              >
+                {p.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="mx-auto max-w-3xl px-6 pb-24">
+        <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+          Perguntas <span className="text-lime">frequentes</span>
+        </h2>
+        <div className="mt-10 space-y-4">
+          {FAQS.map((f) => (
+            <Faq key={f.q} q={f.q} a={f.a} />
+          ))}
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-4xl px-6 py-24 text-center">
+          <h2 className="font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+            Pronto para produzir como <span className="text-lime">profissional</span>?
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-tsecondary">
+            Junte-se a criadores que economizam horas toda semana com o painel da NK Software.
+          </p>
+          <Link
+            to="/entrar"
+            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-lime px-8 py-4 font-semibold text-black hover:brightness-110 hover:shadow-[0_0_32px_rgba(200,245,60,0.4)] transition-all"
+          >
+            Criar conta grátis <ArrowRight className="size-5" />
+          </Link>
+        </div>
+      </section>
+
+      <SiteFooter />
+      <style>{`@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+    </div>
+  );
+}

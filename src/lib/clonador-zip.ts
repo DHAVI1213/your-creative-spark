@@ -207,7 +207,7 @@ function reescreverCss(
       const novo = troca(raw);
       return novo ? `url(${q}${novo}${q})` : full;
     })
-    .replace(CSS_IMPORT_RE, (full, q: string, raw: string) => {
+    .replace(CSS_IMPORT_RE, (full, _q: string, raw: string) => {
       const novo = troca(raw);
       return novo ? full.replace(raw, novo) : full;
     });
@@ -376,7 +376,7 @@ export async function buildSiteZip(
 
   while (fila.length && local.size < MAX_ARQUIVOS && totalBytes < MAX_TOTAL_BYTES) {
     const lote = fila.splice(0, LOTE);
-    const resultados = await fetchAssets({ data: { urls: lote } });
+    const resultados = await fetchAssets(lote);
     for (const r of resultados) {
       feitos++;
       if (!r.ok) {
