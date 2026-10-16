@@ -5,8 +5,6 @@ import {
   Check,
   ChevronDown,
   Clock3,
-  Frame,
-  PenTool,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -171,19 +169,19 @@ const ARSENAL = [
     nome: "Figma Pro Education",
     duracao: "Education",
     descricao: "Design e prototipagem profissional para criar interfaces e criativos de alto nível.",
-    icone: PenTool,
+    imagem: "/arsenal/figma.jpg",
   },
   {
     nome: "Gemini IA",
     duracao: "18 meses",
     descricao: "Inteligência artificial avançada para textos, ideias e automação do seu conteúdo.",
-    icone: Sparkles,
+    imagem: "/arsenal/gemini.jpg",
   },
   {
     nome: "Framer Pro",
     duracao: "12 meses",
     descricao: "Sites e interações em código, com animações premium e publicação instantânea.",
-    icone: Frame,
+    imagem: "/arsenal/framer.jpg",
   },
 ];
 
@@ -356,8 +354,13 @@ export default function Landing() {
                 key={a.nome}
                 className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
               >
-                <div className="flex h-44 items-center justify-center bg-gradient-to-br from-surface2 to-bg">
-                  <a.icone className="size-20 text-lime transition-transform group-hover:scale-110" strokeWidth={1.5} />
+                <div className="aspect-[4/3] overflow-hidden bg-surface2">
+                  <img
+                    src={a.imagem}
+                    alt={a.nome}
+                    className="h-full w-full object-cover object-top transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between">
