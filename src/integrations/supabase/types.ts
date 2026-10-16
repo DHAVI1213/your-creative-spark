@@ -98,6 +98,33 @@ export type Database = {
         }
         Relationships: []
       }
+      editor_profiles: {
+        Row: {
+          id: string
+          is_default: boolean
+          name: string
+          settings: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_default?: boolean
+          name: string
+          settings?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          id?: string
+          is_default?: boolean
+          name?: string
+          settings?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       eventos_kiwify: {
         Row: {
           assinatura_valida: boolean
