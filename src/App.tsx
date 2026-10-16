@@ -7,6 +7,9 @@ import Dashboard from "./pages/Dashboard";
 import ToolWorkspace from "./pages/ToolWorkspace";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
+import { SiteSettingsProvider } from "./lib/site-settings";
+import ClientToolBoundary from "./components/ClientToolBoundary";
 
 function RotaApp({ children }: { children: React.ReactNode }) {
   const { usuario } = useAuth();
@@ -17,8 +20,10 @@ function RotaApp({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
+      <SiteSettingsProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/admin/*" element={<Admin />} />
           <Route path="/" element={<Landing />} />
           <Route path="/entrar" element={<Login />} />
           <Route path="/checkout" element={<Checkout />} />
@@ -31,11 +36,12 @@ export default function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path=":toolId" element={<ToolWorkspace />} />
+            <Route path=":toolId" element={<ClientToolBoundary><ToolWorkspace /></ClientToolBoundary>} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </SiteSettingsProvider>
     </AuthProvider>
   );
 }
