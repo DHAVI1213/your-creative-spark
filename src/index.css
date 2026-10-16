@@ -31,3 +31,68 @@ body {
   background: var(--color-lime);
   color: #0a0a0a;
 }
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes aurora-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(60px, 40px) scale(1.12);
+  }
+  66% {
+    transform: translate(-40px, 70px) scale(0.94);
+  }
+}
+
+@keyframes aurora-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-70px, 50px) scale(1.15);
+  }
+}
+
+@keyframes aurora-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-50px, -30px) scale(1.08);
+  }
+  66% {
+    transform: translate(50px, -60px) scale(0.92);
+  }
+}
+
+.animate-aurora-a {
+  animation: aurora-a 22s ease-in-out infinite;
+}
+
+.animate-aurora-b {
+  animation: aurora-b 28s ease-in-out infinite;
+}
+
+.animate-aurora-c {
+  animation: aurora-c 34s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-a,
+  .animate-aurora-b,
+  .animate-aurora-c {
+    animation: none;
+  }
+}

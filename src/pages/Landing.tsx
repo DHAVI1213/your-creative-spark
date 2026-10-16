@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SiteFooter, SiteHeader } from "../components/Layout";
+import { AnimatedBackground } from "../components/AnimatedBackground";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
 
@@ -194,13 +195,7 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(600px 300px at 50% 0%, rgba(200,245,60,0.08), transparent 70%)",
-          }}
-        />
+        <AnimatedBackground />
         <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center md:pt-32">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-lime/30 bg-lime/10 px-4 py-1.5 text-sm text-lime">
             <Sparkles className="size-4" /> 8 ferramentas profissionais para criadores
