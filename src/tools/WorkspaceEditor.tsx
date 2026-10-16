@@ -1,297 +1,41 @@
-import { useRef, useState } from "react";
-import { Download, Film, Loader2, Trash2, Type, Upload } from "lucide-react";
-import { FILTROS, paraFfmpeg, type Predefinicao } from "../lib/editor/filtros";
-import { loadFFmpeg } from "../lib/metadata/video";
-import { baixarBlob, cn } from "../lib/utils";
-import { Badge, Button, Card, Empty, Input, Label, Progress } from "../components/ui";
-
-type VideoJob = {
-  id: string;
-  file: File;
-  url: string;
-  nome: string;
-  largura: number;
-  altura: number;
-  duracao: number;
-  status: "pronto" | "processando" | "feito" | "erro";
-  progresso: number;
-  erro?: string;
-  saida?: Blob;
-};
-
-function metaVideo(file: File): Promise<{ largura: number; altura: number; duracao: number; url: string }> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const v = document.createElement("video");
-    v.muted = true;
-    v.preload = "metadata";
-    v.onloadedmetadata = () =>
-      resolve({ largura: v.videoWidth || 1080, altura: v.videoHeight || 1920, duracao: v.duration || 0, url });
-    v.onerror = () => reject(new Error("Não consegui ler esse vídeo."));
-    v.src = url;
-  });
-}
-
-async function textoParaPng(
-  linhas: { texto: string; y: number }[],
-  largura: number,
-  altura: number,
-  marca: string,
-): Promise<Uint8Array> {
-  const canvas = document.createElement("canvas");
-  canvas.width = largura;
-  canvas.height = altura;
-  const ctx = canvas.getContext("2d")!;
-  const base = Math.round(largura / 14);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  for (const { texto, y } of linhas) {
-    if (!texto.trim()) continue;
-    const t = texto.toUpperCase();
-    ctx.font = `900 ${base}px Inter, Arial, sans-serif`;
-    const yy = y * altura;
-    ctx.lineWidth = Math.max(4, base / 8);
-    ctx.strokeStyle = "rgba(0,0,0,0.85)";
-    ctx.strokeText(t, largura / 2, yy);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(t, largura / 2, yy);
-  }
-  if (marca.trim()) {
-    ctx.font = `700 ${Math.round(base * 0.55)}px Inter, Arial, sans-serif`;
-    ctx.textAlign = "right";
-    const pad = Math.round(largura * 0.04);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "rgba(0,0,0,0.7)";
-    ctx.strokeText(`@${marca}`, largura - pad, altura - pad);
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.fillText(`@${marca}`, largura - pad, altura - pad);
-  }
-  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
-  if (!blob) throw new Error("Falha ao gerar a legenda.");
-  return new Uint8Array(await blob.arrayBuffer());
-}
-
-export default function WorkspaceEditor() {
-  const [videos, setVideos] = useState<VideoJob[]>([]);
-  const [topo, setTopo] = useState("");
-  const [base, setBase] = useState("");
-  const [marca, setMarca] = useState("");
-  const [filtro, setFiltro] = useState<Predefinicao>(FILTROS[0]!);
-  const [processando, setProcessando] = useState(false);
-  const [avisoFfmpeg, setAvisoFfmpeg] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const adicionar = async (files: FileList | File[]) => {
-    const lista = [...files].filter((f) => f.type.startsWith("video/"));
-    for (const file of lista) {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      try {
-        const m = await metaVideo(file);
-        setVideos((v) => [
-          ...v,
-          { id, file, url: m.url, nome: file.name, largura: m.largura, altura: m.altura, duracao: m.duracao, status: "pronto", progresso: 0 },
-        ]);
-      } catch {
-        /* ignora arquivo inválido */
-      }
-    }
-  };
-
-  const remover = (id: string) => {
-    setVideos((v) => {
-      const alvo = v.find((x) => x.id === id);
-      if (alvo) URL.revokeObjectURL(alvo.url);
-      return v.filter((x) => x.id !== id);
-    });
-  };
-
-  const processar = async () => {
-    if (processando || videos.length === 0) return;
-    setProcessando(true);
-    try {
-      await loadFFmpeg();
-    } catch {
-      setAvisoFfmpeg(true);
-      setProcessando(false);
-      return;
-    }
-    const { fetchFile } = await import("@ffmpeg/util");
-    for (const job of videos) {
-      if (job.status === "feito") continue;
-      setVideos((v) => v.map((x) => (x.id === job.id ? { ...x, status: "processando", progresso: 0, erro: undefined } : x)));
-      try {
-        const ffmpeg = await loadFFmpeg();
-        const tag = Math.random().toString(36).slice(2);
-        const entrada = `in_${tag}.mp4`;
-        const legenda = `leg_${tag}.png`;
-        const saida = `out_${tag}.mp4`;
-        await ffmpeg.writeFile(entrada, await fetchFile(job.file));
-        const png = await textoParaPng(
-          [{ texto: topo, y: 0.12 }, { texto: base, y: 0.86 }],
-          job.largura,
-          job.altura,
-          marca,
-        );
-        await ffmpeg.writeFile(legenda, png);
-        const vf = `${paraFfmpeg(filtro)},overlay=0:0`;
-        const onProg = ({ progress }: { progress: number }) =>
-          setVideos((v) => v.map((x) => (x.id === job.id ? { ...x, progresso: Math.max(0, Math.min(1, progress)) } : x)));
-        ffmpeg.on("progress", onProg);
-        try {
-          const code = await ffmpeg.exec([
-            "-hide_banner", "-i", entrada, "-i", legenda,
-            "-filter_complex", `[0:v]${vf}[v]`,
-            "-map", "[v]", "-map", "0:a?",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
-            "-c:a", "aac", "-movflags", "+faststart",
-            "-shortest", saida,
-          ]);
-          if (code !== 0) throw new Error("O FFmpeg falhou neste vídeo.");
-          const data = await ffmpeg.readFile(saida);
-          const blob = new Blob([data as BlobPart], { type: "video/mp4" });
-          setVideos((v) => v.map((x) => (x.id === job.id ? { ...x, status: "feito", progresso: 1, saida: blob } : x)));
-          await ffmpeg.deleteFile(saida).catch(() => {});
-        } finally {
-          ffmpeg.off("progress", onProg);
-          await ffmpeg.deleteFile(entrada).catch(() => {});
-          await ffmpeg.deleteFile(legenda).catch(() => {});
-        }
-      } catch (e) {
-        setVideos((v) =>
-          v.map((x) => (x.id === job.id ? { ...x, status: "erro", erro: e instanceof Error ? e.message : "Falha ao processar." } : x)),
-        );
-      }
-    }
-    setProcessando(false);
-  };
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="space-y-6 lg:col-span-1">
-        <Card>
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
-            <Type className="size-5 text-lime" /> Textos iguais em todos
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <Label>Texto do topo</Label>
-              <Input value={topo} onChange={(e) => setTopo(e.target.value)} placeholder="Ex: PARTE 1" />
-            </div>
-            <div>
-              <Label>Texto da base</Label>
-              <Input value={base} onChange={(e) => setBase(e.target.value)} placeholder="Ex: SIGA PARA MAIS" />
-            </div>
-            <div>
-              <Label>Sua marca (canto inferior direito)</Label>
-              <Input value={marca} onChange={(e) => setMarca(e.target.value)} placeholder="seuperfil" />
-            </div>
-          </div>
-        </Card>
-        <Card>
-          <h2 className="mb-4 text-lg font-bold">Filtro</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {FILTROS.map((f) => (
-              <button
-                key={f.nome}
-                onClick={() => setFiltro(f)}
-                className={cn(
-                  "rounded-xl border px-3 py-2 text-xs font-semibold cursor-pointer transition-all",
-                  filtro.nome === f.nome ? "border-lime bg-lime/10 text-lime" : "border-border text-tsecondary hover:border-tmuted",
-                )}
-              >
-                {f.nome}
-              </button>
-            ))}
-          </div>
-        </Card>
-        <Button onClick={processar} disabled={processando || videos.length === 0} className="w-full">
-          {processando ? <Loader2 className="size-4 animate-spin" /> : <Film className="size-4" />}
-          {processando ? "Processando..." : `Aplicar em ${videos.length} vídeo(s)`}
-        </Button>
-        {avisoFfmpeg && (
-          <p className="rounded-xl bg-amber-500/10 p-3 text-xs text-amber-400">
-            Não consegui carregar o motor de vídeo (~30 MB). Verifique sua conexão e tente de novo.
-          </p>
-        )}
-      </div>
-
-      <div className="lg:col-span-2">
-        <div
-          onClick={() => inputRef.current?.click()}
-          className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface1 px-6 py-10 text-center hover:border-tmuted transition-colors"
-        >
-          <Upload className="size-8 text-lime" />
-          <p className="mt-3 font-semibold">Adicionar vídeos</p>
-          <p className="text-sm text-tmuted">MP4, WebM ou MOV · quantos quiser</p>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="video/*"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files) adicionar(e.target.files);
-              e.target.value = "";
-            }}
-          />
-        </div>
-
-        {videos.length === 0 ? (
-          <Card className="mt-4">
-            <Empty
-              icon={<Film className="size-7" />}
-              titulo="Nenhum vídeo ainda"
-              descricao="Envie os vídeos, configure os textos e o filtro uma vez só — o app aplica em todos e você baixa um por um."
-            />
-          </Card>
-        ) : (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {videos.map((v) => (
-              <Card key={v.id} className="p-4">
-                <div className="relative">
-                  <video src={v.url} className="aspect-video w-full rounded-xl bg-black object-cover" muted playsInline />
-                  {(topo || base) && (
-                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-between py-3">
-                      {topo && (
-                        <span className="px-2 text-center text-sm font-black uppercase text-white [text-shadow:2px_2px_0_rgba(0,0,0,0.9)]">
-                          {topo}
-                        </span>
-                      )}
-                      {base && (
-                        <span className="px-2 text-center text-sm font-black uppercase text-white [text-shadow:2px_2px_0_rgba(0,0,0,0.9)]">
-                          {base}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <p className="mt-2 truncate text-sm font-semibold">{v.nome}</p>
-                <div className="mt-1 flex items-center gap-2 text-xs text-tmuted">
-                  <span>{v.largura}×{v.altura}</span>
-                  {v.status === "pronto" && <Badge>Na fila</Badge>}
-                  {v.status === "processando" && <Badge tone="lime">Processando</Badge>}
-                  {v.status === "feito" && <Badge tone="lime">Pronto</Badge>}
-                  {v.status === "erro" && <Badge tone="warn">Erro</Badge>}
-                </div>
-                {v.status === "processando" && (
-                  <div className="mt-2"><Progress value={v.progresso} /></div>
-                )}
-                {v.status === "erro" && <p className="mt-1 text-xs text-red-400">{v.erro}</p>}
-                <div className="mt-3 flex gap-2">
-                  {v.status === "feito" && v.saida && (
-                    <Button className="!px-3 !py-2 text-xs" onClick={() => baixarBlob(v.saida!, `editado-${v.nome.replace(/\.[^.]+$/, "")}.mp4`)}>
-                      <Download className="size-3.5" /> Baixar
-                    </Button>
-                  )}
-                  <button onClick={() => remover(v.id)} className="rounded-lg p-2 text-tmuted hover:text-red-400 cursor-pointer" title="Remover">
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+import {useEffect,useRef,useState} from 'react';
+import {Download,Film,Upload,Trash2,Square,Save,CheckSquare,LoaderCircle} from 'lucide-react';
+import {zipSync} from 'fflate';
+import {Button,Input,Select} from '../components/ui';
+import {baixarBlob,cn} from '../lib/utils';
+import type {EditorJob,Profile,Scope,Settings} from '../lib/editor/model';
+import {targetIds,captionsFromLines,outputName,memoryWarning} from '../lib/editor/model';
+import {DEFAULTS,canvasSize,timing} from '../lib/editor/shared.js';
+import {readVideo,canvas,videoElement,canvasBlob} from '../lib/editor/media';
+import {loadProfiles,profileUser,saveProfile,deleteProfile} from '../lib/editor/profiles';
+import {cancelEngine,exportVideo,detectBars,cleanFrame,makeCover} from '../lib/editor/engine';
+import Preview from './editor/Preview';
+import SettingsPanel from './editor/SettingsPanel';
+import CropDialog from './editor/CropDialog';
+import {setPath} from './editor/Controls';
+export default function WorkspaceEditor(){const [jobs,setJobs]=useState<EditorJob[]>([]);const [current,setCurrent]=useState('');const [selected,setSelected]=useState<string[]>([]);const [scope,setScope]=useState<Scope>('este');const [draft,setDraft]=useState<Settings>(structuredClone(DEFAULTS));const [profiles,setProfiles]=useState<Profile[]>([]);const [profile,setProfile]=useState('Padrão');const [newName,setNewName]=useState('');const [user,setUser]=useState<string|null>(null);const [local,setLocal]=useState(true);const [tab,setTab]=useState('recorte');const [time,setTime]=useState(0);const [busy,setBusy]=useState(false);const [running,setRunning]=useState(false);const [crop,setCrop]=useState(false);const [message,setMessage]=useState('');const [testImage,setTestImage]=useState('');const files=useRef<HTMLInputElement>(null);const stop=useRef(false);const allJobs=useRef(jobs);allJobs.current=jobs;
+ useEffect(()=>{let alive=true;void profileUser().then(async id=>{const r=await loadProfiles(id);if(!alive)return;setUser(id);setProfiles(r.profiles);setLocal(r.local);const p=r.profiles.find(p=>p.is_default)??r.profiles[0];if(p){setProfile(p.name);setDraft(p.settings);}});return()=>{alive=false;stop.current=true;cancelEngine();allJobs.current.forEach(j=>URL.revokeObjectURL(j.url));};},[]);
+ const job=jobs.find(j=>j.id===current);const ids=targetIds(jobs,current,selected,scope);
+ const notify=(m:string)=>setMessage(m);
+ const update=(path:string,value:string|number|boolean|null)=>setDraft(s=>{const next=setPath(s,path,value);if(path==='texto.pos')next.texto.v=value==='topo'?14:value==='centro'?50:78;return next;});
+ const patch=(id:string,p:Partial<EditorJob>)=>setJobs(js=>js.map(j=>j.id===id?{...j,...p}:j));
+ const choose=(j:EditorJob)=>{if(running)return;setCurrent(j.id);setDraft(structuredClone(j.settings));setTestImage('');setTime(0);};
+ const add=async(list:FileList|File[])=>{if(running||busy)return;setBusy(true);let first:EditorJob|undefined;for(const file of Array.from(list)){if(!file.type.startsWith('video/')&&!/\.(mp4|mov|webm|mkv|avi|m4v)$/i.test(file.name))continue;try{if(file.size>=1024**3){notify(file.name+': arquivo grande demais para a memória do navegador (1 GB ou mais). Use um trecho menor.');continue;}const data=await readVideo(file);const p=profiles.find(p=>p.is_default);const settings=structuredClone(p?.settings??draft);const size=canvasSize(settings,data.meta);const warning=memoryWarning(file.size,size.CW,size.CH);if(warning.large)notify(file.name+': vídeo grande para a memória do navegador; escolha 720p/1080p ou um trecho menor.');const j:EditorJob={...data,id:crypto.randomUUID(),file,name:file.name,caption:'',coverTitle:'',settings,status:'pronto',progress:0};setJobs(js=>[...js,j]);first??=j;}catch(e){notify(file.name+': '+String(e));}}if(!current&&first){setCurrent(first.id);setDraft(first.settings);}setBusy(false);};
+ const apply=()=>{if(!jobs.length){void save(true);return;}if(!ids.length){notify('Nenhum vídeo no escopo escolhido.');return;}setJobs(js=>js.map(j=>ids.includes(j.id)?{...j,settings:structuredClone(draft),status:'pronto',output:undefined,error:undefined}:j));notify(`Ajustes aplicados em ${ids.length} vídeo(s).`);};
+ const save=async(isDefault=false)=>{const name=newName.trim()||profile;setBusy(true);try{const r=await saveProfile(user,{name,settings:structuredClone(draft),is_default:isDefault||Boolean(profiles.find(p=>p.name===name)?.is_default)},profiles);setProfiles(r.profiles);setProfile(name);setLocal(r.local);setNewName('');notify(r.local?'Perfil salvo neste navegador.':'Perfil salvo na sua conta.');}catch(e){notify(String(e));}finally{setBusy(false);}};
+ const run=async()=>{if(running||busy||!ids.length)return;const queue=jobs.filter(j=>ids.includes(j.id));stop.current=false;setRunning(true);setTestImage('');setJobs(js=>js.map(j=>ids.includes(j.id)?{...j,status:'fila',progress:0,error:undefined,output:undefined}:j));for(const j of queue){if(stop.current)break;const size=canvasSize(j.settings,j.meta);if(memoryWarning(j.file.size,size.CW,size.CH).blocked){patch(j.id,{status:'erro',error:'Memória estimada acima do limite seguro do navegador. Reduza a resolução ou importe um trecho menor.'});continue;}patch(j.id,{status:'processando'});try{const result=await exportVideo(j,p=>patch(j.id,{progress:p}),()=>stop.current);patch(j.id,{...result,status:'feito',progress:1});}catch(e){patch(j.id,{status:stop.current?'cancelado':'erro',error:stop.current?'Cancelado':e instanceof Error?e.message:String(e)});}}setJobs(js=>js.map(j=>j.status==='fila'?{...j,status:'cancelado'}:j));setRunning(false);notify(stop.current?'Fila cancelada. Os vídeos já concluídos continuam disponíveis.':'Fila concluída. Confira e baixe os vídeos prontos.');};
+ const task=async(fn:()=>Promise<void>)=>{if(busy||running)return;setBusy(true);try{await fn();}catch(e){notify(e instanceof Error?e.message:String(e));}finally{setBusy(false);}};
+ const detect=()=>void task(async()=>{for(const j of jobs.filter(j=>ids.includes(j.id))){const r=await detectBars(j);patch(j.id,{settings:{...j.settings,recorte:{...j.settings.recorte,...r}},status:'pronto',output:undefined});if(j.id===current)setDraft(s=>({...s,recorte:{...s.recorte,...r}}));}notify('Detecção de barras aplicada no escopo.');});
+ const showClean=()=>void task(async()=>{if(!job)return;const blob=await cleanFrame(job,draft,time);setTestImage(URL.createObjectURL(blob));});
+ const showRegions=()=>void task(async()=>{if(!job)return;const v=await videoElement(job.url,time);const {c,ctx}=canvas(job.meta.width,job.meta.height);ctx.drawImage(v,0,0,c.width,c.height);for(const role of ['headline','legenda'] as const){const r=draft.limpeza[role];ctx.strokeStyle=role==='headline'?'#ef4444':'#c8f53c';ctx.lineWidth=Math.max(2,c.width/160);ctx.strokeRect(c.width*r.x/100,c.height*r.y/100,c.width*r.w/100,c.height*r.h/100);}setTestImage(URL.createObjectURL(await canvasBlob(c)));v.removeAttribute('src');v.load();});
+ const coverDownload=()=>void task(async()=>{if(job)baixarBlob(await makeCover(job,draft),job.name.replace(/\.[^.]+$/,'')+'_capa.jpg');});
+ const zip=()=>void task(async()=>{const entries:Record<string,Uint8Array>={};for(const j of jobs){if(!j.output)continue;const base=outputName(j.name);let name=base;let n=2;while(entries[name])name=base.replace('.mp4',` (${n++}).mp4`);entries[name]=new Uint8Array(await j.output.arrayBuffer());if(j.cover&&j.settings.capa.salvarJpg)entries[name.replace('.mp4','_capa.jpg')]=new Uint8Array(await j.cover.arrayBuffer());}baixarBlob(new Blob([zipSync(entries,{level:0}) as BlobPart],{type:'application/zip'}),'videos_editados.zip');});
+ return <div className="space-y-5 editor-workspace"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap items-center gap-2"><Select aria-label="Perfil favorito" className="w-40 py-2 text-xs" disabled={busy||running} value={profile} onChange={e=>{const p=profiles.find(p=>p.name===e.target.value);if(p){setProfile(p.name);setDraft(structuredClone(p.settings));}}}>{profiles.map(p=><option key={p.name} value={p.name}>{p.name}{p.is_default?' ★':''}</option>)}</Select><Input aria-label="Nome do perfil" className="w-36 py-2 text-xs" placeholder="Novo perfil" value={newName} onChange={e=>setNewName(e.target.value)}/><Button variant="outline" title="Salvar perfil" aria-label="Salvar perfil" className="p-2" disabled={busy||running} onClick={()=>void save()}><Save className="size-4"/></Button><Button variant="ghost" className="text-xs px-3 py-2" disabled={busy||running} onClick={()=>void save(true)}>Usar como padrão</Button><Button variant="ghost" title="Excluir perfil" aria-label="Excluir perfil" className="p-2" disabled={profiles.length<2||busy||running||Boolean(profiles.find(p=>p.name===profile)?.is_default)} onClick={()=>void task(async()=>{const p=profiles.find(p=>p.name===profile);if(!p)return;const rows=await deleteProfile(user,p,profiles);setProfiles(rows);setProfile(rows[0]?.name??'Padrão');setDraft(rows[0]?.settings??structuredClone(DEFAULTS));})}><Trash2 className="size-4"/></Button><span className="text-[10px] text-tmuted">{local?'Perfis neste navegador':'Perfis na sua conta'}</span></div><div className="flex gap-2"><Button variant="outline" className="text-xs px-3 py-2" disabled={busy||running} onClick={()=>files.current?.click()}><Upload className="size-4"/>Importar vídeos</Button><Button variant="outline" className="text-xs px-3 py-2" disabled={busy||running||!jobs.some(j=>j.output)} onClick={zip}><Download className="size-4"/>Baixar ZIP</Button></div></div>
+ <input ref={files} type="file" multiple accept="video/*,.mkv,.avi" className="hidden" onChange={e=>{if(e.target.files)void add(e.target.files);e.target.value='';}}/>
+ {message&&<p role="status" className="border border-lime/30 bg-lime/5 rounded-lg p-3 text-xs text-tsecondary whitespace-pre-wrap">{message}</p>}
+ <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]"><div className="min-w-0 space-y-5"><div className="flex flex-wrap gap-2 items-center border-b border-border pb-3">{(['este','selecao','todos'] as Scope[]).map(k=><Button key={k} variant={scope===k?'primary':'ghost'} disabled={running||busy} className="text-xs py-2 px-3" onClick={()=>setScope(k)}>{k==='este'?'Este':k==='selecao'?`Seleção (${selected.length})`:`Todos (${jobs.length})`}</Button>)}<Button variant="outline" className="ml-auto text-xs py-2 px-3" disabled={running||busy||(!ids.length&&Boolean(jobs.length))} onClick={apply}>Aplicar</Button></div>
+ {job?<><div className="flex justify-between gap-3 text-xs text-tsecondary"><span className="truncate">{job.name}</span><span className="shrink-0">{canvasSize(draft,job.meta).CW} × {canvasSize(draft,job.meta).CH} · {timing(job.meta,draft).outDur.toFixed(1)}s</span></div><Preview job={job} s={draft} cover={tab==='capa'} onTime={setTime}/>{testImage&&<div className="border border-border rounded-lg p-3"><p className="text-xs text-tmuted mb-3">Quadro de limpeza / regiões · sem template, efeitos, áudio ou capa</p><img src={testImage} alt="Teste da limpeza no quadro" className="max-h-80 mx-auto max-w-full"/></div>}</>:<div className="border border-dashed border-border rounded-lg flex flex-col items-center py-14 text-tmuted"><Film className="size-10 text-lime"/><p className="mt-3 text-sm">Mesa de vídeos vazia</p></div>}
+ <section onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();void add(e.dataTransfer.files);}} className="border-t border-border pt-4"><div className="flex flex-wrap justify-between gap-2 mb-4"><h2 className="font-semibold text-sm">Mesa de vídeos <span className="text-tmuted">({jobs.length})</span></h2><div className="flex gap-2"><Button variant="ghost" className="py-1 px-2 text-xs" disabled={running} onClick={()=>setSelected(selected.length===jobs.length?[]:jobs.map(j=>j.id))}><CheckSquare className="size-3.5"/>{selected.length===jobs.length?'Desmarcar':'Marcar todos'}</Button><Button variant="outline" className="text-xs py-1 px-2" disabled={running||busy} onClick={()=>files.current?.click()}>Adicionar</Button></div></div><div className="grid grid-cols-2 sm:grid-cols-3 gap-3">{jobs.map(j=><article key={j.id} className={cn('rounded-lg border bg-surface1 overflow-hidden',current===j.id?'border-lime':'border-border')}><div className="relative"><Button variant="ghost" className="w-full p-0 rounded-none" disabled={running} onClick={()=>choose(j)} aria-label={'Abrir '+j.name}><img src={j.thumb} alt={j.name} className="w-full aspect-video object-cover"/></Button><input aria-label={'Selecionar '+j.name} type="checkbox" checked={selected.includes(j.id)} disabled={running} onChange={e=>setSelected(ids=>e.target.checked?[...ids,j.id]:ids.filter(id=>id!==j.id))} className="absolute top-2 left-2 size-4 accent-lime"/></div><div className="p-3 space-y-2"><p className="truncate text-xs font-semibold">{j.name}</p><p className="text-[10px] text-tmuted">{j.meta.width}×{j.meta.height} · {j.meta.duration.toFixed(1)}s · {(j.file.size/1024**2).toFixed(1)} MB</p><p className="text-[10px] text-lime">{j.status==='feito'?'Pronto para baixar':j.status==='pronto'?'Na mesa':j.status}{j.status==='processando'?` · ${Math.round(j.progress*100)}%`:''}</p>{j.status==='processando'&&<progress aria-label={'Progresso '+j.name} max={1} value={j.progress} className="admin-progress w-full h-1"/>}{j.error&&<p role="alert" className="text-[10px] text-tsecondary break-words whitespace-pre-wrap">{j.error}</p>}<div className="flex gap-1">{j.output&&<Button variant="outline" className="px-2 py-1 text-[10px]" onClick={()=>{if(j.output)baixarBlob(j.output,outputName(j.name));}}><Download className="size-3"/>Baixar</Button>}<Button variant="ghost" aria-label={'Remover '+j.name} title="Remover vídeo" className="p-1 ml-auto" disabled={running||busy} onClick={()=>{URL.revokeObjectURL(j.url);setJobs(js=>js.filter(x=>x.id!==j.id));setSelected(ids=>ids.filter(id=>id!==j.id));if(current===j.id)setCurrent(jobs.find(x=>x.id!==j.id)?.id??'');}}><Trash2 className="size-3.5"/></Button></div></div></article>)}</div><div className="mt-3 border border-dashed border-border rounded-lg p-5 text-center text-xs text-tmuted">Arraste vídeos aqui</div></section>
+ <div className="flex gap-3">{running?<Button onClick={()=>{stop.current=true;cancelEngine();}} variant="outline"><Square className="size-4"/>Cancelar fila</Button>:<Button onClick={()=>void run()} disabled={busy||!ids.length}><Film className="size-4"/>Processar {ids.length} vídeo(s)</Button>}{busy&&<LoaderCircle className="size-5 text-lime animate-spin self-center"/>}</div><p className="text-[11px] text-tmuted">Processamento local no navegador, um vídeo por vez. Arquivos grandes podem exceder a memória; prefira clipes curtos no celular.</p></div>
+ <SettingsPanel s={draft} update={update} job={job} time={time} tab={tab} setTab={setTab} notify={notify} crop={()=>setCrop(true)} detect={detect} busy={busy||running} caption={t=>{if(job)patch(job.id,{caption:t,status:'pronto',output:undefined});}} coverTitle={t=>{if(job)patch(job.id,{coverTitle:t,status:'pronto',output:undefined});}} batch={(text,cover)=>{const lines=captionsFromLines(text);setJobs(js=>js.map((j,i)=>lines[i]===undefined?j:{...j,...(cover?{coverTitle:lines[i]}:{caption:lines[i]}),status:'pronto',output:undefined}));notify(`Textos distribuídos em ${Math.min(lines.length,jobs.length)} vídeo(s).`);}} clean={showClean} regions={showRegions} applyClean={()=>{if(!selected.length){notify('Marque os vídeos para aplicar a limpeza.');return;}setJobs(js=>js.map(j=>selected.includes(j.id)?{...j,settings:{...j.settings,limpeza:structuredClone(draft.limpeza)},status:'pronto',output:undefined}:j));notify('Limpeza aplicada somente na seleção.');}} downloadCover={coverDownload}/></div>{crop&&job&&<CropDialog job={job} s={draft} close={()=>setCrop(false)} commit={r=>{setDraft(s=>({...s,recorte:r}));setCrop(false);}}}</div>;
 }
