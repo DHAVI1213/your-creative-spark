@@ -12,7 +12,8 @@
   --color-tsecondary: #a6a69e;
   --color-tmuted: #8a8a82;
 
-  --font-sans: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 html {

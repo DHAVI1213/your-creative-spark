@@ -9,9 +9,11 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiteFooter, SiteHeader } from "../components/Layout";
 import { AnimatedBackground } from "../components/AnimatedBackground";
+import { Reveal } from "../components/Reveal";
+import { TiltCard } from "../components/TiltCard";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
 
@@ -227,22 +229,45 @@ function Faq({ q, a }: { q: string; a: string }) {
 }
 
 export default function Landing() {
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  // Parallax 3D no hero: conteúdo sobe e inclina levemente conforme o scroll
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = heroRef.current;
+        if (!el) return;
+        const y = Math.min(window.scrollY, 600);
+        el.style.transform = `translate3d(0, ${y * 0.18}px, 0)`;
+        el.style.opacity = `${Math.max(0, 1 - y / 700)}`;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-bg text-tprimary">
+    <div className="min-h-screen bg-bg font-sans text-tprimary">
       <SiteHeader />
 
       {/* HERO */}
       <section className="relative overflow-hidden">
         <AnimatedBackground />
-        <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center md:pt-32">
+        <div ref={heroRef} className="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center md:pt-32" style={{ willChange: "transform, opacity" }}>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-lime/30 bg-lime/10 px-4 py-1.5 text-sm text-lime">
             <Sparkles className="size-4" /> 8 ferramentas profissionais para criadores
           </div>
           <h1
-            className="mx-auto max-w-4xl font-semibold tracking-tight"
-            style={{ fontSize: "clamp(40px, 7vw, 68px)", letterSpacing: "-0.04em", lineHeight: 1.05 }}
+            className="mx-auto max-w-4xl font-display font-semibold tracking-tight"
+            style={{ fontSize: "clamp(42px, 7.5vw, 76px)", letterSpacing: "-0.045em", lineHeight: 1.02 }}
           >
-            Produza conteúdo como um <span className="text-lime">estúdio</span>, sozinho.
+            Produza conteúdo como um <span className="bg-gradient-to-r from-lime via-lime to-emerald-300 bg-clip-text text-transparent">estúdio</span>, sozinho.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-tsecondary">
             Limpe metadados, clone sites, edite vídeos em massa, ache clientes e agende posts —
@@ -289,16 +314,18 @@ export default function Landing() {
 
       {/* COMO FUNCIONA */}
       <section id="como-funciona" className="mx-auto max-w-7xl px-6 py-24">
-        <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+        <h2 className="text-center font-display font-semibold tracking-tight" style={{ fontSize: "clamp(34px, 5.5vw, 56px)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
           Do zero ao publicado em <span className="text-lime">3 passos</span>
         </h2>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {PASSOS.map((p) => (
-            <div key={p.n} className="rounded-2xl border border-border bg-surface1 p-8">
-              <p className="text-4xl font-bold text-lime/40">{p.n}</p>
-              <h3 className="mt-4 text-xl font-semibold">{p.titulo}</h3>
-              <p className="mt-2 text-tsecondary">{p.texto}</p>
-            </div>
+          {PASSOS.map((p, i) => (
+            <Reveal key={p.n} delay={i * 110} variant="up">
+              <div className="h-full rounded-2xl border border-border bg-surface1 p-8 transition-colors hover:border-lime/40">
+                <p className="font-display text-4xl font-bold text-lime/40">{p.n}</p>
+                <h3 className="mt-4 font-display text-xl font-semibold">{p.titulo}</h3>
+                <p className="mt-2 text-tsecondary">{p.texto}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -306,34 +333,35 @@ export default function Landing() {
       {/* FERRAMENTAS */}
       <section id="ferramentas" className="border-y border-border bg-surface1/50">
         <div className="mx-auto max-w-7xl px-6 py-24">
-          <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+          <h2 className="text-center font-display font-semibold tracking-tight" style={{ fontSize: "clamp(34px, 5.5vw, 56px)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
             Um arsenal <span className="text-lime">completo</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-tsecondary">
             Cada ferramenta resolve um gargalo real de quem cria conteúdo ou vende serviços digitais.
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {FERRAMENTAS.map((f) => (
-              <div
-                key={f.id}
-                className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
-              >
-                <div className="aspect-[4/5] overflow-hidden bg-surface2">
-                  <img
-                    src={f.imagem}
-                    alt={f.nome}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2">
-                    <f.icone className="size-5 text-lime" />
-                    <h3 className="font-semibold">{f.nome}</h3>
+            {FERRAMENTAS.map((f, i) => (
+              <Reveal key={f.id} delay={(i % 4) * 90} variant="up">
+                <TiltCard className="h-full rounded-2xl">
+                  <div className="group h-full overflow-hidden rounded-2xl border border-border bg-surface1 transition-colors hover:border-lime/50">
+                    <div className="aspect-[4/5] overflow-hidden bg-surface2">
+                      <img
+                        src={f.imagem}
+                        alt={f.nome}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-5">
+                      <div className="flex items-center gap-2">
+                        <f.icone className="size-5 text-lime" />
+                        <h3 className="font-display font-semibold">{f.nome}</h3>
+                      </div>
+                      <p className="mt-2 text-sm text-tsecondary">{f.descricao}</p>
+                    </div>
                   </div>
-                  <p className="mt-2 text-sm text-tsecondary">{f.descricao}</p>
-                </div>
-              </div>
+                </TiltCard>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -342,36 +370,37 @@ export default function Landing() {
       {/* ARSENAL GOLD */}
       <section id="arsenal" className="border-b border-border">
         <div className="mx-auto max-w-7xl px-6 py-24">
-          <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+          <h2 className="text-center font-display font-semibold tracking-tight" style={{ fontSize: "clamp(34px, 5.5vw, 56px)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
             Arsenal <span className="text-lime">Gold</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-tsecondary">
             As IAs e ferramentas pro que todo criador precisa — incluídas no plano Gold.
           </p>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {ARSENAL.map((a) => (
-              <div
-                key={a.nome}
-                className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
-              >
-                <div className="aspect-[4/5] overflow-hidden bg-surface2">
-                  <img
-                    src={a.imagem}
-                    alt={a.nome}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-semibold">{a.nome}</h3>
-                    <span className="rounded-full bg-lime/10 px-3 py-1 text-xs font-semibold text-lime">
-                      {a.duracao}
-                    </span>
+            {ARSENAL.map((a, i) => (
+              <Reveal key={a.nome} delay={i * 110} variant="up">
+                <TiltCard className="h-full rounded-2xl" max={8}>
+                  <div className="group h-full overflow-hidden rounded-2xl border border-border bg-surface1 transition-colors hover:border-lime/50">
+                    <div className="aspect-[4/5] overflow-hidden bg-surface2">
+                      <img
+                        src={a.imagem}
+                        alt={a.nome}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-display text-xl font-semibold">{a.nome}</h3>
+                        <span className="rounded-full bg-lime/10 px-3 py-1 text-xs font-semibold text-lime">
+                          {a.duracao}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-tsecondary">{a.descricao}</p>
+                    </div>
                   </div>
-                  <p className="mt-2 text-sm text-tsecondary">{a.descricao}</p>
-                </div>
-              </div>
+                </TiltCard>
+              </Reveal>
             ))}
           </div>
           <div className="mt-10 text-center">
@@ -387,30 +416,30 @@ export default function Landing() {
 
       {/* PREÇOS */}
       <section id="precos" className="mx-auto max-w-7xl px-6 py-24">
-        <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+        <h2 className="text-center font-display font-semibold tracking-tight" style={{ fontSize: "clamp(34px, 5.5vw, 56px)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
           Preço que <span className="text-lime">se paga</span> no primeiro cliente
         </h2>
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {PLANOS.map((p) => (
-            <div
-              key={p.nome}
-              className={cn(
-                "relative rounded-2xl border p-8",
-                p.destaque
-                  ? "border-lime bg-surface1 shadow-[0_0_40px_rgba(200,245,60,0.12)]"
-                  : "border-border bg-surface1",
-              )}
-            >
-              {p.selo && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-4 py-1 text-xs font-bold text-black">
-                  {p.selo}
-                </span>
-              )}
-              <h3 className="text-lg font-semibold">{p.nome}</h3>
-              <p className="mt-4">
-                <span className="text-4xl font-bold">{p.preco}</span>
-                <span className="text-tmuted">{p.periodo}</span>
-              </p>
+          {PLANOS.map((p, i) => (
+            <Reveal key={p.nome} delay={i * 100} variant="up" className="h-full">
+              <div
+                className={cn(
+                  "relative h-full rounded-2xl border p-8 transition-transform duration-300 hover:-translate-y-1.5",
+                  p.destaque
+                    ? "border-lime bg-surface1 shadow-[0_0_40px_rgba(200,245,60,0.12)]"
+                    : "border-border bg-surface1",
+                )}
+              >
+                {p.selo && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-4 py-1 text-xs font-bold text-black">
+                    {p.selo}
+                  </span>
+                )}
+                <h3 className="font-display text-lg font-semibold">{p.nome}</h3>
+                <p className="mt-4">
+                  <span className="font-display text-4xl font-bold tracking-tight">{p.preco}</span>
+                  <span className="text-tmuted">{p.periodo}</span>
+                </p>
               <ul className="mt-6 space-y-3">
                 {p.itens.map((it) => (
                   <li key={it} className="flex items-start gap-2 text-sm text-tsecondary">
@@ -429,7 +458,8 @@ export default function Landing() {
               >
                 {p.cta}
               </Link>
-            </div>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -437,7 +467,7 @@ export default function Landing() {
       {/* DEPOIMENTOS */}
       <section className="overflow-hidden border-t border-border py-24">
         <div className="mx-auto max-w-7xl px-6">
-          <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+          <h2 className="text-center font-display font-semibold tracking-tight" style={{ fontSize: "clamp(34px, 5.5vw, 56px)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
             Quem usa, <span className="text-lime">recomenda</span>
           </h2>
         </div>
@@ -471,7 +501,7 @@ export default function Landing() {
 
       {/* FAQ */}
       <section id="faq" className="mx-auto max-w-3xl px-6 pb-24">
-        <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+        <h2 className="text-center font-display font-semibold tracking-tight" style={{ fontSize: "clamp(34px, 5.5vw, 56px)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
           Perguntas <span className="text-lime">frequentes</span>
         </h2>
         <div className="mt-10 space-y-4">
