@@ -219,6 +219,9 @@ body {
   .admin-kpi p:last-child { margin-top: 12px; font-size: 10px; }
   .admin-revenue-panel, .admin-ranking-panel, .admin-purchases-panel { background: var(--color-surface2); border-radius: 16px; padding: 16px 12px; }
   .admin-revenue-panel { border-top: 3px solid var(--color-lime); }
+  .admin-revenue-panel .py-16, .admin-ranking-panel .py-16, .admin-purchases-panel .py-16 { padding-top: 28px; padding-bottom: 28px; }
+  .admin-revenue-panel .py-16 > p, .admin-ranking-panel .py-16 > p, .admin-purchases-panel .py-16 > p { font-size: 12px; }
+  .admin-mobile-header button { color: var(--color-lime); }
   .admin-overview-charts h2, .admin-purchases-panel h2 { font-size: 17px; }
   .admin-ranking-item > div > span:nth-child(2) { font-size: 12px; font-weight: 600; }
   .admin-ranking-item { padding-bottom: 2px; }
