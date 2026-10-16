@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { SiteFooter, SiteHeader } from "../components/Layout";
-import { AnimatedBackground } from "../components/AnimatedBackground";
 import { Reveal } from "../components/Reveal";
 import { TiltCard } from "../components/TiltCard";
 import { FERRAMENTAS } from "../lib/tools";
