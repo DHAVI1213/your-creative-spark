@@ -431,7 +431,7 @@ export default function Landing() {
             <Reveal key={p.nome} delay={i * 100} variant="up" className="h-full">
               <div
                 className={cn(
-                  "relative h-full rounded-2xl border p-8 transition-transform duration-300 hover:-translate-y-1.5",
+                  "relative flex h-full flex-col rounded-2xl border p-8 transition-transform duration-300 hover:-translate-y-1.5",
                   p.destaque
                     ? "border-lime bg-surface1 shadow-[0_0_40px_rgba(200,245,60,0.12)]"
                     : "border-border bg-surface1",
@@ -447,7 +447,7 @@ export default function Landing() {
                   <span className="font-display text-4xl font-bold tracking-tight">{p.preco}</span>
                   <span className="text-tmuted">{p.periodo}</span>
                 </p>
-              <ul className="mt-6 space-y-3">
+              <ul className="mt-6 flex-1 space-y-3">
                 {p.itens.map((it) => (
                   <li key={it} className="flex items-start gap-2 text-sm text-tsecondary">
                     <Check className="mt-0.5 size-4 shrink-0 text-lime" /> {it}
@@ -457,10 +457,10 @@ export default function Landing() {
               <Link
                 to="/entrar"
                 className={cn(
-                  "mt-8 block rounded-xl py-3 text-center font-semibold transition-all",
+                  "btn-shine mt-8 block rounded-xl py-3 text-center font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]",
                   p.destaque
-                    ? "bg-lime text-black hover:brightness-110"
-                    : "border border-border text-tprimary hover:border-lime",
+                    ? "btn-pulse bg-lime text-black hover:brightness-110"
+                    : "border border-border text-tprimary hover:border-lime hover:shadow-[0_0_20px_rgba(200,245,60,0.2)]",
                 )}
               >
                 {p.cta}
