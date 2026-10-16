@@ -11,6 +11,7 @@ import WorkspaceMinerador from "../tools/WorkspaceMinerador";
 import WorkspaceAgendador from "../tools/WorkspaceAgendador";
 import WorkspaceLegendas from "../tools/WorkspaceLegendas";
 import WorkspacePropostas from "../tools/WorkspacePropostas";
+import { useSiteSettings } from "../lib/site-settings";
 
 const WORKSPACES: Record<string, React.ComponentType> = {
   limpador: WorkspaceLimpador,
@@ -26,13 +27,17 @@ const WORKSPACES: Record<string, React.ComponentType> = {
 export default function ToolWorkspace() {
   const { toolId } = useParams();
   const { usuario } = useAuth();
-  const ferramenta = ferramentaPorId(toolId ?? "");
+  const settings = useSiteSettings();
+  const original = ferramentaPorId(toolId ?? "");
+  const saved = settings.tools.find(t => t.id === toolId);
+  const ferramenta = original && saved ? { ...original, nome: saved.name, descricao: saved.description } : original;
 
   if (!usuario) return <Navigate to="/entrar" replace />;
   if (!ferramenta) return <NotFound />;
 
   const bloqueada = ferramenta.plano === "pro" && usuario.plano === "gratis";
-  const Body = WORKSPACES[ferramenta.id]!;
+  const Body = WORKSPACES[ferramenta.id];
+  if (!Body) return <NotFound />;
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">

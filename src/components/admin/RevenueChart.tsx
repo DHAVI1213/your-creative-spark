@@ -1,0 +1,11 @@
+import { useId } from 'react';
+import { TrendingUp } from 'lucide-react';
+import { brl } from '../../lib/utils';
+import { revenueSeries, type Transaction } from '../../lib/admin-metrics';
+import { Empty } from '../ui';
+export default function RevenueChart({transactions,days=30,mode='Diário'}:{transactions:Transaction[];days?:number;mode?:string}) {
+ const id=useId().replace(/:/g,'');const series=revenueSeries(transactions,days,mode);const hasData=transactions.some(t=>['pago','paid'].includes(t.status)&&new Date(t.created_at).getTime()>=Date.now()-days*86400000);
+ if(!hasData)return <Empty icon={<TrendingUp className="size-6"/>} titulo="Sua receita começa aqui" descricao="As primeiras compras confirmadas aparecerão neste gráfico."/>;
+ const max=Math.max(...series.map(s=>s.value),1);const points=series.map((s,i)=>[56+i*610/Math.max(series.length-1,1),220-s.value/max*175]);const path=points.map((p,i)=>`${i?'L':'M'}${p[0]},${p[1]}`).join(' ');
+ return <div className="w-full overflow-hidden"><svg viewBox="0 0 690 265" role="img" aria-label="Receita no período" className="admin-chart w-full"><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--color-lime)" stopOpacity=".23"/><stop offset="1" stopColor="var(--color-lime)" stopOpacity="0"/></linearGradient></defs>{[0,.5,1].map(n=><g key={n}><line x1="56" y1={220-n*175} x2="675" y2={220-n*175} stroke="var(--color-border)" strokeDasharray="4 5"/><text x="0" y={224-n*175} fill="var(--color-tmuted)" fontSize="11">{brl(max*n)}</text></g>)}<path d={`${path} L${points.at(-1)?.[0]},220 L56,220 Z`} fill={`url(#${id})`}/><path className="admin-chart-line" d={path} fill="none" stroke="var(--color-lime)" strokeWidth="2.5" pathLength="1"/>{points.map((p,i)=><circle key={i} cx={p[0]} cy={p[1]} r="3" fill="var(--color-lime)"><title>{series[i]?.label}: {brl(series[i]?.value??0)}</title></circle>)}{series.filter((_,i)=>i===0||i===series.length-1||i%Math.max(1,Math.floor(series.length/5))===0).map(s=><text key={s.label} x={points[series.indexOf(s)]?.[0]} y="253" textAnchor="middle" fill="var(--color-tmuted)" fontSize="11">{s.label}</text>)}</svg></div>;
+}

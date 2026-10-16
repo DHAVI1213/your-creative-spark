@@ -15,6 +15,8 @@ import { Reveal } from "../components/Reveal";
 import { TiltCard } from "../components/TiltCard";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
+import { useSiteSettings } from "../lib/site-settings";
+import { brl } from "../lib/utils";
 
 const TICKER = [
   "Limpador de Metadados",
@@ -229,6 +231,10 @@ function Faq({ q, a }: { q: string; a: string }) {
 
 export default function Landing() {
   const heroRef = useRef<HTMLDivElement>(null);
+  const settings = useSiteSettings();
+  const planos = PLANOS.map(p => { const saved = settings.plans.find(x => x.name === p.nome); return saved ? { ...p, preco: brl(saved.price_cents / 100) } : p; });
+  const depoimentos = settings.content.testimonials ?? DEPOIMENTOS;
+  const faqs = settings.content.faq ?? FAQS;
 
   // Parallax 3D no hero: conteúdo sobe e inclina levemente conforme o scroll
   useEffect(() => {
@@ -274,11 +280,10 @@ export default function Landing() {
             className="mx-auto max-w-4xl font-display font-semibold tracking-tight"
             style={{ fontSize: "clamp(42px, 7.5vw, 76px)", letterSpacing: "-0.045em", lineHeight: 1.02 }}
           >
-            Produza conteúdo como um <span className="bg-gradient-to-r from-lime via-lime to-emerald-300 bg-clip-text text-transparent">estúdio</span>, sozinho.
+            {settings.content.hero_title || <>Produza conteúdo como um <span className="bg-gradient-to-r from-lime via-lime to-emerald-300 bg-clip-text text-transparent">estúdio</span>, sozinho.</>}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-tsecondary">
-            Limpe metadados, clone sites, edite vídeos em massa, ache clientes e agende posts —
-            tudo num painel só, direto do navegador.
+            {settings.content.hero_description || 'Limpe metadados, clone sites, edite vídeos em massa, ache clientes e agende posts — tudo num painel só, direto do navegador.'}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
@@ -427,7 +432,7 @@ export default function Landing() {
           Preço que <span className="text-lime">se paga</span> no primeiro cliente
         </h2>
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {PLANOS.map((p, i) => (
+          {planos.map((p, i) => (
             <Reveal key={p.nome} delay={i * 100} variant="up" className="h-full">
               <div
                 className={cn(
@@ -480,7 +485,7 @@ export default function Landing() {
         </div>
         <div className="group relative mt-12">
           <div className="flex w-max animate-[ticker_45s_linear_infinite] gap-6 px-6 group-hover:[animation-play-state:paused]">
-            {[...DEPOIMENTOS, ...DEPOIMENTOS].map((d, i) => (
+            {[...depoimentos, ...depoimentos].map((d, i) => (
               <div
                 key={`${d.nome}-${i}`}
                 className="w-[300px] shrink-0 rounded-2xl border border-border bg-surface1 p-6 sm:w-[340px]"
@@ -512,7 +517,7 @@ export default function Landing() {
           Perguntas <span className="text-lime">frequentes</span>
         </h2>
         <div className="mt-10 space-y-4">
-          {FAQS.map((f) => (
+          {faqs.map((f) => (
             <Faq key={f.q} q={f.q} a={f.a} />
           ))}
         </div>

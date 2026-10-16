@@ -14,6 +14,8 @@
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --shadow-admin-glow: 0 0 28px color-mix(in srgb, var(--color-lime) 6%, transparent);
+  --shadow-admin-panel: 0 12px 50px color-mix(in srgb, var(--color-bg) 75%, transparent);
 }
 
 html {
@@ -181,6 +183,24 @@ body {
   background-size: 200% 100%;
   animation: footer-line 5s linear infinite;
 }
+.admin-root { letter-spacing: 0; }
+.admin-root button.bg-lime { color: var(--color-bg); }
+.admin-hover { transition: border-color .2s, box-shadow .2s, transform .2s; }
+.admin-hover:hover { border-color: color-mix(in srgb, var(--color-lime) 30%, var(--color-border)); box-shadow: var(--shadow-admin-glow); transform: translateY(-2px); }
+.admin-table th { text-align: left; font-size: 11px; font-weight: 500; color: var(--color-tmuted); padding: 12px 18px; border-bottom: 1px solid var(--color-border); }
+.admin-table td { padding: 17px 18px; border-bottom: 1px solid var(--color-border); color: var(--color-tsecondary); }
+.admin-table tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr { transition: background .2s; }
+.admin-table tbody tr:hover { background: var(--color-surface2); }
+.admin-progress { appearance: none; border: 0; border-radius: 10px; overflow: hidden; background: var(--color-surface2); }
+.admin-progress::-webkit-progress-bar { background: var(--color-surface2); }
+.admin-progress::-webkit-progress-value { background: var(--color-lime); border-radius: 10px; }
+.admin-progress::-moz-progress-bar { background: var(--color-lime); }
+@keyframes admin-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes admin-line { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.admin-enter { animation: admin-enter .3s ease both; }
+.admin-chart-line { stroke-dasharray: 1; animation: admin-line 1.2s ease both; }
+@media (prefers-reduced-motion: reduce) { .admin-enter, .admin-chart-line { animation: none; } .admin-hover { transition: none; } }
 @media (prefers-reduced-motion: reduce) {
   .footer-line {
     animation: none;
