@@ -92,7 +92,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-aurora-a,
   .animate-aurora-b,
-  .animate-aurora-c {
+  .animate-aurora-c,
+  .animate-\[ticker_45s_linear_infinite\],
+  .animate-\[ticker_30s_linear_infinite\] {
     animation: none;
   }
 }

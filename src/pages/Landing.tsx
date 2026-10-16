@@ -435,14 +435,19 @@ export default function Landing() {
       </section>
 
       {/* DEPOIMENTOS */}
-      <section className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 py-24">
+      <section className="overflow-hidden border-t border-border py-24">
+        <div className="mx-auto max-w-7xl px-6">
           <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
             Quem usa, <span className="text-lime">recomenda</span>
           </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {DEPOIMENTOS.map((d) => (
-              <div key={d.nome} className="rounded-2xl border border-border bg-surface1 p-6">
+        </div>
+        <div className="group relative mt-12">
+          <div className="flex w-max animate-[ticker_45s_linear_infinite] gap-6 px-6 group-hover:[animation-play-state:paused]">
+            {[...DEPOIMENTOS, ...DEPOIMENTOS].map((d, i) => (
+              <div
+                key={`${d.nome}-${i}`}
+                className="w-[300px] shrink-0 rounded-2xl border border-border bg-surface1 p-6 sm:w-[340px]"
+              >
                 <div className="flex items-center gap-4">
                   <img
                     src={d.foto}
@@ -458,6 +463,9 @@ export default function Landing() {
               </div>
             ))}
           </div>
+          {/* fade nas bordas */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-bg to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-bg to-transparent" />
         </div>
       </section>
 
