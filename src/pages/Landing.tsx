@@ -318,7 +318,7 @@ export default function Landing() {
                 key={f.id}
                 className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
               >
-                <div className="aspect-video overflow-hidden bg-surface2">
+                <div className="aspect-[4/5] overflow-hidden bg-surface2">
                   <img
                     src={f.imagem}
                     alt={f.nome}

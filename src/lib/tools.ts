@@ -30,7 +30,7 @@ const IMAGENS: Record<string, string> = {
   propostas: "propostas",
 };
 
-const img = (id: string) => `/tools/${IMAGENS[id] ?? id}.webp`;
+const img = (id: string) => `/tools/${IMAGENS[id] ?? id}.jpg`;
 
 export const FERRAMENTAS: Ferramenta[] = [
   {
