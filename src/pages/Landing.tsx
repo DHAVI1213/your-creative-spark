@@ -5,6 +5,8 @@ import {
   Check,
   ChevronDown,
   Clock3,
+  Frame,
+  PenTool,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -164,6 +166,27 @@ const DEPOIMENTOS = [
   },
 ];
 
+const ARSENAL = [
+  {
+    nome: "Figma Pro Education",
+    duracao: "Education",
+    descricao: "Design e prototipagem profissional para criar interfaces e criativos de alto nível.",
+    icone: PenTool,
+  },
+  {
+    nome: "Gemini IA",
+    duracao: "18 meses",
+    descricao: "Inteligência artificial avançada para textos, ideias e automação do seu conteúdo.",
+    icone: Sparkles,
+  },
+  {
+    nome: "Framer Pro",
+    duracao: "12 meses",
+    descricao: "Sites e interações em código, com animações premium e publicação instantânea.",
+    icone: Frame,
+  },
+];
+
 const FAQS = [
   {
     q: "Preciso instalar alguma coisa?",
@@ -314,6 +337,47 @@ export default function Landing() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ARSENAL GOLD */}
+      <section id="arsenal" className="border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 py-24">
+          <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
+            Arsenal <span className="text-lime">Gold</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-tsecondary">
+            As IAs e ferramentas pro que todo criador precisa — incluídas no plano Gold.
+          </p>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {ARSENAL.map((a) => (
+              <div
+                key={a.nome}
+                className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
+              >
+                <div className="flex h-44 items-center justify-center bg-gradient-to-br from-surface2 to-bg">
+                  <a.icone className="size-20 text-lime transition-transform group-hover:scale-110" strokeWidth={1.5} />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-semibold">{a.nome}</h3>
+                    <span className="rounded-full bg-lime/10 px-3 py-1 text-xs font-semibold text-lime">
+                      {a.duracao}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-tsecondary">{a.descricao}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <a
+              href="#precos"
+              className="inline-flex items-center gap-2 rounded-xl bg-lime px-8 py-4 font-semibold text-black transition-all hover:brightness-110 hover:shadow-[0_0_32px_rgba(200,245,60,0.4)]"
+            >
+              Quero o Arsenal Gold <ArrowRight className="size-5" />
+            </a>
           </div>
         </div>
       </section>
