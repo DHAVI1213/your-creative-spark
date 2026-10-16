@@ -1,6 +1,5 @@
-/// <reference types="bun" />
 import { test, expect } from 'bun:test';
-import { metrics, growth, revenueSeries, type AdminData } from './admin-metrics';
+import { metrics, growth, revenueSeries, type AdminData } from '../src/lib/admin-metrics';
 const base:AdminData={users:[],transactions:[],plans:[],tools:[],usage:[],online:0,content:{},subscriptions:[],captured_at:''};
 test('only paid purchases count in the last 24 hours',()=>{const now=new Date('2026-10-16T12:00:00Z');const transactions=[{id:'1',user_id:null,email:'',plan:'pro',amount_cents:5000,status:'pago',created_at:'2026-10-16T10:00:00Z',source:'purchase'},{id:'2',user_id:null,email:'',plan:'elite',amount_cents:10000,status:'pendente',created_at:'2026-10-16T10:00:00Z',source:'purchase'}];expect(metrics({...base,transactions},now).purchases24).toBe(1);expect(metrics({...base,transactions},now).total).toBe(50);});
 test('empty data does not invent a conversion or ticket',()=>{expect(metrics(base).conversion).toBeNull();expect(metrics(base).ticket).toBeNull();expect(growth(50,0)).toBeNull();});

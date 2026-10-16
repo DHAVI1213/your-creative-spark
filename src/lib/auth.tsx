@@ -16,28 +16,31 @@ function ler(): Usuario | null {
 
 const AuthCtx = createContext<{
   usuario: Usuario | null;
+  carregando: boolean;
   entrar: (nome: string, email: string) => void;
   sair: () => void;
   assinar: (plano: "pro" | "elite") => void;
-}>({ usuario: null, entrar: () => {}, sair: () => {}, assinar: () => {} });
+}>({ usuario: null, carregando: true, entrar: () => {}, sair: () => {}, assinar: () => {} });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     setUsuario(ler());
     let alive = true;
     const hydrate = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) { if (alive) setCarregando(false); return; }
       const { data, error } = await supabase.rpc('client_account_state');
       if (!alive) return;
       const state = data as { active: boolean; plan: string | null } | null;
-      if (error || state?.active === false) { setUsuario(null); return; }
+      if (error || state?.active === false) { setUsuario(null); setCarregando(false); return; }
       const { data: subscriptions } = await supabase.from('assinaturas').select('plano').eq('user_id', session.user.id).eq('status', 'ativo').order('criado_em', { ascending: false }).limit(1);
       const candidate = state?.plan ?? subscriptions?.[0]?.plano ?? 'gratis';
       const plano: Usuario['plano'] = candidate === 'basico' || candidate === 'pro' || candidate === 'elite' || candidate === 'gold' ? candidate : 'gratis';
       setUsuario({ nome: String(session.user.user_metadata?.nome ?? session.user.email?.split('@')[0] ?? 'Usuário'), email: session.user.email ?? '', plano });
+      setCarregando(false);
     };
     void hydrate();
     const id = setInterval(() => void hydrate(), 30000);
@@ -73,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthCtx.Provider value={{ usuario, entrar, sair, assinar }}>{children}</AuthCtx.Provider>
+    <AuthCtx.Provider value={{ usuario, carregando, entrar, sair, assinar }}>{children}</AuthCtx.Provider>
   );
 }
 

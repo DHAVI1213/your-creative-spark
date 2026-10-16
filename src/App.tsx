@@ -12,7 +12,8 @@ import { SiteSettingsProvider } from "./lib/site-settings";
 import ClientToolBoundary from "./components/ClientToolBoundary";
 
 function RotaApp({ children }: { children: React.ReactNode }) {
-  const { usuario } = useAuth();
+  const { usuario, carregando } = useAuth();
+  if (carregando) return <div className="min-h-screen bg-bg" />;
   if (!usuario) return <Navigate to="/entrar" replace />;
   return <>{children}</>;
 }
