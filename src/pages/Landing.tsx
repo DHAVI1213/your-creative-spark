@@ -116,6 +116,34 @@ const DEPOIMENTOS = [
     texto:
       "O agendador sozinho já vale a assinatura. Programo a semana toda no domingo e esqueço. Meu alcance subiu porque parei de falhar dia.",
   },
+  {
+    foto: "/depoimentos/rafael.jpg",
+    nome: "Rafael T.",
+    profissao: "Gestor de tráfego",
+    texto:
+      "O minerador de clientes me entrega uma lista pronta de lojas que precisam de site. Junto com o gerador de propostas, virei uma máquina de fechar contrato.",
+  },
+  {
+    foto: "/depoimentos/juliana.jpg",
+    nome: "Juliana P.",
+    profissao: "Criadora de conteúdo",
+    texto:
+      "As legendas prontas por nicho economizam meu tempo todo dia, e as hashtags realmente funcionam. Meu engajamento dobrou em dois meses.",
+  },
+  {
+    foto: "/depoimentos/marcos.jpg",
+    nome: "Marcos V.",
+    profissao: "Fotógrafo",
+    texto:
+      "Entrego as fotos para os clientes já sem metadados, direto pelo limpador. Profissional demais — e o clonador me ajuda a montar portfólio rapidinho.",
+  },
+  {
+    foto: "/depoimentos/beatriz.jpg",
+    nome: "Beatriz A.",
+    profissao: "Empreendedora digital",
+    texto:
+      "Uso o minerador viral para garimpar ideias e o agendador para manter constância. Saí de 2 mil para 25 mil seguidores sem comprar nada.",
+  },
 ];
 
 const FAQS = [
