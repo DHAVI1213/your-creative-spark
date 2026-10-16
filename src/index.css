@@ -184,7 +184,6 @@ body {
   animation: footer-line 5s linear infinite;
 }
 .admin-root { letter-spacing: 0; }
-.admin-root button { color: inherit; }
 .admin-root button.bg-lime { color: var(--color-bg); }
 .admin-hover { transition: border-color .2s, box-shadow .2s, transform .2s; }
 .admin-hover:hover { border-color: color-mix(in srgb, var(--color-lime) 30%, var(--color-border)); box-shadow: var(--shadow-admin-glow); transform: translateY(-2px); }

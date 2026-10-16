@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { test, expect } from 'bun:test';
 import { metrics, growth, revenueSeries, type AdminData } from './admin-metrics';
 const base:AdminData={users:[],transactions:[],plans:[],tools:[],usage:[],online:0,content:{},subscriptions:[],captured_at:''};
