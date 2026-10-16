@@ -143,6 +143,30 @@ export type Database = {
         }
         Relationships: []
       }
+      plans: {
+        Row: {
+          id: string
+          name: string
+          price_cents: number
+          recurring: boolean
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          price_cents?: number
+          recurring?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          price_cents?: number
+          recurring?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -167,6 +191,138 @@ export type Database = {
           id?: string
           nome?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          email: string
+          external_id: string | null
+          id: string
+          plan: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          email?: string
+          external_id?: string | null
+          id?: string
+          plan: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          email?: string
+          external_id?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      tool_settings: {
+        Row: {
+          description: string
+          enabled: boolean
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          description?: string
+          enabled?: boolean
+          id: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          description?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tool_usage: {
+        Row: {
+          created_at: string
+          id: string
+          tool_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tool_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tool_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_accounts: {
+        Row: {
+          active: boolean
+          plan_override: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          plan_override?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          plan_override?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          last_seen_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -232,11 +388,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_change_account: {
+        Args: { _active: boolean; _plan: string; _user_id: string }
+        Returns: undefined
+      }
       admin_has_secret: { Args: { _chave: string }; Returns: boolean }
+      admin_panel_data: { Args: never; Returns: Json }
       admin_set_secret: {
         Args: { _chave: string; _valor: string }
         Returns: undefined
       }
+      client_account_state: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -248,6 +410,8 @@ export type Database = {
         Args: { _email: string; _id: string }
         Returns: undefined
       }
+      public_site_settings: { Args: never; Returns: Json }
+      record_activity: { Args: { _tool_id?: string }; Returns: undefined }
       tem_acesso: { Args: never; Returns: boolean }
     }
     Enums: {

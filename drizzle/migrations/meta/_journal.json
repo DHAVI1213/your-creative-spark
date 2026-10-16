@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792193641736,
+      "tag": "0000_nk_owner_panel",
+      "breakpoints": true
+    }
+  ]
+}
