@@ -12,6 +12,7 @@
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
+    "@supabase/supabase-js": "^2.118.0",
     "fflate": "^0.8.3",
     "lucide-react": "^1.57.0",
     "react": "^18.3.1",
