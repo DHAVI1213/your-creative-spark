@@ -101,7 +101,6 @@ const PLANOS = [
       "Figma Pro Education",
       "Gemini IA — 18 meses",
       "Framer Pro — 12 meses",
-      "Lovable Pro — 12 meses",
     ],
   },
 ];
