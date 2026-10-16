@@ -354,11 +354,11 @@ export default function Landing() {
                 key={a.nome}
                 className="group overflow-hidden rounded-2xl border border-border bg-surface1 transition-all hover:border-lime/50"
               >
-                <div className="aspect-[4/3] overflow-hidden bg-surface2">
+                <div className="aspect-[4/5] overflow-hidden bg-surface2">
                   <img
                     src={a.imagem}
                     alt={a.nome}
-                    className="h-full w-full object-cover object-top transition-transform group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
                     loading="lazy"
                   />
                 </div>
