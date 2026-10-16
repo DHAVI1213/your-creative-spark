@@ -184,6 +184,49 @@ body {
   animation: footer-line 5s linear infinite;
 }
 .admin-root { letter-spacing: 0; }
+.admin-sidebar { top: 28px; bottom: 28px; left: 28px; border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-admin-panel); }
+.admin-brand { border-bottom: 1px solid var(--color-border); margin: 0 -16px; padding-left: 24px; padding-right: 24px; }
+.admin-kpi { border-radius: 8px; min-height: 152px; }
+.admin-kpi-label > span:first-child { order: 2; }
+.admin-kpi-icon { order: 1; }
+.admin-kpi-value { font-variant-numeric: tabular-nums; }
+.admin-revenue-panel, .admin-ranking-panel, .admin-purchases-panel { border-radius: 8px; }
+.admin-overview-charts h2, .admin-purchases-panel h2 { font-size: 18px; }
+.admin-overview-charts h2 + p, .admin-purchases-panel h2 + p { display: none; }
+.admin-purchases-panel .admin-table th { background: var(--color-surface2); padding: 10px 12px; }
+.admin-purchases-panel .admin-table td { padding: 12px; }
+.admin-bottom-nav { padding: 8px 6px max(8px, env(safe-area-inset-bottom)); gap: 5px; }
+.admin-bottom-nav a { border-radius: 16px; background: var(--color-surface2); border: 1px solid var(--color-border); }
+@media (min-width: 768px) and (max-width: 1100px) {
+  .admin-sidebar { width: 220px; left: 16px; }
+  .admin-main { margin-left: 260px; }
+}
+@media (max-width: 767px) {
+  .admin-mobile-header { padding-left: 20px; padding-right: 20px; }
+  .admin-mobile-header > a { font-size: 22px; }
+  .admin-main { background: var(--color-surface1); }
+  .admin-page-header h1 { font-size: 34px; line-height: 1.15; }
+  .admin-kpis { gap: 12px; }
+  .admin-kpi { background: var(--color-surface2); border-radius: 16px; min-height: 150px; padding: 14px 12px; }
+  .admin-kpi:nth-child(2) { order: 3; }
+  .admin-kpi:nth-child(3) { order: 2; }
+  .admin-kpi:nth-child(4) { order: 4; }
+  .admin-kpi-label { align-items: center; gap: 8px; }
+  .admin-kpi-label > span:first-child { font-size: 11px; }
+  .admin-kpi-icon { background: transparent; color: var(--color-lime); width: 24px; height: 28px; }
+  .admin-kpi-icon svg { width: 24px; height: 24px; }
+  .admin-kpi-value { font-size: 23px; }
+  .admin-kpi p:last-child { margin-top: 12px; font-size: 10px; }
+  .admin-revenue-panel, .admin-ranking-panel, .admin-purchases-panel { background: var(--color-surface2); border-radius: 16px; padding: 16px 12px; }
+  .admin-revenue-panel { border-top: 3px solid var(--color-lime); }
+  .admin-revenue-panel .py-16, .admin-ranking-panel .py-16, .admin-purchases-panel .py-16 { padding-top: 28px; padding-bottom: 28px; }
+  .admin-revenue-panel .py-16 > p, .admin-ranking-panel .py-16 > p, .admin-purchases-panel .py-16 > p { font-size: 12px; }
+  .admin-mobile-header button { color: var(--color-lime); }
+  .admin-overview-charts h2, .admin-purchases-panel h2 { font-size: 17px; }
+  .admin-ranking-item > div > span:nth-child(2) { font-size: 12px; font-weight: 600; }
+  .admin-ranking-item { padding-bottom: 2px; }
+  .admin-ranking-item .admin-progress { margin-left: 28px; width: calc(100% - 28px); }
+}
 .admin-root button.bg-lime { color: var(--color-bg); }
 .admin-hover { transition: border-color .2s, box-shadow .2s, transform .2s; }
 .admin-hover:hover { border-color: color-mix(in srgb, var(--color-lime) 30%, var(--color-border)); box-shadow: var(--shadow-admin-glow); transform: translateY(-2px); }
