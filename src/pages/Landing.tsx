@@ -258,8 +258,16 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <AnimatedBackground />
-        <div ref={heroRef} className="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center md:pt-32" style={{ willChange: "transform, opacity" }}>
+        {/* capa como fundo em tela cheia */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <img
+            src="/capa-saas.jpg"
+            alt=""
+            className="h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-bg/80 via-bg/30 to-bg" />
+        </div>
+        <div ref={heroRef} className="relative mx-auto max-w-7xl px-6 pb-24 pt-24 text-center md:pt-32" style={{ willChange: "transform, opacity" }}>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-lime/30 bg-lime/10 px-4 py-1.5 text-sm text-lime">
             <Sparkles className="size-4" /> 8 ferramentas profissionais para criadores
           </div>
@@ -298,19 +306,6 @@ export default function Landing() {
               <Zap className="size-4 text-lime" /> Cancele quando quiser
             </span>
           </div>
-
-          {/* CAPA */}
-          <Reveal variant="scale" delay={200} className="mx-auto mt-14 max-w-md">
-            <TiltCard max={7} className="rounded-3xl">
-              <div className="overflow-hidden rounded-3xl border border-border shadow-[0_0_80px_rgba(200,245,60,0.15)]">
-                <img
-                  src="/capa-saas.jpg"
-                  alt="NK Software — Produza conteúdo como um estúdio, sozinho"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </TiltCard>
-          </Reveal>
         </div>
       </section>
 
