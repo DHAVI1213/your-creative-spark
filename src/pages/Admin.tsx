@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { LayoutDashboard, UsersRound, Wrench, CreditCard, Settings2, Search, Bell, Menu, X, LogOut, ArrowUpRight, ArrowDownRight, Wallet, ShoppingBag, ChevronRight, RefreshCw, Activity, Sparkles, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, UsersRound, Wrench, CreditCard, Settings2, Search, Bell, Menu, X, LogOut, ArrowUpRight, ArrowDownRight, Wallet, ShoppingBag, RefreshCw, Activity, Sparkles, ShieldCheck } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { Button, Card, Empty, Select } from '../components/ui';
 import { brl, cn } from '../lib/utils';
