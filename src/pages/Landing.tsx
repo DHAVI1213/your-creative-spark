@@ -46,11 +46,12 @@ const PASSOS = [
 
 const PLANOS = [
   {
-    nome: "Gratuito",
-    preco: "R$ 0",
-    periodo: "para sempre",
+    nome: "Básico",
+    preco: "R$ 25",
+    periodo: "/mês",
     destaque: false,
-    cta: "Começar grátis",
+    selo: null,
+    cta: "Assinar o Básico",
     itens: [
       "Limpador de Metadados",
       "Clonador de Sites",
@@ -61,9 +62,10 @@ const PLANOS = [
   },
   {
     nome: "Pro",
-    preco: "R$ 47",
+    preco: "R$ 50",
     periodo: "/mês",
     destaque: true,
+    selo: "MAIS POPULAR",
     cta: "Assinar o Pro",
     itens: [
       "Todas as ferramentas, exceto o Agendador",
@@ -73,9 +75,10 @@ const PLANOS = [
   },
   {
     nome: "Elite",
-    preco: "R$ 97",
+    preco: "R$ 100",
     periodo: "/mês",
     destaque: false,
+    selo: null,
     cta: "Assinar o Elite",
     itens: [
       "Tudo do Pro",
@@ -84,6 +87,21 @@ const PLANOS = [
       "Acesso antecipado a novidades",
       "Sessão de onboarding 1:1",
       "Grupo fechado de criadores",
+    ],
+  },
+  {
+    nome: "Gold",
+    preco: "R$ 500",
+    periodo: "pagamento único",
+    destaque: false,
+    selo: "OFERTA GOLD",
+    cta: "Quero a oferta Gold",
+    itens: [
+      "Tudo do Elite",
+      "Figma Pro Education",
+      "Gemini IA — 18 meses",
+      "Framer Pro — 12 meses",
+      "Lovable Pro — 12 meses",
     ],
   },
 ];
@@ -215,7 +233,7 @@ export default function Landing() {
               to="/entrar"
               className="inline-flex items-center gap-2 rounded-xl bg-lime px-8 py-4 font-semibold text-black hover:brightness-110 hover:shadow-[0_0_32px_rgba(200,245,60,0.4)] transition-all"
             >
-              Começar grátis <ArrowRight className="size-5" />
+              Começar agora <ArrowRight className="size-5" />
             </Link>
             <a
               href="#precos"
@@ -306,7 +324,7 @@ export default function Landing() {
         <h2 className="text-center font-semibold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 52px)" }}>
           Preço que <span className="text-lime">se paga</span> no primeiro cliente
         </h2>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {PLANOS.map((p) => (
             <div
               key={p.nome}
@@ -317,9 +335,9 @@ export default function Landing() {
                   : "border-border bg-surface1",
               )}
             >
-              {p.destaque && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-lime px-4 py-1 text-xs font-bold text-black">
-                  MAIS POPULAR
+              {p.selo && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-lime px-4 py-1 text-xs font-bold text-black">
+                  {p.selo}
                 </span>
               )}
               <h3 className="text-lg font-semibold">{p.nome}</h3>
