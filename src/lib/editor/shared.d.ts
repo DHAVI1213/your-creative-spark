@@ -1,0 +1,17 @@
+import type { Settings,Meta,Layout,Region } from './model';
+export const DEFAULTS:Settings;
+export function clone<T>(value:T):T;
+export function merge(base:Settings,over:unknown):Settings;
+export function even(n:number):number;
+export function canvasSize(s:Settings,meta?:Meta):{CW:number;CH:number};
+export function layout(meta:Meta,s:Settings):Layout;
+export function timing(meta:Meta,s:Settings):{start:number;end:number;inDur:number;outDur:number;speed:number};
+export function eqParams(e:Settings['efeitos']):{contrast:number;saturation:number;brightness:number;gamma:number;changed:boolean};
+export function filtroSpec(e:Settings['efeitos']):{m:number[];slope:number;icpt:number;vin:number}|null;
+export const FILTROS:Record<string,{nome:string}>;
+export function vinAngle(v:number):number;
+export function limpezaRects(meta:Meta,s:Settings):Array<Region&{role:string}>;
+export function limpezaFilters(meta:Meta,s:Settings):string[];
+export function ocultarTexto(s:Settings):boolean;
+export function capaSourceTime(meta:Meta,s:Settings):number;
+export function capaIntro(s:Settings):number;
