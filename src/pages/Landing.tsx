@@ -298,6 +298,19 @@ export default function Landing() {
               <Zap className="size-4 text-lime" /> Cancele quando quiser
             </span>
           </div>
+
+          {/* CAPA */}
+          <Reveal variant="scale" delay={200} className="mx-auto mt-14 max-w-md">
+            <TiltCard max={7} className="rounded-3xl">
+              <div className="overflow-hidden rounded-3xl border border-border shadow-[0_0_80px_rgba(200,245,60,0.15)]">
+                <img
+                  src="/capa-saas.jpg"
+                  alt="NK Software — Produza conteúdo como um estúdio, sozinho"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </TiltCard>
+          </Reveal>
         </div>
       </section>
 
