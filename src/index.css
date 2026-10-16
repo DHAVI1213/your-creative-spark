@@ -139,3 +139,50 @@ body {
     animation: none;
   }
 }
+
+/* logo animada: brilho pulsante + shine no hover */
+@keyframes logo-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 245, 60, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 18px 3px rgba(200, 245, 60, 0.5);
+  }
+}
+.logo-anim {
+  animation: logo-glow 3.2s ease-in-out infinite;
+}
+.logo-shine {
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%) skewX(-20deg);
+  transition: transform 0.6s ease;
+}
+.group:hover .logo-shine {
+  transform: translateX(120%) skewX(-20deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-anim {
+    animation: none;
+  }
+}
+
+/* linha gradiente animada no topo do rodapé */
+@keyframes footer-line {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.footer-line {
+  background: linear-gradient(90deg, transparent, rgba(200, 245, 60, 0.7), transparent, rgba(200, 245, 60, 0.7), transparent);
+  background-size: 200% 100%;
+  animation: footer-line 5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-line {
+    animation: none;
+  }
+}

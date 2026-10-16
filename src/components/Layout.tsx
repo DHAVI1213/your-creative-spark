@@ -3,6 +3,8 @@ import { LayoutDashboard, LogOut, Sparkles } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
+import { AnimatedLogo } from "./AnimatedLogo";
+import { Reveal } from "./Reveal";
 
 export function SiteHeader() {
   const { usuario, sair } = useAuth();
@@ -11,8 +13,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border bg-bg/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-3">
-          <img src="/logo.webp" alt="NK Software" className="h-9 w-9 rounded-lg object-cover" />
-          <span className="font-bold tracking-tight text-tprimary">
+          <AnimatedLogo />
+          <span className="font-display font-bold tracking-tight text-tprimary">
             NK <span className="text-lime">Software</span>
           </span>
         </Link>
@@ -71,19 +73,23 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-10 md:flex-row">
-        <div className="flex items-center gap-3">
-          <img src="/logo.webp" alt="NK Software" className="h-8 w-8 rounded-lg object-cover" />
-          <span className="font-bold text-tprimary">
-            NK <span className="text-lime">Software</span>
-          </span>
+    <footer className="relative border-t border-border">
+      {/* linha gradiente animada */}
+      <div className="footer-line absolute inset-x-0 top-0 h-px" aria-hidden="true" />
+      <Reveal variant="up" className="mx-auto max-w-7xl">
+        <div className="flex flex-col items-center justify-between gap-6 px-6 py-10 md:flex-row">
+          <div className="flex items-center gap-3">
+            <AnimatedLogo size="sm" />
+            <span className="font-display font-bold text-tprimary">
+              NK <span className="text-lime">Software</span>
+            </span>
+          </div>
+          <p className="text-sm text-tmuted">
+            Ferramentas profissionais para criadores de conteúdo. Feito no Brasil.
+          </p>
+          <p className="text-xs text-tmuted">© 2026 NK Software. Todos os direitos reservados.</p>
         </div>
-        <p className="text-sm text-tmuted">
-          Ferramentas profissionais para criadores de conteúdo. Feito no Brasil.
-        </p>
-        <p className="text-xs text-tmuted">© 2026 NK Software. Todos os direitos reservados.</p>
-      </div>
+      </Reveal>
     </footer>
   );
 }
@@ -95,8 +101,8 @@ export function AppShell() {
     <div className="flex min-h-screen bg-bg">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface1 p-4 md:flex">
         <Link to="/app" className="flex items-center gap-3 px-2 py-4">
-          <img src="/logo.webp" alt="NK Software" className="h-9 w-9 rounded-lg object-cover" />
-          <span className="font-bold text-tprimary">
+          <AnimatedLogo />
+          <span className="font-display font-bold text-tprimary">
             NK <span className="text-lime">Software</span>
           </span>
         </Link>
