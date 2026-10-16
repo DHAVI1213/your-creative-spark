@@ -260,7 +260,7 @@ export default function Landing() {
         {/* capa como fundo em tela cheia */}
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <img
-            src="/capa-saas.jpg"
+            src="/fundo-hero.jpg"
             alt=""
             className="h-full w-full object-cover object-center"
           />
