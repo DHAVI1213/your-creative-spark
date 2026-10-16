@@ -2,7 +2,7 @@ import { ShoppingBag } from 'lucide-react';
 import { brl } from '../../lib/utils';
 import { isPaid, type Transaction, type AdminUser, type Plan } from '../../lib/admin-metrics';
 import { Badge, Empty } from '../ui';
-export function Avatar({name}:{name:string}){return <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-lime/15 bg-lime/10 text-xs font-semibold text-lime">{name.trim().split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase()||'?'}</span>;}
+export function Avatar({name}:{name:string}){return <span className="admin-avatar flex size-9 shrink-0 items-center justify-center rounded-full border border-lime/15 bg-lime/10 text-xs font-semibold text-lime">{name.trim().split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase()||'?'}</span>;}
 export default function Transactions({items,users,plans}:{items:Transaction[];users:AdminUser[];plans:Plan[]}) {
  if(!items.length)return <Empty icon={<ShoppingBag className="size-6"/>} titulo="Nenhuma compra por aqui, ainda" descricao="As transações reais aparecerão assim que forem registradas."/>;
  const customer=(t:Transaction)=>users.find(u=>u.id===t.user_id||u.email===t.email);
