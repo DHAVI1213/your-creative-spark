@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Sparkles, BookOpen, Crown } from "lucide-react";
+import { LayoutDashboard, LogOut, Sparkles, BookOpen, Crown, ShieldCheck } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
@@ -160,6 +160,11 @@ export function AppShell() {
           </NavLink>
         </nav>
         <div className="border-t border-border pt-4">
+          {usuario?.admin && (
+            <Link to="/admin" className="mb-3 flex items-center gap-2 rounded-xl bg-lime/10 px-3 py-2 text-sm font-semibold text-lime hover:bg-lime/20">
+              <ShieldCheck className="size-4" /> Painel admin
+            </Link>
+          )}
           <div className="flex items-center gap-2 px-2 text-sm">
             <Sparkles className="size-4 text-lime" />
             <span className="truncate text-tsecondary">{usuario?.nome ?? "Visitante"}</span>

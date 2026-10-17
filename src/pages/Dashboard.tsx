@@ -8,6 +8,7 @@ import { NOME_PLANO, temAcesso } from "../lib/planos";
 export default function Dashboard() {
   const { usuario } = useAuth();
   const plano = usuario?.plano ?? "gratis";
+  const admin = !!usuario?.admin;
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
@@ -18,7 +19,7 @@ export default function Dashboard() {
           </h1>
           <p className="mt-1 text-tsecondary">Escolha uma ferramenta para começar a produzir.</p>
         </div>
-        {plano !== "gold" && (
+        {plano !== "gold" && !admin && (
           <Link
             to="/#precos"
             className="inline-flex items-center gap-2 rounded-xl bg-lime px-5 py-3 text-sm font-semibold text-black hover:brightness-110"
@@ -30,7 +31,7 @@ export default function Dashboard() {
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {FERRAMENTAS.map((f) => {
-          const bloqueada = !temAcesso(plano, f.plano);
+          const bloqueada = !temAcesso(usuario, f.plano);
           return (
             <Link
               key={f.id}
@@ -46,7 +47,7 @@ export default function Dashboard() {
                 />
                 <div className="absolute left-3 top-3 flex gap-2">
                   <Badge tone={bloqueada ? "warn" : "lime"}>
-                    {bloqueada ? `🔒 PLANO ${NOME_PLANO[f.plano].toUpperCase()}` : NOME_PLANO[f.plano].toUpperCase()}
+                    {bloqueada ? `🔒 PLANO ${NOME_PLANO[f.plano].toUpperCase()}` : admin ? "ADMIN · LIBERADO" : NOME_PLANO[f.plano].toUpperCase()}
                   </Badge>
                 </div>
               </div>
@@ -78,8 +79,8 @@ export default function Dashboard() {
             <p className="text-sm text-tsecondary">Figma Pro Education, Gemini IA (18 meses) e Framer Pro (12 meses).</p>
           </div>
         </div>
-        <Badge tone={temAcesso(plano, "gold") ? "lime" : "warn"}>
-          {temAcesso(plano, "gold") ? "LIBERAR PELO WHATSAPP" : "🔒 PLANO GOLD"}
+        <Badge tone={temAcesso(usuario, "gold") ? "lime" : "warn"}>
+          {temAcesso(usuario, "gold") ? "LIBERAR PELO WHATSAPP" : "🔒 PLANO GOLD"}
         </Badge>
       </Link>
     </div>

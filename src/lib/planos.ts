@@ -14,6 +14,8 @@ export const NOME_PLANO: Record<Nivel, string> = {
 };
 
 /** O plano do usuário libera algo que exige `minimo`? */
-export function temAcesso(plano: Usuario["plano"] | undefined, minimo: PlanoMinimo) {
-  return ORDEM_PLANOS.indexOf(plano ?? "gratis") >= ORDEM_PLANOS.indexOf(minimo);
+export function temAcesso(quem: Usuario["plano"] | Usuario | null | undefined, minimo: PlanoMinimo) {
+  if (quem && typeof quem === "object" && quem.admin) return true; // o dono usa tudo de graça
+  const plano: Nivel = typeof quem === "string" ? quem : (quem?.plano ?? "gratis");
+  return ORDEM_PLANOS.indexOf(plano) >= ORDEM_PLANOS.indexOf(minimo);
 }

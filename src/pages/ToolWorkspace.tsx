@@ -36,7 +36,7 @@ export default function ToolWorkspace() {
   if (!usuario) return <Navigate to="/entrar" replace />;
   if (!ferramenta) return <NotFound />;
 
-  const bloqueada = !temAcesso(usuario.plano, ferramenta.plano);
+  const bloqueada = !temAcesso(usuario, ferramenta.plano);
   const Body = WORKSPACES[ferramenta.id];
   if (!Body) return <NotFound />;
 

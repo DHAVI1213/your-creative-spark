@@ -11,7 +11,7 @@ import { brl } from "../lib/utils";
 export default function PlanoGold() {
   const { usuario } = useAuth();
   const settings = useSiteSettings();
-  const gold = temAcesso(usuario?.plano, "gold");
+  const gold = temAcesso(usuario, "gold");
   const plano = settings.plans.find((p) => p.id === "gold");
   const preco = brl((plano?.price_cents ?? 50000) / 100);
   const numero = settings.content.whatsapp_gold?.trim() ?? "";
@@ -27,7 +27,7 @@ export default function PlanoGold() {
           <h1 className="mt-2 text-3xl font-bold tracking-tight">Arsenal Gold</h1>
           <p className="mt-1 text-tsecondary">As IAs e ferramentas pro que todo criador precisa, incluídas no plano Gold.</p>
         </div>
-        {gold && <span className="rounded-full bg-lime px-4 py-1.5 text-sm font-semibold text-black">Você é Gold ✨</span>}
+        {gold && <span className="rounded-full bg-lime px-4 py-1.5 text-sm font-semibold text-black">{usuario?.admin ? "Admin: acesso total" : "Você é Gold ✨"}</span>}
       </div>
 
       <div className="mt-8 grid gap-6 md:grid-cols-3">
