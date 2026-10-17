@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Sparkles } from "lucide-react";
+import { LayoutDashboard, LogOut, Sparkles, BookOpen } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
@@ -134,6 +134,18 @@ export function AppShell() {
               <span className="truncate">{f.nome}</span>
             </NavLink>
           ))}
+          <NavLink
+            to="/app/tutoriais"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
+              )
+            }
+          >
+            <BookOpen className="size-5 shrink-0" />
+            <span className="truncate">Tutoriais</span>
+          </NavLink>
         </nav>
         <div className="border-t border-border pt-4">
           <div className="flex items-center gap-2 px-2 text-sm">

@@ -453,6 +453,7 @@ export default function CortesVirais({ onMesa, recebido }: { onMesa: (itens: Cor
               </>,
             )}
           <p className="text-xs text-tmuted">{DICAS[ia.provedor]}</p>
+          <a href="/app/tutoriais#ia-local" className="text-xs text-lime underline">Tutorial: IA no seu PC (lista por PC fraco, médio e forte) e chaves grátis</a>
           {ia.provedor !== "nenhum" && (
             <Button variant="outline" className="!py-2 text-xs" onClick={() => void testar()}>
               Testar conexão
@@ -492,7 +493,7 @@ export default function CortesVirais({ onMesa, recebido }: { onMesa: (itens: Cor
         </Button>
       </aside>
 
-      <main className="min-w-0 space-y-4">
+      <section className="min-w-0 space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-lime">Cortes virais</p>
@@ -598,7 +599,7 @@ export default function CortesVirais({ onMesa, recebido }: { onMesa: (itens: Cor
           </Card>
         )}
         <p className="text-[11px] text-tmuted">Dica: mantenha esta aba aberta enquanto gera: o processamento acontece no seu navegador.</p>
-      </main>
+      </section>
     </div>
   );
 }

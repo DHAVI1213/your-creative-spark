@@ -36,7 +36,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     id: "limpador",
     nome: "Limpador de Metadados",
-    descricao: "Remove localização, aparelho e datas das suas fotos e vídeos, sem upload.",
+    descricao: "Remove localização, aparelho e datas de fotos e vídeos (até pastas inteiras), sem refazer o vídeo.",
     icone: ImageOff,
     plano: "gratis",
     imagem: img("limpador"),
@@ -52,7 +52,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     id: "editor",
     nome: "Editor em Massa",
-    descricao: "Aplique o mesmo texto e marca d'água em vários vídeos de uma vez.",
+    descricao: "Edite um vídeo e aplique em todos: recorte, efeitos, legenda animada, capa, Cortes Virais com IA.",
     icone: Scissors,
     plano: "pro",
     imagem: img("editor"),
@@ -76,7 +76,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     id: "agendador",
     nome: "Agendador",
-    descricao: "Agende Reels, Stories e posts com data e hora.",
+    descricao: "Agende em massa no Instagram, YouTube e TikTok, em várias contas, e publique com o PC desligado.",
     icone: CalendarClock,
     plano: "pro",
     imagem: img("agendador"),
