@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { Crown, Lock } from "lucide-react";
 import { Button, Card } from "./ui";
+import { useSiteSettings } from "../lib/site-settings";
+import { brl } from "../lib/utils";
 
 export default function Paywall({ ferramenta }: { ferramenta: string }) {
+  const pro = useSiteSettings().plans.find((p) => p.id === "pro");
+  const preco = brl((pro?.price_cents ?? 5000) / 100);
   return (
     <div className="mx-auto max-w-lg px-6 py-20">
       <Card className="text-center">
@@ -15,9 +19,9 @@ export default function Paywall({ ferramenta }: { ferramenta: string }) {
           para desbloquear as 8 ferramentas.
         </p>
         <div className="mt-6 flex flex-col gap-3">
-          <Link to="/checkout">
+          <Link to="/checkout?plano=pro">
             <Button className="w-full">
-              <Crown className="size-4" /> Assinar o Pro — R$ 47/mês
+              <Crown className="size-4" /> Assinar o Pro — {preco}/mês
             </Button>
           </Link>
           <Link to="/app">

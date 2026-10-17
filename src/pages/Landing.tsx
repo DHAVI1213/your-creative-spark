@@ -49,6 +49,7 @@ const PASSOS = [
 
 const PLANOS = [
   {
+    id: "basico",
     nome: "Básico",
     preco: "R$ 25",
     periodo: "/mês",
@@ -64,6 +65,7 @@ const PLANOS = [
     ],
   },
   {
+    id: "pro",
     nome: "Pro",
     preco: "R$ 50",
     periodo: "/mês",
@@ -77,6 +79,7 @@ const PLANOS = [
     ],
   },
   {
+    id: "elite",
     nome: "Elite",
     preco: "R$ 100",
     periodo: "/mês",
@@ -93,6 +96,7 @@ const PLANOS = [
     ],
   },
   {
+    id: "gold",
     nome: "Gold",
     preco: "R$ 500",
     periodo: "pagamento único",
@@ -232,7 +236,7 @@ function Faq({ q, a }: { q: string; a: string }) {
 export default function Landing() {
   const heroRef = useRef<HTMLDivElement>(null);
   const settings = useSiteSettings();
-  const planos = PLANOS.map(p => { const saved = settings.plans.find(x => x.name === p.nome); return saved ? { ...p, preco: brl(saved.price_cents / 100) } : p; });
+  const planos = PLANOS.map(p => { const saved = settings.plans.find(x => x.id === p.id); return saved ? { ...p, preco: brl(saved.price_cents / 100) } : p; });
   const depoimentos = settings.content.testimonials ?? DEPOIMENTOS;
   const faqs = settings.content.faq ?? FAQS;
 
@@ -460,7 +464,7 @@ export default function Landing() {
                 ))}
               </ul>
               <Link
-                to="/entrar"
+                to={`/checkout?plano=${p.id}`}
                 className={cn(
                   "btn-shine mt-8 block rounded-xl py-3 text-center font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]",
                   p.destaque

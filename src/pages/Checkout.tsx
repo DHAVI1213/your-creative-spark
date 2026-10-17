@@ -1,20 +1,31 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BadgeCheck, CreditCard, Lock } from "lucide-react";
-import { useAuth } from "../lib/auth";
+import { useAuth, type PlanoPago } from "../lib/auth";
+import { useSiteSettings } from "../lib/site-settings";
 import { Button, Card, Input, Label } from "../components/ui";
 import { SiteHeader } from "../components/Layout";
 import { brl } from "../lib/utils";
 
-const PLANOS = [
-  { id: "pro" as const, nome: "Pro", preco: 47, desc: "Todas as 8 ferramentas, uso ilimitado." },
-  { id: "elite" as const, nome: "Elite", preco: 97, desc: "Tudo do Pro + onboarding 1:1 e grupo fechado." },
+/** Valores padrão — os preços reais vêm do painel admin (Configurações > Preços dos planos). */
+const PLANOS: { id: PlanoPago; nome: string; preco: number; unico: boolean; desc: string }[] = [
+  { id: "basico", nome: "Básico", preco: 25, unico: false, desc: "Limpador, Clonador, Legendas e Propostas." },
+  { id: "pro", nome: "Pro", preco: 50, unico: false, desc: "Todas as ferramentas, exceto o Agendador." },
+  { id: "elite", nome: "Elite", preco: 100, unico: false, desc: "Tudo do Pro + Agendador, suporte e onboarding 1:1." },
+  { id: "gold", nome: "Gold", preco: 500, unico: true, desc: "Tudo do Elite + Figma, Gemini e Framer." },
 ];
 
 export default function Checkout() {
   const { usuario, assinar } = useAuth();
   const nav = useNavigate();
-  const [plano, setPlano] = useState<"pro" | "elite">("pro");
+  const settings = useSiteSettings();
+  const [params] = useSearchParams();
+  const planos = PLANOS.map((x) => {
+    const salvo = settings.plans.find((p) => p.id === x.id);
+    return salvo ? { ...x, nome: salvo.name, preco: salvo.price_cents / 100, unico: !salvo.recurring } : x;
+  });
+  const inicial = planos.find((x) => x.id === params.get("plano"))?.id ?? "pro";
+  const [plano, setPlano] = useState<PlanoPago>(inicial);
   const [nome, setNome] = useState("");
   const [cartao, setCartao] = useState("");
   const [ok, setOk] = useState(false);
@@ -33,7 +44,7 @@ export default function Checkout() {
     );
   }
 
-  const p = PLANOS.find((x) => x.id === plano)!;
+  const p = planos.find((x) => x.id === plano)!;
 
   const pagar = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +73,7 @@ export default function Checkout() {
         ) : (
           <div className="mt-8 grid gap-6">
             <div className="grid grid-cols-2 gap-4">
-              {PLANOS.map((x) => (
+              {planos.map((x) => (
                 <button
                   key={x.id}
                   onClick={() => setPlano(x.id)}
@@ -71,7 +82,7 @@ export default function Checkout() {
                   }`}
                 >
                   <p className="font-bold">{x.nome}</p>
-                  <p className="mt-1 text-2xl font-bold text-lime">{brl(x.preco)}<span className="text-sm text-tmuted">/mês</span></p>
+                  <p className="mt-1 text-2xl font-bold text-lime">{brl(x.preco)}<span className="text-sm text-tmuted">{x.unico ? " único" : "/mês"}</span></p>
                   <p className="mt-2 text-xs text-tsecondary">{x.desc}</p>
                 </button>
               ))}

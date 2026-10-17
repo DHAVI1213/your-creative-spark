@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from '../integrations/supabase/client';
 
+export type PlanoPago = "basico" | "pro" | "elite" | "gold";
 export type Usuario = { nome: string; email: string; plano: "gratis" | "basico" | "pro" | "elite" | "gold" };
 
 const CHAVE = "nk_usuario";
@@ -19,7 +20,7 @@ const AuthCtx = createContext<{
   carregando: boolean;
   entrar: (nome: string, email: string) => void;
   sair: () => void;
-  assinar: (plano: "pro" | "elite") => void;
+  assinar: (plano: PlanoPago) => void;
 }>({ usuario: null, carregando: true, entrar: () => {}, sair: () => {}, assinar: () => {} });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUsuario(null);
   }, []);
 
-  const assinar = useCallback((plano: "pro" | "elite") => {
+  const assinar = useCallback((plano: PlanoPago) => {
     setUsuario((u) => {
       if (!u) return u;
       const novo = { ...u, plano };
