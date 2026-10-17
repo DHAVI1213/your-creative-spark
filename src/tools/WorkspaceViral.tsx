@@ -132,7 +132,7 @@ export default function WorkspaceViral() {
       <ExtensaoCard
         nome="Minerador Viral"
         arquivo="/downloads/minerador-viral.zip"
-        versao="1.3.0"
+        versao="1.3.1"
         resumo="Encontra os vídeos que mais performaram num perfil do Instagram, TikTok ou YouTube Shorts (acima da média, potencial viral, mais vistos…), baixa em massa e manda direto para o Editor em Massa e os Cortes Virais."
         usar={[
           <>Clique no ícone 📈 da extensão: o painel abre do lado da página.</>,
