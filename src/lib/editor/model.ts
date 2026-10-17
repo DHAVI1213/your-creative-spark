@@ -15,6 +15,6 @@ export type EditorJob = { id:string; file:File; url:string; name:string; meta:Me
 export type Profile = { id?:string; name:string; settings:Settings; is_default:boolean };
 export type Scope = 'este'|'selecao'|'todos';
 export function targetIds(jobs:EditorJob[], current:string, selected:string[], scope:Scope) {return jobs.filter(j=>scope==='todos'||(scope==='este'?j.id===current:selected.includes(j.id))).map(j=>j.id);}
-export function captionsFromLines(text:string) {return text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).map(s=>s.replace(/\|/g,'\n'));}
+export function captionsFromLines(text:string) {return text.split(/\r?\n/).map(s=>s.trim().replace(/\s*\|\s*/g,'\n'));}
 export function outputName(name:string) {return name.replace(/\.[^.]+$/,'')+'_editado.mp4';}
 export function memoryWarning(fileBytes:number, width:number,height:number) {const estimated=fileBytes*3+width*height*64+256*1024*1024;return {estimated,large:fileBytes>200*1024*1024||estimated>1024**3,blocked:fileBytes>=1024**3||estimated>1800*1024*1024};}
