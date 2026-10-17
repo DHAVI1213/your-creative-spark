@@ -155,9 +155,9 @@ import * as S from './shared.js';
       const dx = bx - (L.sw - L.dw) / 2, dy = by - (L.sh - L.dh) / 2;
       if (o.frame) {
         const fw = o.frame.videoWidth || o.frame.naturalWidth || o.frame.width;
-        const r = fw / o.meta.width; // quadro pode vir em outra escala
+        const r = fw / o.meta.width; const ry = (o.frame.videoHeight || o.frame.naturalHeight || o.frame.height) / o.meta.height; // quadro pode vir em outra escala
         ctx.filter = filt;
-        ctx.drawImage(o.frame, L.left * r, L.top * r, L.cw * r, L.ch * r, dx, dy, L.sw, L.sh);
+        ctx.drawImage(o.frame, L.left * r, L.top * ry, L.cw * r, L.ch * ry, dx, dy, L.sw, L.sh);
         ctx.filter = 'none';
         const fx = S.filtroSpec(e);
         if (fx && fx.vin) drawVinheta(ctx, fx.vin, dx, dy, L.sw, L.sh);

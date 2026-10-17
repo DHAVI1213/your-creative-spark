@@ -4,7 +4,7 @@ import type {EditorJob,Settings} from '../../lib/editor/model';
 import {even} from '../../lib/editor/shared.js';
 type Rect={x:number;y:number;w:number;h:number};
 export default function CropDialog({job,s,close,commit}:{job:EditorJob;s:Settings;close:()=>void;commit:(r:Settings['recorte'])=>void}){const {width:W,height:H}=job.meta;const [ratio,setRatio]=useState(0);const [r,setR]=useState<Rect>({x:s.recorte.left,y:s.recorte.top,w:W-s.recorte.left-s.recorte.right,h:H-s.recorte.top-s.recorte.bottom});const svg=useRef<SVGSVGElement>(null);const drag=useRef<{mode:string;x:number;y:number;rect:Rect}|null>(null);
- const apply=()=>commit({...s.recorte,left:even(r.x),top:even(r.y),right:even(Math.max(0,W-r.x-r.w)),bottom:even(Math.max(0,H-r.y-r.h))});
+ const apply=()=>{const left=even(Math.max(0,Math.min(W-16,r.x))),top=even(Math.max(0,Math.min(H-16,r.y)));const w=even(Math.max(16,Math.min(W-left,r.w))),h=even(Math.max(16,Math.min(H-top,r.h)));commit({...s.recorte,left,top,right:W-left-w,bottom:H-top-h});};
  useEffect(()=>{const handler=(e:KeyboardEvent)=>{if(e.key==='Escape')close();if(e.key==='Enter')apply();};window.addEventListener('keydown',handler);return()=>window.removeEventListener('keydown',handler);});
  const point=(e:React.PointerEvent)=>{const box=svg.current?.getBoundingClientRect();if(!box)return {x:0,y:0};return {x:(e.clientX-box.left)*W/box.width,y:(e.clientY-box.top)*H/box.height};};
  const constrain=(v:Rect)=>{let {x,y,w,h}=v;w=Math.min(W,Math.max(Math.min(32,W),w));h=Math.min(H,Math.max(Math.min(32,H),h));if(ratio){h=w/ratio;if(h>H){h=H;w=h*ratio;}}x=Math.max(0,Math.min(W-w,x));y=Math.max(0,Math.min(H-h,y));return {x,y,w,h};};
