@@ -4,3 +4,4 @@
 - Expose only allowlisted public settings through a read-only function; administrative tables remain admin-only under RLS.
 - Track authenticated tool workspace openings as usage sessions and heartbeat activity separately; do not imply completed processing or anonymous users are tracked.
 - Keep shared client presentation unchanged and apply published settings through a provider and route boundary.
+- Keep the browser batch editor isolated in lib/editor and tools/editor with a single shared layout/filter model, a sequential cancellable wasm worker and owner-scoped profiles; this preserves reference fidelity without importing desktop code.

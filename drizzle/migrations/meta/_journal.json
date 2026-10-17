@@ -8,6 +8,13 @@
       "when": 1792193641736,
       "tag": "0000_nk_owner_panel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792194825621,
+      "tag": "0001_editor_profiles",
+      "breakpoints": true
     }
   ]
 }
