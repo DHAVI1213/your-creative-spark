@@ -371,10 +371,11 @@ export async function cortar(m: Montado, c: { s: number; e: number }, aoProgress
   const parar = () => void import("../editor/engine").then((e) => e.cancelEngine());
   sinal.addEventListener("abort", parar, { once: true });
   m.f.on("progress", ouvir);
+  const threads = (await import("../editor/engine")).engineThreads();
   try {
     const code = await m.f.exec([
       "-y", "-hide_banner", "-ss", c.s.toFixed(3), "-i", m.caminho, "-t", dur.toFixed(3),
-      "-map", "0:v:0", "-map", "0:a:0?", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "18", "-pix_fmt", "yuv420p",
+      "-map", "0:v:0", "-map", "0:a:0?", "-c:v", "libx264", "-preset", "ultrafast", "-threads", String(threads), "-crf", "18", "-pix_fmt", "yuv420p",
       "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-map_metadata", "-1", "-movflags", "+faststart", saida,
     ]);
     if (sinal.aborted) throw new Error("Cancelado");

@@ -1,3 +1,4 @@
+import { ehCelular } from "../../lib/dispositivo";
 import { useEffect, useRef, useState } from "react";
 import { Download, Flame, Loader2, Scissors, Send, Square, Upload } from "lucide-react";
 import { zipSync } from "fflate";
@@ -498,6 +499,11 @@ export default function CortesVirais({ onMesa, recebido }: { onMesa: (itens: Cor
                 <option key={k} value={k}>{n}</option>
               ))}
             </Select>,
+          )}
+          {ehCelular() && trans.motor.startsWith("navegador") && (
+            <p className="rounded-lg border border-lime/30 bg-lime/5 p-2 text-[11px] text-tsecondary">
+              No celular, transcrever no navegador é lento. Escolha <b>Groq</b> (grátis com chave): transcreve em segundos.
+            </p>
           )}
           {(trans.motor === "groq" || trans.motor === "openai") &&
             campo(

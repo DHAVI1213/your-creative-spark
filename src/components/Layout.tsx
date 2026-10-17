@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Sparkles, BookOpen, Crown, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { LayoutDashboard, LogOut, Sparkles, BookOpen, Crown, ShieldCheck, Menu, X } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { FERRAMENTAS } from "../lib/tools";
 import { cn } from "../lib/utils";
@@ -94,9 +95,95 @@ export function SiteFooter() {
   );
 }
 
-export function AppShell() {
+function MenuApp({ fechar }: { fechar?: () => void }) {
   const { usuario, sair } = useAuth();
   const nav = useNavigate();
+  return (
+    <>
+      <nav className="mt-2 flex-1 space-y-1 overflow-y-auto">
+        <NavLink
+        onClick={fechar}
+          to="/app"
+          end
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
+            )
+          }
+        >
+          <LayoutDashboard className="size-5" /> Painel
+        </NavLink>
+        {FERRAMENTAS.map((f) => (
+          <NavLink
+        onClick={fechar}
+            key={f.id}
+            to={`/app/${f.id}`}
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
+              )
+            }
+          >
+            <f.icone className="size-5 shrink-0" />
+            <span className="truncate">{f.nome}</span>
+          </NavLink>
+        ))}
+        <NavLink
+        onClick={fechar}
+          to="/app/gold"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              isActive ? "bg-lime/15 text-lime" : "text-lime/80 hover:bg-surface2 hover:text-lime",
+            )
+          }
+        >
+          <Crown className="size-5 shrink-0" />
+          <span className="truncate">Plano Gold</span>
+        </NavLink>
+        <NavLink
+        onClick={fechar}
+          to="/app/tutoriais"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
+            )
+          }
+        >
+          <BookOpen className="size-5 shrink-0" />
+          <span className="truncate">Tutoriais</span>
+        </NavLink>
+      </nav>
+      <div className="border-t border-border pt-4">
+        {usuario?.admin && (
+          <Link to="/admin" onClick={fechar} className="mb-3 flex items-center gap-2 rounded-xl bg-lime/10 px-3 py-2 text-sm font-semibold text-lime hover:bg-lime/20">
+            <ShieldCheck className="size-4" /> Painel admin
+          </Link>
+        )}
+        <div className="flex items-center gap-2 px-2 text-sm">
+          <Sparkles className="size-4 text-lime" />
+          <span className="truncate text-tsecondary">{usuario?.nome ?? "Visitante"}</span>
+        </div>
+        <button
+          onClick={() => {
+            sair();
+            nav("/");
+          }}
+          className="mt-2 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-tmuted hover:text-tprimary"
+        >
+          <LogOut className="size-4" /> Sair
+        </button>
+      </div>
+    </>
+  );
+}
+
+export function AppShell() {
+  const [aberto, setAberto] = useState(false);
+  const fechar = () => setAberto(false);
   return (
     <div className="flex min-h-screen bg-bg">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface1 p-4 md:flex">
@@ -106,86 +193,33 @@ export function AppShell() {
             NK <span className="text-lime">Software</span>
           </span>
         </Link>
-        <nav className="mt-2 flex-1 space-y-1 overflow-y-auto">
-          <NavLink
-            to="/app"
-            end
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
-              )
-            }
-          >
-            <LayoutDashboard className="size-5" /> Painel
-          </NavLink>
-          {FERRAMENTAS.map((f) => (
-            <NavLink
-              key={f.id}
-              to={`/app/${f.id}`}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
-                )
-              }
-            >
-              <f.icone className="size-5 shrink-0" />
-              <span className="truncate">{f.nome}</span>
-            </NavLink>
-          ))}
-          <NavLink
-            to="/app/gold"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive ? "bg-lime/15 text-lime" : "text-lime/80 hover:bg-surface2 hover:text-lime",
-              )
-            }
-          >
-            <Crown className="size-5 shrink-0" />
-            <span className="truncate">Plano Gold</span>
-          </NavLink>
-          <NavLink
-            to="/app/tutoriais"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive ? "bg-lime/15 text-lime" : "text-tsecondary hover:bg-surface2 hover:text-tprimary",
-              )
-            }
-          >
-            <BookOpen className="size-5 shrink-0" />
-            <span className="truncate">Tutoriais</span>
-          </NavLink>
-        </nav>
-        <div className="border-t border-border pt-4">
-          {usuario?.admin && (
-            <Link to="/admin" className="mb-3 flex items-center gap-2 rounded-xl bg-lime/10 px-3 py-2 text-sm font-semibold text-lime hover:bg-lime/20">
-              <ShieldCheck className="size-4" /> Painel admin
-            </Link>
-          )}
-          <div className="flex items-center gap-2 px-2 text-sm">
-            <Sparkles className="size-4 text-lime" />
-            <span className="truncate text-tsecondary">{usuario?.nome ?? "Visitante"}</span>
-          </div>
-          <button
-            onClick={() => {
-              sair();
-              nav("/");
-            }}
-            className="mt-2 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-tmuted hover:text-tprimary"
-          >
-            <LogOut className="size-4" /> Sair
-          </button>
-        </div>
+        <MenuApp />
       </aside>
+      {aberto && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+          <button aria-label="Fechar menu" className="absolute inset-0 bg-black/60" onClick={fechar} />
+          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-border bg-surface1 p-4">
+            <div className="flex items-center justify-between px-2 py-3">
+              <span className="font-display font-bold text-tprimary">
+                NK <span className="text-lime">Software</span>
+              </span>
+              <button aria-label="Fechar menu" onClick={fechar} className="rounded-lg p-2 text-tsecondary">
+                <X className="size-5" />
+              </button>
+            </div>
+            <MenuApp fechar={fechar} />
+          </aside>
+        </div>
+      )}
       <main className="min-w-0 flex-1">
-        <div className="border-b border-border bg-surface1 px-6 py-3 md:hidden">
+        <div className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-surface1/95 px-4 py-2.5 backdrop-blur md:hidden">
           <Link to="/app" className="flex items-center gap-2">
             <img src="/logo.webp" alt="NK" className="h-7 w-7 rounded-lg object-cover" />
-            <span className="font-bold text-tprimary text-sm">NK Software</span>
+            <span className="text-sm font-bold text-tprimary">NK Software</span>
           </Link>
+          <button aria-label="Abrir menu" onClick={() => setAberto(true)} className="rounded-xl border border-border p-2 text-tprimary">
+            <Menu className="size-5" />
+          </button>
         </div>
         <Outlet />
       </main>

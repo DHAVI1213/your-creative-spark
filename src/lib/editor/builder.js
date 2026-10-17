@@ -158,7 +158,7 @@ export function buildArgs(job, paths) {
 
   // opções com :0 valem só para o vídeo principal (a miniatura embutida é o stream v:1)
   const rate = ['-b:v:0', `${br}M`, '-maxrate:v:0', `${Math.round(br * 1.5)}M`, '-bufsize:v:0', `${br * 2}M`];
-  args.push('-c:v:0', 'libx264', '-preset:v:0', 'ultrafast', '-threads:v:0', '1', ...rate, '-profile:v:0', 'high');
+  args.push('-c:v:0', 'libx264', '-preset:v:0', 'ultrafast', '-threads:v:0', String(paths.threads || 1), ...rate, '-profile:v:0', 'high');
   if (embed) args.push('-c:v:1', 'mjpeg', '-disposition:v:1', 'attached_pic');
   // apaga todos os metadados: data de criação, aparelho, local, programa/encoder usado,
   // capítulos e as informações que o codificador grava dentro do vídeo (SEI)
