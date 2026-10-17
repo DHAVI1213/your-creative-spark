@@ -115,7 +115,61 @@ export async function readVideoMeta(file: File): Promise<MetaEntry[]> {
   }
 }
 
-export async function cleanVideo(file: File, onProgress?: (ratio: number) => void): Promise<Blob> {
+export type StreamInfo = { index: number; tipo: "video" | "audio" | "outro"; codec: string; capa: boolean };
+export type ProbeInfo = { duracao: number; streams: StreamInfo[] };
+
+/** Lê duração e faixas a partir do log do FFmpeg (no navegador não há ffprobe). */
+export function parseProbe(lines: string[]): ProbeInfo {
+  let duracao = 0;
+  const streams: StreamInfo[] = [];
+  for (const line of lines) {
+    const d = line.match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+    if (d) duracao = Number(d[1]) * 3600 + Number(d[2]) * 60 + Number(d[3]);
+    const s = line.match(/Stream #0:(\d+)[^:]*:\s*(Video|Audio|Data|Subtitle|Attachment):\s*([a-z0-9_]+)/i);
+    if (s) {
+      const t = (s[2] ?? "").toLowerCase();
+      streams.push({
+        index: Number(s[1]),
+        tipo: t === "video" ? "video" : t === "audio" ? "audio" : "outro",
+        codec: (s[3] ?? "").toLowerCase(),
+        capa: /attached pic/i.test(line),
+      });
+    }
+  }
+  return { duracao, streams };
+}
+
+/** Monta o comando de limpeza igual ao limpar-metadados.js do desktop. */
+export function cleanArgs(input: string, output: string, ext: string, probe: ProbeInfo, removerSei: boolean): string[] {
+  const args = ["-hide_banner", "-loglevel", "error", "-i", input];
+  const uteis = probe.streams.filter((s) => s.tipo !== "outro");
+  // Vídeo (inclusive a capa embutida) e áudio. Faixas de dados (GPS do iPhone/Android) e legendas saem.
+  for (const s of uteis) args.push("-map", `0:${s.index}`);
+  args.push("-c", "copy", "-map_metadata", "-1", "-map_chapters", "-1", "-fflags", "+bitexact");
+  uteis.forEach((s, o) => {
+    args.push(`-metadata:s:${o}`, "encoder= ", `-metadata:s:${o}`, "handler_name= ", `-metadata:s:${o}`, "creation_time=");
+    // Apaga as informações que o codificador grava dentro do vídeo (SEI).
+    if (removerSei && s.tipo === "video" && !s.capa) {
+      if (s.codec === "h264") args.push(`-bsf:${o}`, "filter_units=remove_types=6");
+      else if (s.codec === "hevc") args.push(`-bsf:${o}`, "filter_units=remove_types=39|40");
+    }
+  });
+  if (ext === "mp4" || ext === "mov" || ext === "m4v") args.push("-movflags", "+faststart");
+  args.push(output);
+  return args;
+}
+
+async function probe(ffmpeg: FFmpeg, nome: string): Promise<ProbeInfo> {
+  return parseProbe(await runWithLogs(ffmpeg, ["-hide_banner", "-i", nome]));
+}
+
+export type CleanResult = { blob: Blob; removidos: number };
+
+/**
+ * Limpa sem refazer o vídeo (mesma qualidade e tamanho, capa embutida mantida) e confere
+ * antes de entregar: o resultado precisa ter a mesma duração e as mesmas faixas.
+ */
+export async function cleanVideo(file: File, onProgress?: (ratio: number) => void): Promise<CleanResult> {
   const ffmpeg = await loadFFmpeg();
   const { input, output, ext } = uniqueName(file);
   const { fetchFile } = await import("@ffmpeg/util");
@@ -123,38 +177,57 @@ export async function cleanVideo(file: File, onProgress?: (ratio: number) => voi
 
   const progress = ({ progress }: { progress: number }) =>
     onProgress?.(Math.max(0, Math.min(1, progress)));
-  ffmpeg.on("progress", progress);
   try {
-    const code = await ffmpeg.exec([
-      "-hide_banner",
-      "-i",
-      input,
-      // Só vídeo e áudio: descarta faixas de dados (onde iPhone e Android guardam GPS).
-      "-map",
-      "0:v?",
-      "-map",
-      "0:a?",
-      "-map_metadata",
-      "-1",
-      "-map_chapters",
-      "-1",
-      "-c",
-      "copy",
-      "-fflags",
-      "+bitexact",
-      "-flags:v",
-      "+bitexact",
-      "-flags:a",
-      "+bitexact",
-      ...(ext === "mp4" || ext === "mov" || ext === "m4v" ? ["-movflags", "+faststart"] : []),
-      output,
-    ]);
+    const logAntes = await runWithLogs(ffmpeg, ["-hide_banner", "-i", input]);
+    const original = parseProbe(logAntes);
+    const removidos = parseMetadata(logAntes).length;
+    const uteis = original.streams.filter((s) => s.tipo !== "outro").length;
+    if (!uteis) throw new Error("Não achei vídeo nem áudio nesse arquivo.");
+
+    ffmpeg.on("progress", progress);
+    let code = await ffmpeg.exec(cleanArgs(input, output, ext, original, true));
+    // Se o filtro de SEI não existir nessa versão do FFmpeg, limpa o resto mesmo assim.
+    if (code !== 0) code = await ffmpeg.exec(cleanArgs(input, output, ext, original, false));
+    ffmpeg.off("progress", progress);
     if (code !== 0) throw new Error("O FFmpeg não conseguiu processar esse vídeo.");
+
+    const limpo = await probe(ffmpeg, output);
+    if (limpo.streams.length !== uteis || Math.abs(limpo.duracao - original.duracao) > 0.25) {
+      throw new Error("O resultado não bateu com o original (nada foi alterado).");
+    }
     const data = await ffmpeg.readFile(output);
-    return new Blob([data as BlobPart], { type: file.type || "video/mp4" });
+    return { blob: new Blob([data as BlobPart], { type: file.type || "video/mp4" }), removidos };
   } finally {
     ffmpeg.off("progress", progress);
     await ffmpeg.deleteFile(input).catch(() => {});
     await ffmpeg.deleteFile(output).catch(() => {});
   }
+}
+
+/** Pasta de um arquivo escolhido por pasta ("" quando veio solto). */
+export function pastaDe(caminho: string): string {
+  const i = caminho.lastIndexOf("/");
+  return i < 0 ? "" : caminho.slice(0, i);
+}
+
+/**
+ * Nomes "vídeo 1", "vídeo 2"... com numeração separada por pasta, na ordem do Explorer
+ * (ordem natural pt-BR). Recebe os caminhos relativos e devolve o novo caminho de cada um.
+ */
+export function nomesSequenciais(caminhos: string[]): Map<string, string> {
+  const porPasta = new Map<string, string[]>();
+  for (const c of caminhos) {
+    const p = pastaDe(c);
+    porPasta.set(p, [...(porPasta.get(p) ?? []), c]);
+  }
+  const base = (c: string) => c.slice(c.lastIndexOf("/") + 1);
+  const ordem = (a: string, b: string) => base(a).localeCompare(base(b), "pt-BR", { numeric: true, sensitivity: "base" });
+  const out = new Map<string, string>();
+  for (const [pasta, lista] of porPasta) {
+    [...lista].sort(ordem).forEach((c, i) => {
+      const ext = (base(c).match(/\.[^.]+$/)?.[0] ?? ".mp4").toLowerCase();
+      out.set(c, `${pasta ? pasta + "/" : ""}vídeo ${i + 1}${ext}`);
+    });
+  }
+  return out;
 }
