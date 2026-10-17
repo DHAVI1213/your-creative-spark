@@ -43,7 +43,7 @@ const PASSOS = [
   {
     n: "03",
     titulo: "Produza e publique",
-    texto: "Limpe, edite, clone, agende e venda — direto do navegador.",
+    texto: "Limpe, edite, clone, agende e venda — no navegador e no seu próprio PC.",
   },
 ];
 
@@ -191,11 +191,11 @@ const ARSENAL = [
 const FAQS = [
   {
     q: "Preciso instalar alguma coisa?",
-    a: "Não. Tudo roda no navegador: você envia os arquivos, processa e baixa o resultado. Nada sai do seu computador sem você mandar.",
+    a: "Para começar, não: o Editor em Massa, os Cortes Virais e o Limpador rodam no navegador. Algumas ferramentas vão além com instalação rápida e grátis: as extensões do Chrome (Minerador Viral, Clonador de Sites e Minerador de Clientes), o servidor grátis do Agendador na Cloudflare e, se quiser, a IA no seu PC. Cada uma tem tutorial passo a passo.",
   },
   {
     q: "Meus arquivos são enviados para algum servidor?",
-    a: "Não. O processamento é 100% local, no seu navegador. Fotos, vídeos e sites clonados nunca passam pelos nossos servidores.",
+    a: "Não. Fotos, vídeos e sites clonados são processados no seu navegador e nunca passam pelos nossos servidores. Os posts agendados ficam no seu próprio servidor grátis da Cloudflare, e a IA roda no seu PC ou com a sua chave do Gemini/Groq.",
   },
   {
     q: "Posso cancelar quando quiser?",
@@ -283,7 +283,7 @@ export default function Landing() {
             {settings.content.hero_title || <>Produza conteúdo como um <span className="bg-gradient-to-r from-lime via-lime to-emerald-300 bg-clip-text text-transparent">estúdio</span>, sozinho.</>}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-tsecondary">
-            {settings.content.hero_description || 'Limpe metadados, clone sites, edite vídeos em massa, ache clientes e agende posts — tudo num painel só, direto do navegador.'}
+            {settings.content.hero_description || 'Limpe metadados, clone sites, edite vídeos em massa, ache clientes e agende posts — tudo num painel só, com extensões e servidor grátis para ir além.'}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
@@ -301,10 +301,10 @@ export default function Landing() {
           </div>
           <div className="mt-8 flex items-center justify-center gap-6 text-sm text-tmuted">
             <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="size-4 text-lime" /> 100% no navegador
+              <ShieldCheck className="size-4 text-lime" /> Seus arquivos ficam com você
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Clock3 className="size-4 text-lime" /> Sem instalação
+              <Clock3 className="size-4 text-lime" /> Tutorial de cada passo
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Zap className="size-4 text-lime" /> Cancele quando quiser
