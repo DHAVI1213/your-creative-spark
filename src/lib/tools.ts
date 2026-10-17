@@ -9,13 +9,15 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import type { PlanoMinimo } from "./planos";
 
 export type Ferramenta = {
   id: string;
   nome: string;
   descricao: string;
   icone: LucideIcon;
-  plano: "gratis" | "pro";
+  /** Plano mínimo que libera a ferramenta (o mesmo da página de preços). */
+  plano: PlanoMinimo;
   imagem: string;
 };
 
@@ -38,7 +40,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     nome: "Limpador de Metadados",
     descricao: "Remove localização, aparelho e datas de fotos e vídeos (até pastas inteiras), sem refazer o vídeo.",
     icone: ImageOff,
-    plano: "gratis",
+    plano: "basico",
     imagem: img("limpador"),
   },
   {
@@ -46,7 +48,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     nome: "Clonador de Sites",
     descricao: "Extensão que copia um site (com autorização), edita e exporta para a Lovable/GitHub.",
     icone: Copy,
-    plano: "gratis",
+    plano: "basico",
     imagem: img("clonador"),
   },
   {
@@ -78,7 +80,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     nome: "Agendador",
     descricao: "Agende em massa no Instagram, YouTube e TikTok, em várias contas, e publique com o PC desligado.",
     icone: CalendarClock,
-    plano: "pro",
+    plano: "elite",
     imagem: img("agendador"),
   },
   {
@@ -86,7 +88,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     nome: "Legendas e Hashtags",
     descricao: "Gere legendas prontas por nicho e hashtags que ficam clicáveis no Instagram.",
     icone: MessagesSquare,
-    plano: "gratis",
+    plano: "basico",
     imagem: img("legendas"),
   },
   {
@@ -94,7 +96,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     nome: "Gerador de Propostas",
     descricao: "Monte a proposta para o cliente: mensagem de WhatsApp e PDF com seu orçamento.",
     icone: FileText,
-    plano: "gratis",
+    plano: "basico",
     imagem: img("propostas"),
   },
 ];

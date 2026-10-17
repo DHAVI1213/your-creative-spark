@@ -1,6 +1,7 @@
 import { Navigate, useParams } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { ferramentaPorId } from "../lib/tools";
+import { temAcesso } from "../lib/planos";
 import Paywall from "../components/Paywall";
 import NotFound from "./NotFound";
 import WorkspaceLimpador from "../tools/WorkspaceLimpador";
@@ -35,7 +36,7 @@ export default function ToolWorkspace() {
   if (!usuario) return <Navigate to="/entrar" replace />;
   if (!ferramenta) return <NotFound />;
 
-  const bloqueada = ferramenta.plano === "pro" && usuario.plano === "gratis";
+  const bloqueada = !temAcesso(usuario.plano, ferramenta.plano);
   const Body = WORKSPACES[ferramenta.id];
   if (!Body) return <NotFound />;
 
@@ -56,7 +57,7 @@ export default function ToolWorkspace() {
           </div>
         </div>
       </div>
-      {bloqueada ? <Paywall ferramenta={ferramenta.nome} /> : <Body />}
+      {bloqueada ? <Paywall ferramenta={ferramenta.nome} plano={ferramenta.plano} /> : <Body />}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { SiteFooter, SiteHeader } from "../components/Layout";
 import { Reveal } from "../components/Reveal";
 import { TiltCard } from "../components/TiltCard";
 import { FERRAMENTAS } from "../lib/tools";
+import { NOME_PLANO } from "../lib/planos";
 import { cn } from "../lib/utils";
 import { useSiteSettings } from "../lib/site-settings";
 import { brl } from "../lib/utils";
@@ -359,7 +360,7 @@ export default function Landing() {
             {FERRAMENTAS.map((f, i) => (
               <Reveal key={f.id} delay={(i % 4) * 90} variant="up">
                 <TiltCard className="h-full rounded-2xl">
-                  <div className="group h-full overflow-hidden rounded-2xl border border-border bg-surface1 transition-colors hover:border-lime/50">
+                  <Link to={`/checkout?plano=${f.plano}`} title={`Disponível a partir do plano ${NOME_PLANO[f.plano]}`} className="group relative block h-full overflow-hidden rounded-2xl border border-border bg-surface1 transition-colors hover:border-lime/50">
                     <div className="aspect-[4/5] overflow-hidden bg-surface2">
                       <img
                         src={f.imagem}
@@ -374,8 +375,11 @@ export default function Landing() {
                         <h3 className="font-display font-semibold">{f.nome}</h3>
                       </div>
                       <p className="mt-2 text-sm text-tsecondary">{f.descricao}</p>
+                      <span className="mt-4 inline-flex rounded-full border border-lime/30 bg-lime/10 px-3 py-1 text-xs font-semibold text-lime">
+                        A partir do plano {NOME_PLANO[f.plano]}
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 </TiltCard>
               </Reveal>
             ))}
@@ -396,7 +400,8 @@ export default function Landing() {
             {ARSENAL.map((a, i) => (
               <Reveal key={a.nome} delay={i * 110} variant="up">
                 <TiltCard className="h-full rounded-2xl" max={8}>
-                  <div className="group h-full overflow-hidden rounded-2xl border border-border bg-surface1 transition-colors hover:border-lime/50">
+                  <Link to="/checkout?plano=gold" title="Incluído no plano Gold" className="group relative block h-full overflow-hidden rounded-2xl border border-border bg-surface1 transition-colors hover:border-lime/50">
+
                     <div className="aspect-[4/5] overflow-hidden bg-surface2">
                       <img
                         src={a.imagem}
@@ -413,8 +418,11 @@ export default function Landing() {
                         </span>
                       </div>
                       <p className="mt-2 text-sm text-tsecondary">{a.descricao}</p>
+                      <span className="mt-4 inline-flex rounded-full border border-lime/30 bg-lime/10 px-3 py-1 text-xs font-semibold text-lime">
+                        Incluído no plano Gold
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 </TiltCard>
               </Reveal>
             ))}

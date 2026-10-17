@@ -38,7 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const state = data as { active: boolean; plan: string | null } | null;
       if (error || state?.active === false) { setUsuario(null); setCarregando(false); return; }
       const { data: subscriptions } = await supabase.from('assinaturas').select('plano').eq('user_id', session.user.id).eq('status', 'ativo').order('criado_em', { ascending: false }).limit(1);
-      const candidate = state?.plan ?? subscriptions?.[0]?.plano ?? 'gratis';
+      const { data: admin } = await supabase.rpc('has_role', { _user_id: session.user.id, _role: 'admin' });
+      const candidate = admin === true ? 'gold' : state?.plan ?? subscriptions?.[0]?.plano ?? 'gratis';
       const plano: Usuario['plano'] = candidate === 'basico' || candidate === 'pro' || candidate === 'elite' || candidate === 'gold' ? candidate : 'gratis';
       setUsuario({ nome: String(session.user.user_metadata?.nome ?? session.user.email?.split('@')[0] ?? 'Usuário'), email: session.user.email ?? '', plano });
       setCarregando(false);
