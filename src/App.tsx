@@ -8,6 +8,7 @@ import ToolWorkspace from "./pages/ToolWorkspace";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
+import PlanoGold from "./pages/PlanoGold";
 import Tutoriais from "./pages/Tutoriais";
 import { SiteSettingsProvider } from "./lib/site-settings";
 import ClientToolBoundary from "./components/ClientToolBoundary";
@@ -39,6 +40,7 @@ export default function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="tutoriais" element={<Tutoriais />} />
+            <Route path="gold" element={<PlanoGold />} />
             <Route path=":toolId" element={<ClientToolBoundary><ToolWorkspace /></ClientToolBoundary>} />
           </Route>
           <Route path="*" element={<NotFound />} />

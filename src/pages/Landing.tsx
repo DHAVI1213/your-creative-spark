@@ -15,6 +15,7 @@ import { Reveal } from "../components/Reveal";
 import { TiltCard } from "../components/TiltCard";
 import { FERRAMENTAS } from "../lib/tools";
 import { NOME_PLANO } from "../lib/planos";
+import { ARSENAL } from "../lib/arsenal";
 import { cn } from "../lib/utils";
 import { useSiteSettings } from "../lib/site-settings";
 import { brl } from "../lib/utils";
@@ -169,27 +170,6 @@ const DEPOIMENTOS = [
     profissao: "Empreendedora digital",
     texto:
       "Uso o minerador viral para garimpar ideias e o agendador para manter constância. Saí de 2 mil para 25 mil seguidores sem comprar nada.",
-  },
-];
-
-const ARSENAL = [
-  {
-    nome: "Figma Pro Education",
-    duracao: "Education",
-    descricao: "Design e prototipagem profissional para criar interfaces e criativos de alto nível.",
-    imagem: "/arsenal/figma.jpg",
-  },
-  {
-    nome: "Gemini IA",
-    duracao: "18 meses",
-    descricao: "Inteligência artificial avançada para textos, ideias e automação do seu conteúdo.",
-    imagem: "/arsenal/gemini.jpg",
-  },
-  {
-    nome: "Framer Pro",
-    duracao: "12 meses",
-    descricao: "Sites e interações em código, com animações premium e publicação instantânea.",
-    imagem: "/arsenal/framer.jpg",
   },
 ];
 

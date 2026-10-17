@@ -2,7 +2,7 @@ export type Transaction = { id: string; user_id: string | null; email: string; p
 export type AdminUser = { id: string; name: string | null; email: string; plan: string; active: boolean; created_at: string; last_seen_at: string | null };
 export type Plan = { id: string; name: string; price_cents: number; recurring: boolean };
 export type ToolSetting = { id: string; name: string; description: string; enabled: boolean };
-export type SiteContent = { hero_title?: string; hero_description?: string; testimonials?: { nome: string; profissao: string; texto: string; foto: string }[]; faq?: { q: string; a: string }[] };
+export type SiteContent = { hero_title?: string; hero_description?: string; testimonials?: { nome: string; profissao: string; texto: string; foto: string }[]; faq?: { q: string; a: string }[]; whatsapp_gold?: string };
 export type AdminData = { users: AdminUser[]; transactions: Transaction[]; plans: Plan[]; tools: ToolSetting[]; usage: { tool_id: string; day: string; count: number }[]; online: number; content: SiteContent; subscriptions: { user_id: string | null; status: string; plano: string; valido_ate: string | null; valor_centavos: number | null }[]; captured_at: string };
 export const isPaid = (t: Transaction) => t.status === 'pago' || t.status === 'paid';
 export function growth(current: number, previous: number): number | null { return previous > 0 ? (current - previous) / previous * 100 : null; }

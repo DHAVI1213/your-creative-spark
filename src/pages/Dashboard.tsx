@@ -64,6 +64,24 @@ export default function Dashboard() {
           );
         })}
       </div>
+
+      <Link
+        to="/app/gold"
+        className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-lime/40 bg-gradient-to-r from-lime/10 to-transparent p-6 transition-all hover:border-lime"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-lime text-black">
+            <Crown className="size-6" />
+          </div>
+          <div>
+            <h3 className="font-semibold">Arsenal Gold — IAs e ferramentas pro</h3>
+            <p className="text-sm text-tsecondary">Figma Pro Education, Gemini IA (18 meses) e Framer Pro (12 meses).</p>
+          </div>
+        </div>
+        <Badge tone={temAcesso(plano, "gold") ? "lime" : "warn"}>
+          {temAcesso(plano, "gold") ? "LIBERAR PELO WHATSAPP" : "🔒 PLANO GOLD"}
+        </Badge>
+      </Link>
     </div>
   );
 }
