@@ -11,6 +11,7 @@ import {
   salvarIa,
   salvarTranscricao,
   testarIA,
+  baixarModeloOllama,
   transcricaoSalva,
   type IaConfig,
   type Provedor,
@@ -459,9 +460,29 @@ export default function CortesVirais({ onMesa, recebido }: { onMesa: (itens: Cor
           <p className="text-xs text-tmuted">{DICAS[ia.provedor]}</p>
           <a href="/app/tutoriais#ia-local" className="text-xs text-lime underline">Tutorial: IA no seu PC (lista por PC fraco, médio e forte) e chaves grátis</a>
           {ia.provedor !== "nenhum" && (
-            <Button variant="outline" className="!py-2 text-xs" onClick={() => void testar()}>
-              Testar conexão
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" className="!py-2 text-xs" onClick={() => void testar()}>
+                Testar conexão
+              </Button>
+              {ia.provedor === "ollama" && (
+                <Button
+                  variant="outline"
+                  className="!py-2 text-xs"
+                  onClick={async () => {
+                    const modelo = completar(ia).modelo;
+                    if (!confirm(`Baixar o modelo ${modelo} no Ollama? São alguns GB. Só precisa uma vez.`)) return;
+                    try {
+                      await baixarModeloOllama(ia, (msg) => setIaStatus({ msg }));
+                      await testar();
+                    } catch (e) {
+                      setIaStatus({ msg: e instanceof Error ? e.message : String(e), ok: false });
+                    }
+                  }}
+                >
+                  ⬇ Baixar modelo
+                </Button>
+              )}
+            </div>
           )}
           {iaStatus.msg && <p className={cn("text-xs", iaStatus.ok === true ? "text-lime" : iaStatus.ok === false ? "text-red-400" : "text-tmuted")}>{iaStatus.msg}</p>}
           {campo("Pedido extra para a IA (opcional)", <Textarea rows={2} value={prefs.instr} onChange={(e) => p("instr", e.target.value)} placeholder="Ex.: prefira falas sobre dinheiro e família; evite política" className="text-sm" />)}

@@ -274,3 +274,32 @@ Responda só JSON: {"textos":[{"texto":"..."${o.legendaPost ? ',"legenda":"..."'
   if (!out.length) throw new Error("A IA não devolveu frases. Tente de novo ou troque o modelo.");
   return out;
 }
+
+/** Baixa um modelo no Ollama do PC do cliente (ollama pull), com progresso. */
+export async function baixarModeloOllama(iaBruta: IaConfig, aoProgresso: (msg: string) => void) {
+  const ia = completar(iaBruta);
+  const r = await fetch(ia.url.replace(/\/+$/, "") + "/api/pull", { method: "POST", body: JSON.stringify({ model: ia.modelo, stream: true }) }).catch(() => null);
+  if (!r || !r.ok || !r.body) throw new Error("O Ollama não respondeu. Deixe ele aberto e libere o site com OLLAMA_ORIGINS=*.");
+  const reader = r.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  const mb = (b: number) => (b / 1048576).toFixed(0) + " MB";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const ls = buf.split("\n");
+    buf = ls.pop() || "";
+    for (const l of ls) {
+      if (!l.trim()) continue;
+      let j: { error?: string; status?: string; total?: number; completed?: number };
+      try {
+        j = JSON.parse(l);
+      } catch {
+        continue;
+      }
+      if (j.error) throw new Error(j.error);
+      aoProgresso(`Ollama: ${j.status || ""}${j.total ? " · " + mb(j.completed || 0) + " de " + mb(j.total) : ""}`);
+    }
+  }
+}
