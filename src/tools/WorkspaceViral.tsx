@@ -1,4 +1,6 @@
 import { useState } from "react";
+import ExtensaoCard from "../components/ExtensaoCard";
+import { PONTE_KIT } from "../lib/ponte";
 import { BookmarkPlus, ExternalLink, Lightbulb, Trash2 } from "lucide-react";
 import {
   NICHOS_VIRAIS,
@@ -11,7 +13,7 @@ import {
 import { Badge, Button, Card, Input, Label, Select, Textarea } from "../components/ui";
 import { cn } from "../lib/utils";
 
-export default function WorkspaceViral() {
+function IdeiasDeFormato() {
   const [nicho, setNicho] = useState(NICHOS_VIRAIS[0]!.id);
   const [url, setUrl] = useState("");
   const [anotacao, setAnotacao] = useState("");
@@ -120,6 +122,47 @@ export default function WorkspaceViral() {
           )}
         </Card>
       </div>
+    </div>
+  );
+}
+
+export default function WorkspaceViral() {
+  return (
+    <div className="space-y-6">
+      <ExtensaoCard
+        nome="Minerador Viral"
+        arquivo="/downloads/minerador-viral.zip"
+        versao="1.3.0"
+        resumo="Encontra os vídeos que mais performaram num perfil do Instagram, TikTok ou YouTube Shorts (acima da média, potencial viral, mais vistos…), baixa em massa e manda direto para o Editor em Massa e os Cortes Virais."
+        usar={[
+          <>Clique no ícone 📈 da extensão: o painel abre do lado da página.</>,
+          <>Abra um perfil (logado): instagram.com/perfil, tiktok.com/@perfil ou a aba Shorts de um canal do YouTube.</>,
+          <>Escolha o ranking, quantos vídeos quer e os filtros mínimos, e clique em <b>⛏ Minerar perfil</b> (ou em ☝ Escolher direto na página).</>,
+          <>Marque os vídeos e use <b>⬇ ZIP</b> (Instagram, direto pelo navegador), <b>⋯</b> para planilha e links, ou <b>➜ Editor</b> para mandar para o site.</>,
+          <>Aba <b>🔗 Link</b>: cole links de vídeo do YouTube, TikTok ou Instagram (com autorização do dono) para baixar e cortar.</>,
+        ]}
+        extra={
+          <div className="rounded-xl border border-lime/30 bg-lime/5 p-4 text-xs text-tsecondary">
+            <p className="font-semibold text-tprimary">➜ Editor e aba Link: precisam da Ponte NK aberta no seu PC</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4">
+              <li>Instale o Node.js (LTS) em nodejs.org.</li>
+              <li>
+                <a href={PONTE_KIT} download className="text-lime underline">Baixe a Ponte NK</a>, descompacte e dê dois cliques em <b>iniciar-ponte.bat</b> (Mac: iniciar-ponte.command). Deixe a
+                janela aberta: ela baixa TikTok e YouTube com o yt-dlp (só na primeira vez demora um pouco).
+              </li>
+              <li>Na janela aparece o <b>código da ponte</b>. No site, em Editor em Massa → <b>Receber do Minerador Viral</b>, cole o código uma vez só.</li>
+              <li>Os vídeos ficam em Downloads/Minerador e aparecem no Editor (botão ➜ Mesa) ou nos Cortes Virais (links do YouTube).</li>
+            </ol>
+            <p className="mt-2 text-tmuted">Se o Chrome perguntar se o site pode acessar a sua rede local, clique em Permitir. Sem a ponte, o ⬇ ZIP do Instagram continua funcionando.</p>
+          </div>
+        }
+      />
+      <details className="rounded-2xl border border-border p-4">
+        <summary className="cursor-pointer text-sm font-semibold">Ideias de formato por nicho</summary>
+        <div className="mt-4">
+          <IdeiasDeFormato />
+        </div>
+      </details>
     </div>
   );
 }

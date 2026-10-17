@@ -174,7 +174,35 @@ export default function Tutoriais() {
       </Secao>
 
       <Secao id="extensoes" icone={<Puzzle className="size-5" />} titulo="Extensões do Chrome">
-        <p className="text-sm text-tsecondary">O Minerador Viral, o Clonador de Sites e o Minerador de Clientes funcionam como extensões do Chrome. O passo a passo de cada uma fica na página da ferramenta.</p>
+        <p className="text-sm text-tsecondary">Três ferramentas funcionam como extensões do Chrome (ou Edge). Instalar é igual para todas:</p>
+        <Passos
+          itens={[
+            <>Baixe o ZIP da extensão abaixo e descompacte numa pasta que você não vai apagar (ex.: Documentos).</>,
+            <>No Chrome, abra <Cmd>chrome://extensions</Cmd> e ligue o <b>Modo do desenvolvedor</b> (canto de cima, à direita).</>,
+            <>Clique em <b>Carregar sem compactação</b> e escolha a pasta da extensão.</>,
+            <>Clique no ícone de quebra-cabeça do Chrome e fixe a extensão na barra. Pronto.</>,
+          ]}
+        />
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            ["Minerador Viral", "/downloads/minerador-viral.zip", "/app/viral", "Acha os vídeos que mais performaram num perfil do Instagram, TikTok ou YouTube e baixa em massa."],
+            ["Clonador de Sites", "/downloads/clonador-de-sites.zip", "/app/clonador", "Copia um site (com autorização), edita e exporta para a Lovable/GitHub."],
+            ["Minerador de Clientes", "/downloads/minerador-de-clientes.zip", "/app/minerador", "Acha lojas no Google Maps que precisam de site e abre o WhatsApp com a mensagem pronta."],
+          ].map(([n, zip, pag, d]) => (
+            <div key={n} className="space-y-2 rounded-xl border border-border p-4">
+              <p className="font-semibold">{n}</p>
+              <p className="text-xs text-tmuted">{d}</p>
+              <div className="flex gap-3 text-xs">
+                <a href={zip} download className="font-semibold text-lime underline">Baixar</a>
+                <a href={pag} className="text-tsecondary underline">Como usar</a>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-tmuted">
+          O botão ➜ Editor e a aba Link do Minerador Viral usam a <b>Ponte NK</b>, um programinha que roda no seu PC e baixa TikTok e YouTube.{" "}
+          <a href="/downloads/ponte-nk.zip" download className="text-lime underline">Baixar a Ponte NK</a> e veja o passo a passo na página do Minerador Viral.
+        </p>
       </Secao>
     </div>
   );

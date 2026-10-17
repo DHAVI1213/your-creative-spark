@@ -44,7 +44,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     id: "clonador",
     nome: "Clonador de Sites",
-    descricao: "Copie um site (com autorização do dono), edite os textos e baixe para o cliente.",
+    descricao: "Extensão que copia um site (com autorização), edita e exporta para a Lovable/GitHub.",
     icone: Copy,
     plano: "gratis",
     imagem: img("clonador"),
@@ -60,7 +60,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     id: "viral",
     nome: "Minerador Viral",
-    descricao: "Encontre os formatos que mais estouram num nicho e use como referência.",
+    descricao: "Extensão que acha os vídeos que mais performaram num perfil (IG, TikTok, YouTube) e baixa em massa.",
     icone: Search,
     plano: "pro",
     imagem: img("viral"),
@@ -68,7 +68,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     id: "minerador",
     nome: "Minerador de Clientes",
-    descricao: "Encontre lojas da sua cidade que precisam de site e organize seus leads.",
+    descricao: "Extensão que acha lojas no Google Maps que precisam de site; organize os leads aqui.",
     icone: Users,
     plano: "pro",
     imagem: img("minerador"),

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ExtensaoCard from "../components/ExtensaoCard";
 import { Code2, Download, FileArchive, Globe, Loader2, Pencil, ShieldAlert } from "lucide-react";
 import {
   clonePageHtml,
@@ -12,7 +13,7 @@ import { Badge, Button, Card, Input, Label, Progress, Textarea } from "../compon
 
 type Etapa = "entrada" | "analise";
 
-export default function WorkspaceClonador() {
+function ClonadorRapido() {
   const [modo, setModo] = useState<"url" | "colar">("url");
   const [url, setUrl] = useState("");
   const [htmlColado, setHtmlColado] = useState("");
@@ -213,6 +214,33 @@ export default function WorkspaceClonador() {
           className="h-[600px] w-full bg-white"
         />
       </Card>
+    </div>
+  );
+}
+
+export default function WorkspaceClonador() {
+  return (
+    <div className="space-y-6">
+      <ExtensaoCard
+        nome="Clonador de Sites"
+        arquivo="/downloads/clonador-de-sites.zip"
+        versao="1.3.0"
+        resumo="Copia um site do jeito que aparece na tela (ou completo, com animações e 3D), deixa editar textos, imagens, WhatsApp e cores antes de baixar, copia só um componente para a Lovable e manda o projeto pronto para o GitHub. Use só em sites com autorização do dono."
+        usar={[
+          <>Abra o site e clique no ícone da extensão.</>,
+          <><b>Cópia visual</b>: a página como aparece, sem scripts (ótima para editar). <b>Cópia completa</b>: leva JavaScript, animações e 3D; para abrir, extraia o ZIP e dê dois cliques em ABRIR-SITE.bat.</>,
+          <><b>Editar antes de copiar</b>: clique em qualquer parte para trocar texto, imagem, link, nome da loja, WhatsApp e cores (Ctrl+Z desfaz).</>,
+          <><b>Copiar só um componente</b>: passe o mouse, clique no bloco e exporte em HTML ou React (.tsx) para a Lovable.</>,
+          <><b>Projeto para Lovable/GitHub</b>: gera um projeto pronto; marque “Enviar para o GitHub”, escreva o repositório e cole um token só daquele repositório.</>,
+        ]}
+        extra={<p className="text-[11px] text-tmuted">Dica: em “Detalhes” da extensão, ligue “Permitir acesso a URLs de arquivo” para editar também as cópias abertas do seu PC. Os arquivos vão para Downloads\copias-de-sites.</p>}
+      />
+      <details className="rounded-2xl border border-border p-4">
+        <summary className="cursor-pointer text-sm font-semibold">Versão rápida no navegador (sem extensão, só para sites simples)</summary>
+        <div className="mt-4">
+          <ClonadorRapido />
+        </div>
+      </details>
     </div>
   );
 }

@@ -32,6 +32,7 @@ import {
 import { gerarEmojis } from "../../lib/editor/legendas";
 import type { CorteMesa, FormatoCorte, OpcoesMesa } from "../../lib/cortes/mesa";
 import type { Word } from "../../lib/editor/model";
+import ReceberPonte from "../../components/ReceberPonte";
 
 const ETAPAS = [
   ["preparar", "Preparar"],
@@ -348,6 +349,9 @@ export default function CortesVirais({ onMesa, recebido }: { onMesa: (itens: Cor
               )}
             </div>
           )}
+          <div className="mt-3">
+            <ReceberPonte destino="cortes" rotulo="Baixados pelo link (Minerador Viral)" usar={(f) => escolher(f)} />
+          </div>
           <p className="mt-3 text-xs text-tmuted">
             Podcast, live, palestra, pregação, vídeo motivacional… O vídeo é lido direto do seu computador, sem enviar para nenhum servidor.
           </p>
