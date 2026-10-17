@@ -357,7 +357,9 @@ import * as S from './shared.js';
   // Fontes que precisam estar carregadas antes de gerar os PNGs.
   function fontsFor(s) {
     const x = s.texto;
-    return [fontStr(x.fonte, x.peso, 64), fontStr(x.fonte, 800, 42), fontStr(x.fonte, 900, 100)];
+    const la = s.legendaAnim;
+    const extra = la && la.ativo ? [fontStr(la.fonte, la.peso, 80)] : [];
+    return [fontStr(x.fonte, x.peso, 64), fontStr(x.fonte, 800, 42), fontStr(x.fonte, 900, 100), ...extra];
   }
 
 

@@ -4,7 +4,7 @@ const check=(path:string,label:string):FieldSpec=>({path,label,type:'check'});
 const color=(path:string,label:string):FieldSpec=>({path,label,type:'color'});
 const file=(path:string,label:string,accept?:string):FieldSpec=>({path,label,type:'file',accept});
 const select=(path:string,label:string,options:[string,string][]):FieldSpec=>({path,label,type:'select',options});
-export const TABS=[['recorte','Recorte'],['efeitos','Efeitos'],['filtros','Filtros'],['template','Template'],['texto','Texto'],['capa','Capa'],['audio','Áudio'],['saida','Saída']] as const;
+export const TABS=[['recorte','Recorte'],['efeitos','Efeitos'],['filtros','Filtros'],['template','Template'],['texto','Texto'],['legendas','Legendas'],['capa','Capa'],['audio','Áudio'],['saida','Saída']] as const;
 export const FIELDS:Record<string,FieldSpec[]>={
  recorte:[...['top','bottom','left','right'].map((k,i)=>({path:'recorte.'+k,label:['Topo (px)','Base (px)','Esquerda (px)','Direita (px)'][i],type:'number' as const,min:0,step:2})),range('recorte.zoom','Zoom',.5,2.5),range('recorte.posV','Posição vertical',0,1)],
  efeitos:[check('efeitos.espelhar','Espelhar vídeo'),check('efeitos.cortarPontas','Cortar 0,5s das pontas'),check('efeitos.ajusteAuto','Ajuste automático de cor'),check('efeitos.antiDup','Anti-duplicidade'),check('efeitos.melhorarAudio','Melhorar áudio'),range('efeitos.velocidade','Velocidade',.5,2),{path:'efeitos.corteInicio',label:'Tirar do início (s)',type:'number',min:0},{path:'efeitos.corteFim',label:'Tirar do fim (s)',type:'number',min:0}],

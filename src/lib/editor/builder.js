@@ -28,6 +28,11 @@ export function buildArgs(job, paths) {
   }
   args.push('-loop', '1', '-framerate', String(fps), '-i', paths.ov);
   idx.ov = n++;
+  // legenda animada: sequência de PNGs (lista do demuxer concat) com a duração de cada estado
+  if (paths.cap) {
+    args.push('-f', 'concat', '-safe', '0', '-i', paths.cap.list);
+    idx.cap = n++;
+  }
   if (intro) {
     args.push('-loop', '1', '-framerate', String(fps), '-t', num(intro), '-i', paths.capa);
     idx.capa = n++;
@@ -100,7 +105,13 @@ export function buildArgs(job, paths) {
   g.push(`${fg},setsar=1[fg]`);
   g.push(`[bg][fg]overlay=${L.x}:${L.y}:shortest=1[c1]`);
   g.push(`[${idx.ov}:v]scale=${CW}:${CH},format=rgba[ov]`);
-  g.push(`[c1][ov]overlay=0:0:shortest=1[c2]`);
+  if (idx.cap !== undefined) {
+    g.push(`[c1][ov]overlay=0:0:shortest=1[c1o]`);
+    g.push(`[${idx.cap}:v]format=rgba,fps=${fps}[capv]`);
+    g.push(`[c1o][capv]overlay=0:${paths.cap.y}:eof_action=pass:format=auto[c2]`);
+  } else {
+    g.push(`[c1][ov]overlay=0:0:shortest=1[c2]`);
+  }
   if (intro) {
     g.push(`[c2]format=yuv420p,setsar=1[vmain]`);
     g.push(`[${idx.capa}:v]scale=${CW}:${CH},setsar=1,fps=${fps},format=yuv420p[vcapa]`);

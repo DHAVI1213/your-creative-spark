@@ -6,6 +6,7 @@ import {buildArgs} from './builder.js';
 import {layout,timing,capaSourceTime,limpezaFilters} from './shared.js';
 import {drawBackground,drawOverlay,drawCover} from './render.js';
 import {image,canvas,canvasBlob,readyFonts,videoElement} from './media';
+import {gerarFaixa,listaConcat} from './legendas';
 let engine:FFmpeg|null=null;let loading:Promise<FFmpeg>|null=null;
 export function cancelEngine(){engine?.terminate();engine=null;loading=null;}
 export async function editorEngine(){if(!loading)loading=(async()=>{const f=new FFmpeg();engine=f;const base='https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';const urls=await Promise.all([toBlobURL(base+'/ffmpeg-core.js','text/javascript'),toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')]);try{await Promise.race([f.load({classWorkerURL,coreURL:urls[0],wasmURL:urls[1]}),new Promise<never>((_,reject)=>setTimeout(()=>reject(new Error('O processador não carregou em 60 segundos. Confira a conexão e tente novamente.')),60000))]);return f;}finally{urls.forEach(URL.revokeObjectURL);}})().catch(e=>{loading=null;engine=null;throw e;});return loading;}
@@ -20,7 +21,8 @@ export async function exportVideo(job:EditorJob,onProgress:(n:number)=>void,isCa
  const [bgImg,logo]=await Promise.all([image(s.template.fundoImagem),image(s.template.logo)]);const background=canvas(L.CW,L.CH);drawBackground(background.ctx,s,L.CW,L.CH,bgImg);await f.writeFile(bg,await fetchFile(await canvasBlob(background.c)));background.c.width=1;background.c.height=1;
  const overlay=canvas(L.CW,L.CH);drawOverlay(overlay.ctx,s,job.caption,L.CW,L.CH,logo);await f.writeFile(ov,await fetchFile(await canvasBlob(overlay.c)));overlay.c.width=1;overlay.c.height=1;
  if(s.capa.ativo){cover=await makeCover(job,s);await f.writeFile(coverPath,await fetchFile(cover));}
+ let cap:{list:string;y:number}|null=null;const faixa=job.words?.length?await gerarFaixa(s,{words:job.words,emojis:job.emojis},T,L.CW,L.CH):null;if(faixa&&faixa.quadros.length){const nomes=faixa.quadros.map((_,i)=>`${tag}_cap${String(i).padStart(5,'0')}.png`);for(let i=0;i<nomes.length;i++){await f.writeFile(nomes[i]!,faixa.quadros[i]!.png);names.push(nomes[i]!);}const list=tag+'_cap.txt';await f.writeFile(list,new TextEncoder().encode(listaConcat(nomes,faixa.quadros)));names.push(list);cap={list,y:faixa.y0};}
  const exported=structuredClone(s);if(s.audio.musica){await f.writeFile(music,await fetchFile(s.audio.musica));exported.audio.musica=music;}
- if(isCancelled())throw new Error('Cancelado');const built=buildArgs({meta:{...job.meta,hasAudio},s:exported,input},{bg,ov,out,capa:cover?coverPath:null});await execute(f,built.args);if(isCancelled())throw new Error('Cancelado');const output=new Blob([await f.readFile(out) as BlobPart],{type:'video/mp4'});onProgress(1);return {output,cover};
+ if(isCancelled())throw new Error('Cancelado');const built=buildArgs({meta:{...job.meta,hasAudio},s:exported,input},{bg,ov,out,capa:cover?coverPath:null,cap});await execute(f,built.args);if(isCancelled())throw new Error('Cancelado');const output=new Blob([await f.readFile(out) as BlobPart],{type:'video/mp4'});onProgress(1);return {output,cover};
  }finally{f.off('progress',onProg);await Promise.all(names.map(n=>f.deleteFile(n).catch(()=>{})));}
 }

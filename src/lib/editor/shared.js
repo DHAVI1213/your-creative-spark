@@ -67,6 +67,31 @@
       embutir: true,
       salvarJpg: false
     },
+    legendaAnim: {
+      ativo: false,
+      estilo: 'destaque', // destaque | karaoke | caixa | palavra | simples
+      animacao: 'pop', // pop | subir | nenhuma
+      palavras: 3,
+      fonte: 'Montserrat',
+      peso: 900,
+      tamanho: 80,
+      v: 70,
+      largura: 86,
+      maiusculas: true,
+      semPontuacao: true,
+      manterInterrogacao: true,
+      cor: '#ffffff',
+      destaque: '#ffe14d',
+      destaque2: '#3ee6ff',
+      destaque3: '#ff4fa3',
+      trocarCor: true,
+      caixaTexto: '#120a2a',
+      contorno: true,
+      contornoCor: '#000000',
+      sombra: true,
+      emojis: true,
+      emojiTam: 110
+    },
     audio: { modo: 'original', volume: 1, musica: null, musicaVolume: 0.3 },
     saida: { res: 1080, fps: 30, bitrate: 8, semMetadados: true, melhorarVideo: false }
   };
